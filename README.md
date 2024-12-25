@@ -6,6 +6,7 @@ A simple portfolio website built with:
 - HTML5
 - TailwindCSS
 - JavaScript
+- EmailJS (Used for email services)
 
 ## Features
 
