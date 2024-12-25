@@ -5,6 +5,12 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Your Portfolio</title>
 		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				darkMode: 'class',
+				// ... rest of your config
+			}
+		</script>
 
 		<!-- Add custom fonts -->
 		<link
@@ -18,57 +24,65 @@
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 		/>
 	</head>
-	<body class="bg-gray-100 font-['Poppins'] text-gray-900">
+	<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-white font-['Poppins']">
 		<!-- Navigation -->
-		<nav class="fixed w-full bg-white shadow-md z-50">
+		<nav class="fixed w-full bg-white dark:bg-gray-800 shadow-md z-50">
 			<div class="container mx-auto px-6 py-4">
 				<div class="flex items-center justify-between">
-					<div class="text-2xl font-bold text-gray-800">
-						Your Name
+					<!-- Left side - Name -->
+					<div class="text-xl font-semibold text-gray-800 dark:text-white">
+						<a href="#about">Ehnand Azucena</a>
 					</div>
+
+					<!-- Center - Navigation Links -->
 					<div class="hidden md:flex space-x-8">
-						<a
-							href="#about"
-							class="text-gray-600 hover:text-blue-600"
-							>About</a
-						>
-						<a
-							href="#experience"
-							class="text-gray-600 hover:text-blue-600"
-							>Experience</a
-						>
-						<a
-							href="#education"
-							class="text-gray-600 hover:text-blue-600"
-							>Education</a
-						>
-						<a
-							href="#skills"
-							class="text-gray-600 hover:text-blue-600"
-							>Skills</a
-						>
-						<a
-							href="#certifications"
-							class="text-gray-600 hover:text-blue-600"
-							>Certifications</a
-						>
-						<a
-							href="#works"
-							class="text-gray-600 hover:text-blue-600"
-							>Works</a
-						>
-						<a
-							href="#contact"
-							class="text-gray-600 hover:text-blue-600"
-							>Contact</a
-						>
+						<a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
+						<a href="#experience" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Experience</a>
+						<a href="#education" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Education</a>
+						<a href="#skills" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Skills</a>
+						<a href="#certifications" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Certifications</a>
+						<a href="#works" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Works</a>
+						<a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
 					</div>
+
+					<!-- Right side - Theme Toggle -->
+					<button id="themeToggle" 
+							class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+							aria-label="Toggle Dark Mode">
+						<!-- Sun Icon -->
+						<svg id="lightIcon" 
+							 class="w-6 h-6 hidden text-gray-800 dark:text-white" 
+							 fill="none" 
+							 stroke="currentColor" 
+							 viewBox="0 0 24 24">
+							<path stroke-linecap="round" 
+								  stroke-linejoin="round" 
+								  stroke-width="2" 
+								  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+						</svg>
+						<!-- Moon Icon -->
+						<svg id="darkIcon" 
+							 class="w-6 h-6 text-gray-800 dark:text-white" 
+							 fill="none" 
+							 stroke="currentColor" 
+							 viewBox="0 0 24 24">
+							<path stroke-linecap="round" 
+								  stroke-linejoin="round" 
+								  stroke-width="2" 
+								  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+						</svg>
+					</button>
+
+					<!-- Mobile menu button -->
+					<button class="md:hidden">
+						<!-- Mobile menu icon -->
+					</button>
 				</div>
 			</div>
 		</nav>
 
 		<!-- About Section -->
-		<section id="about" class="pt-20 bg-white">
+		<section id="about" class="pt-20 bg-white dark:bg-gray-900">
 			<div
 				class="max-w-4xl flex items-center h-auto lg:h-[600px] flex-wrap mx-auto my-32 lg:my-0"
 			>
@@ -77,21 +91,21 @@
 					id="profile"
 					class="w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-2xl bg-white opacity-75 mx-6 lg:mx-0"
 				>
-					<div class="p-4 md:p-12 text-center lg:text-left">
+					<div class="p-4 md:p-12 text-center lg:text-left ">
 						<!-- Image for mobile view-->
 						<div
 							class="block lg:hidden rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
 							style="background-image: url('assets/profile.JPG')"
 						></div>
 
-						<h1 class="text-3xl font-bold pt-8 lg:pt-0">
+						<h1 class="text-3xl font-bold pt-8 lg:pt-0 dark:text-gray-600">
 							Ehnand A. Azucena
 						</h1>
 						<div
 							class="mx-auto lg:mx-0 w-4/5 pt-3 border-b-2 border-green-500 opacity-25"
 						></div>
 						<p
-							class="pt-4 text-sm font-bold flex items-center justify-center lg:justify-start"
+							class="dark:text-gray-600 pt-4 text-sm font-bold flex items-center justify-center lg:justify-start"
 						>
 							<svg
 								class="h-4 fill-current text-green-700 pr-4"
@@ -119,7 +133,7 @@
 							</svg>
 							Initao, Misamis Oriental, 9022
 						</p>
-						<p class="pt-5 text-sm">
+						<p class="dark:text-gray-600 pt-5 text-sm">
 							Dedicated Full Stack Developer and Database
 							Specialist with expertise in developing secure,
 							efficient systems and cloud-based applications.
@@ -230,27 +244,20 @@
 						class="rounded-none lg:rounded-lg shadow-2xl hidden lg:block"
 					/>
 				</div>
-
-				<!-- Theme toggle button -->
-				<div class="absolute top-0 right-0 h-12 w-18 p-4">
-					<button class="js-change-theme focus:outline-none">
-						🌙
-					</button>
-				</div>
 			</div>
 		</section>
 
 		<!-- Professional Experience Section -->
-		<section id="experience" class="py-20 bg-gray-50">
+		<section id="experience" class="py-20 bg-gray-50 dark:bg-gray-800">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12">
+				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
 					Professional Experience
 				</h2>
 				<!-- Changed to regular block layout -->
 				<div class="block md:flex md:flex-row gap-8 justify-center">
 					<!-- Experience Item 1 -->
 					<div class="md:w-1/3 mb-8 md:mb-0">
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="flex flex-col">
 								<!-- Company Logo -->
 								<div class="mb-2 flex justify-center">
@@ -262,7 +269,7 @@
 								</div>
 								<div>
 									<h3
-										class="text-xl font-semibold text-blue-600 cursor-pointer flex justify-between items-center"
+										class="text-xl font-semibold text-blue-600 dark:text-white cursor-pointer flex justify-between items-center"
 										onclick="toggleContent('moresco1Content')"
 									>
 										System & Database Specialist - Intern
@@ -281,10 +288,10 @@
 											/>
 										</svg>
 									</h3>
-									<p class="text-gray-700 font-medium mb-2">
+									<p class="text-gray-600 dark:text-gray-300 font-medium mb-2">
 										MORESCO-1
 									</p>
-									<div class="text-gray-600 mb-4">
+									<div class="text-gray-600 dark:text-gray-400 mb-4">
 										Jan 2024 - June 2024 | Laguindingan,
 										Misamis Oriental, Philippines
 									</div>
@@ -293,12 +300,12 @@
 										class="hidden transition-all duration-300 overflow-hidden"
 									>
 										<p
-											class="text-gray-600 mb-4 text-justify"
+											class="text-gray-600 dark:text-gray-300 mb-4 text-justify"
 										>
 											I contributed to the development of
 											the M1-HRIS employee module and
 											M1-Helpdesk system, optimized
-											databases, ensured system
+											 databases, ensured system
 											reliability through maintenance and
 											testing, supported security
 											measures, and documented processes
@@ -306,7 +313,7 @@
 											knowledge sharing.
 										</p>
 										<ul
-											class="list-disc list-inside text-gray-600 space-y-2"
+											class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2"
 										>
 											<li>
 												Developed the employee module
@@ -363,7 +370,7 @@
 
 					<!-- Experience Item 2 -->
 					<div class="md:w-1/3 mb-8 md:mb-0">
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="flex flex-col">
 								<!-- Company Logo -->
 								<div class="mb-2 flex justify-center">
@@ -375,7 +382,7 @@
 								</div>
 								<div>
 									<h3
-										class="text-xl font-semibold text-blue-600 cursor-pointer flex justify-between items-center"
+										class="text-xl font-semibold text-blue-600 dark:text-white cursor-pointer flex justify-between items-center"
 										onclick="toggleContent('company2Content')"
 									>
 										IT Specialist
@@ -394,10 +401,10 @@
 											/>
 										</svg>
 									</h3>
-									<p class="text-gray-700 font-medium mb-2">
-										Eduquest
+									<p class="dark:text-white text-gray-600 dark:text-gray-300 font-medium mb-2">
+										Eduquest Inc.
 									</p>
-									<div class="text-gray-600 mb-4">
+									<div class="text-gray-600 dark:text-gray-400 mb-4">
 										July 2024 - Present | Cagayan De Oro
 										City, Philippines
 									</div>
@@ -406,7 +413,7 @@
 										class="hidden transition-all duration-300 overflow-hidden"
 									>
 										<p
-											class="text-gray-600 mb-4 text-justify"
+											class="text-gray-600 dark:text-gray-300 mb-4 text-justify"
 										>
 											Spearheaded system maintenance, user
 											support, and comprehensive
@@ -418,7 +425,7 @@
 											quality and user experience.
 										</p>
 										<ul
-											class="list-disc list-inside text-gray-600 space-y-2"
+											class="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2"
 										>
 											<li>
 												Maintained 98% system uptime and
@@ -501,26 +508,28 @@
 		</section>
 
 		<!-- Education Section -->
-		<section id="education" class="py-20 bg-white">
+		<section id="education" class="py-20 bg-white dark:bg-gray-900">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12">Education</h2>
+				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+					Education
+				</h2>
 				<div class="max-w-4xl mx-auto space-y-8">
 					<!-- College -->
-					<div class="bg-white p-6 rounded-lg shadow-md">
+					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600">
+							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
 								Bachelor of Science in Information Technology
 							</h3>
-							<span class="text-gray-600"
+							<span class="text-gray-600 dark:text-white"
 								>Aug 2019 - Jul 2024</span
 							>
 						</div>
-						<p class="text-gray-700 mb-2">
+						<p class="text-gray-600 dark:text-gray-300 mb-2">
 							Mindanao State University-Naawan
 						</p>
-						<p class="text-gray-600">
+						<p class="text-gray-600 dark:text-gray-300">
 							Major in Database Systems. Developed strong
 							foundation in database management, system
 							development, and programming.
@@ -528,21 +537,21 @@
 					</div>
 
 					<!-- Senior High School -->
-					<div class="bg-white p-6 rounded-lg shadow-md">
+					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600">
+							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
 								Senior High School - HUMSS
 							</h3>
-							<span class="text-gray-600"
+							<span class="text-gray-600 dark:text-white"
 								>Jun 2017 - Mar 2019</span
 							>
 						</div>
-						<p class="text-gray-700 mb-2">
+						<p class="text-gray-600 dark:text-gray-300 mb-2">
 							Initao National Comprehensive High School
 						</p>
-						<p class="text-gray-600">
+						<p class="text-gray-600 dark:text-gray-300">
 							Humanities and Social Sciences Strand. Developed
 							critical thinking and analytical skills through
 							comprehensive humanities education.
@@ -550,21 +559,21 @@
 					</div>
 
 					<!-- Junior High School -->
-					<div class="bg-white p-6 rounded-lg shadow-md">
+					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600">
+							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
 								Junior High School
 							</h3>
-							<span class="text-gray-600"
+							<span class="text-gray-600 dark:text-white"
 								>Jun 2012 - Mar 2017</span
 							>
 						</div>
-						<p class="text-gray-700 mb-2">
+						<p class="text-gray-600 dark:text-gray-300 mb-2">
 							Initao National Comprehensive High School
 						</p>
-						<p class="text-gray-600">
+						<p class="text-gray-600 dark:text-gray-300">
 							Completed junior high school education with strong
 							academic performance and participation in various
 							extracurricular activities.
@@ -572,21 +581,21 @@
 					</div>
 
 					<!-- Elementary -->
-					<div class="bg-white p-6 rounded-lg shadow-md">
+					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600">
+							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
 								Elementary Education
 							</h3>
-							<span class="text-gray-600"
+							<span class="text-gray-600 dark:text-white"
 								>Jun 2006 - Mar 2012</span
 							>
 						</div>
-						<p class="text-gray-700 mb-2">
+						<p class="text-gray-600 dark:text-gray-300 mb-2">
 							Tubigan Elementary School
 						</p>
-						<p class="text-gray-600">
+						<p class="text-gray-600 dark:text-gray-300">
 							Completed six years of basic education with
 							excellence in academics and active participation in
 							school activities.
@@ -597,25 +606,25 @@
 		</section>
 
 		<!-- Skills Section -->
-		<section id="skills" class="py-20 bg-gray-50">
+		<section id="skills" class="py-20 bg-gray-50 dark:bg-gray-800">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12">
+				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
 					Skills & Expertise
 				</h2>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 					<!-- Programming & Frameworks -->
-					<div class="bg-white p-6 rounded-lg shadow-md">
+					<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 						<h3 class="text-xl font-semibold mb-4">
 							Programming & Frameworks
 						</h3>
 						<div class="space-y-4">
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="dark:text-white text-gray-700"
 										>PHP/Laravel</span
 									>
-									<span class="text-gray-600">90%</span>
+									<span class="text-gray-600 dark:text-white">90%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -628,10 +637,10 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>Tailwind CSS</span
 									>
-									<span class="text-gray-600">70%</span>
+									<span class="text-gray-600 dark:text-white">70%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -644,10 +653,10 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>JavaScript</span
 									>
-									<span class="text-gray-600">85%</span>
+									<span class="text-gray-600 dark:text-white">85%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -660,8 +669,8 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700">HTML/CSS</span>
-									<span class="text-gray-600">95%</span>
+									<span class="text-gray-700 dark:text-white">HTML/CSS</span>
+									<span class="text-gray-600 dark:text-white">95%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -674,8 +683,8 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700">C#/.NET</span>
-									<span class="text-gray-600">80%</span>
+									<span class="text-gray-700 dark:text-white">C#/.NET</span>
+									<span class="text-gray-600 dark:text-white">80%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -690,17 +699,17 @@
 					</div>
 
 					<!-- Databases -->
-					<div class="bg-white p-6 rounded-lg shadow-md">
+					<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 						<h3 class="text-xl font-semibold mb-4">
 							Database Technologies
 						</h3>
 						<div class="space-y-4">
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>SQL Server</span
 									>
-									<span class="text-gray-600">90%</span>
+									<span class="text-gray-600 dark:text-white">90%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -713,8 +722,8 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700">MySQL</span>
-									<span class="text-gray-600">95%</span>
+									<span class="text-gray-700 dark:text-white">MySQL</span>
+									<span class="text-gray-600 dark:text-white">95%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -727,10 +736,10 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>PostgreSQL</span
 									>
-									<span class="text-gray-600">85%</span>
+									<span class="text-gray-600 dark:text-white">85%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -743,8 +752,8 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700">SQLite</span>
-									<span class="text-gray-600">80%</span>
+									<span class="text-gray-700 dark:text-white">SQLite</span>
+									<span class="text-gray-600 dark:text-white">80%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -759,17 +768,17 @@
 					</div>
 
 					<!-- Other Technical Skills -->
-					<div class="bg-white p-6 rounded-lg shadow-md">
+					<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 						<h3 class="text-xl font-semibold mb-4">
 							Other Technical Skills
 						</h3>
 						<div class="space-y-4">
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>Database Design</span
 									>
-									<span class="text-gray-600">95%</span>
+									<span class="text-gray-600 dark:text-white">95%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -782,10 +791,10 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>Network Design</span
 									>
-									<span class="text-gray-600">85%</span>
+									<span class="text-gray-600 dark:text-white">85%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -798,10 +807,10 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>System Security</span
 									>
-									<span class="text-gray-600">90%</span>
+									<span class="text-gray-600 dark:text-white">90%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -814,10 +823,10 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700"
+									<span class="text-gray-700 dark:text-white"
 										>Cloud Technology</span
 									>
-									<span class="text-gray-600">85%</span>
+									<span class="text-gray-600 dark:text-white">85%</span>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -835,53 +844,53 @@
 		</section>
 
 		<!-- Certifications & Awards Section -->
-		<section id="certifications" class="py-20 bg-white">
+		<section id="certifications" class="py-20 bg-white dark:bg-gray-900">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12">
+				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
 					Certifications & Awards
 				</h2>
 
 				<!-- Academic Awards -->
 				<div class="mb-12">
-					<h3 class="text-2xl font-semibold mb-6">Academic Awards</h3>
+					<h3 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Academic Awards</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 						<!-- Latin Honor -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="flex items-center gap-4">
 								<i
 									class="fas fa-award text-4xl text-yellow-500"
 								></i>
 								<div>
 									<h4
-										class="text-xl font-semibold text-blue-600"
+										class="text-xl font-semibold text-blue-600 dark:text-white"
 									>
 										Latin Honor - Cum Laude
 									</h4>
-									<p class="text-gray-700">
+									<p class="text-gray-600 dark:text-gray-300">
 										Mindanao State University - Naawan
 									</p>
-									<p class="text-gray-600">July 2024</p>
+									<p class="text-gray-600 dark:text-gray-300">July 2024</p>
 								</div>
 							</div>
 						</div>
 
 						<!-- High School Honor -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="flex items-center gap-4">
 								<i
 									class="fas fa-award text-4xl text-yellow-500"
 								></i>
 								<div>
 									<h4
-										class="text-xl font-semibold text-blue-600"
+										class="text-xl font-semibold text-blue-600 dark:text-white"
 									>
 										With High Honors
 									</h4>
-									<p class="text-gray-700">
+									<p class="text-gray-600 dark:text-gray-300">
 										Initao National Comprehensive High
 										School
 									</p>
-									<p class="text-gray-600">July 2019</p>
+									<p class="text-gray-600 dark:text-gray-300">July 2019</p>
 								</div>
 							</div>
 						</div>
@@ -890,14 +899,14 @@
 
 				<!-- Professional Certifications -->
 				<div>
-					<h3 class="text-2xl font-semibold mb-6">
+					<h3 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
 						Professional Certifications
 					</h3>
 					<div
 						class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
 					>
 						<!-- JavaScript Algorithms Certificate -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="mb-4 relative group">
 								<a
 									href="assets/JavaScript Algorithms and Data Structures Certificate.jpg"
@@ -913,11 +922,11 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600">
+							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
 								JavaScript Algorithms and Data Structures (Beta)
 							</h4>
-							<p class="text-gray-700">freeCodeCamp</p>
-							<p class="text-gray-600">December 2024</p>
+							<p class="text-gray-600 dark:text-gray-300">freeCodeCamp</p>
+							<p class="text-gray-600 dark:text-gray-300">December 2024</p>
 							<a
 								href="https://www.freecodecamp.org/certification/Ehnand/javascript-algorithms-and-data-structures-v8"
 								target="_blank"
@@ -928,7 +937,7 @@
 						</div>
 
 						<!-- Responsive Web Design -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Responsive Web Design Certificate - FreeCode Camp.jpg"
@@ -944,11 +953,11 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600">
+							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
 								Responsive Web Design
 							</h4>
-							<p class="text-gray-700">freeCodeCamp</p>
-							<p class="text-gray-600">December 2024</p>
+							<p class="text-gray-600 dark:text-gray-300">freeCodeCamp</p>
+							<p class="text-gray-600 dark:text-gray-300">December 2024</p>
 							<a
 								href="https://www.freecodecamp.org/certification/Ehnand/responsive-web-design"
 								target="_blank"
@@ -959,7 +968,7 @@
 						</div>
 
 						<!-- CSX Cybersecurity -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Cybersecurity Fundamentals.jpg"
@@ -975,13 +984,13 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600">
+							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
 								CSX Cybersecurity Fundamentals Certificate
 								(CSXF)
 							</h4>
-							<p class="text-gray-700">Cybrary</p>
-							<p class="text-gray-600">August 2023</p>
-							<p class="text-gray-500 text-sm">
+							<p class="text-gray-600 dark:text-gray-300">Cybrary</p>
+							<p class="text-gray-600 dark:text-gray-300">August 2023</p>
+							<p class="text-gray-500 text-sm dark:text-gray-300">
 								Credential ID:
 								CC-900adb08-fcfc-4837-b719-e9dcbf3129e4
 							</p>
@@ -995,23 +1004,23 @@
 						</div>
 
 						<!-- Civil Service -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="mb-4">
 								<i
 									class="fas fa-certificate text-5xl text-blue-600"
 								></i>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600">
+							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
 								Civil Service Eligibility
 							</h4>
-							<p class="text-gray-700">
+							<p class="text-gray-600 dark:text-gray-300">
 								Civil Service Commission
 							</p>
-							<p class="text-gray-600">July 2023</p>
+							<p class="text-gray-600 dark:text-gray-300">July 2023</p>
 						</div>
 
 						<!-- Blue Teaming -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Blue Teaming Internship Certificate.jpg"
@@ -1027,13 +1036,13 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600">
+							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
 								Blue Teaming Internship
 							</h4>
-							<p class="text-gray-700">
+							<p class="text-gray-600 dark:text-gray-300">
 								Virtual Cyber Labs Academy
 							</p>
-							<p class="text-gray-700">January 2023</p>
+							<p class="text-gray-600 dark:text-gray-300">January 2023</p>
 							<a
 								href="https://verification.givemycertificate.com/v/944bf71e-ac18-468c-ad61-637f7cd7d10a"
 								target="_blank"
@@ -1044,7 +1053,7 @@
 						</div>
 
 						<!-- Technical Support -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Technical Support.jpg"
@@ -1060,11 +1069,11 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600">
+							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
 								Technical Support Fundamentals
 							</h4>
-							<p class="text-gray-700">Google</p>
-							<p class="text-gray-600">November 2022</p>
+							<p class="text-gray-600 dark:text-gray-300">Google</p>
+							<p class="text-gray-600 dark:text-gray-300">November 2022</p>
 							<a
 								href="https://www.coursera.org/account/accomplishments/verify/SWNULUC8VLYL"
 								target="_blank"
@@ -1075,7 +1084,7 @@
 						</div>
 
 						<!-- Intrusion Detection -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
+						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Intrusion Detection Setup - Virtual CyberLabs.png"
@@ -1091,12 +1100,12 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600">
+							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
 								Intrusion Detection Setup
 							</h4>
-							<p class="text-gray-700">Virtual Cyber Labs</p>
-							<p class="text-gray-600">October 2022</p>
-							<p class="text-gray-500 text-sm">
+							<p class="text-gray-600 dark:text-gray-300">Virtual Cyber Labs</p>
+							<p class="text-gray-600 dark:text-gray-300">October 2022</p>
+							<p class="text-gray-500 text-sm dark:text-gray-300">
 								Credential ID: BKS2KRNH
 							</p>
 							<a
@@ -1149,34 +1158,34 @@
 		</section>
 
 		<!-- Projects Section -->
-		<section id="works" class="py-20 bg-gray-50">
+		<section id="works" class="py-20 bg-gray-50 dark:bg-gray-800">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12">
+				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
 					Recent Projects
 				</h2>
 				<div class="space-y-12">
 					<!-- MORESCO-1 Web HRIS -->
-					<div class="bg-white rounded-lg shadow-md overflow-hidden">
+					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
 						<div class="p-6">
 							<div
 								class="flex flex-col md:flex-row justify-between mb-4"
 							>
 								<h3
-									class="text-2xl font-semibold text-blue-600"
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
 								>
 									M1-Web HRIS (MORESCO-1 Human Resource
 									Information System)
 								</h3>
-								<span class="text-gray-600"
+								<span class="text-gray-600 dark:text-white"
 									>Jan 2024 - May 2024</span
 								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-700 font-medium"
+								<span class="text-gray-600 dark:text-white font-medium"
 									>Associated with MORESCO-1</span
 								>
 							</div>
-							<p class="text-gray-600 mb-6">
+							<p class="text-gray-600 dark:text-white mb-6">
 								A comprehensive web-based Human Resource
 								Information System specifically developed for
 								MORESCO-1's HR department. This cloud-hosted
@@ -1190,27 +1199,27 @@
 							</p>
 							<div class="flex flex-wrap gap-2">
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Laravel</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Microsoft SQL Server</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Transact-SQL (T-SQL)</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Database Design</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Bootstrap</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>VMWare Deployment</span
 								>
 							</div>
@@ -1218,29 +1227,29 @@
 					</div>
 
 					<!-- MORESCO-1 Helpdesk -->
-					<div class="bg-white rounded-lg shadow-md overflow-hidden">
+					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
 						<div class="p-6">
 							<div
 								class="flex flex-col md:flex-row justify-between mb-4"
 							>
 								<h3
-									class="text-2xl font-semibold text-blue-600"
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
 								>
 									M1-Helpdesk System
 								</h3>
-								<span class="text-gray-600"
+								<span class="text-gray-600 dark:text-white"
 									>Jan 2024 - May 2024</span
 								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-700 font-medium"
+								<span class="text-gray-600 dark:text-white font-medium"
 									>Associated with MORESCO-1</span
 								>
 							</div>
-							<p class="text-gray-600 mb-6">
+							<p class="text-gray-600 dark:text-white mb-6">
 								A centralized helpdesk solution designed for
 								MORESCO-1's internal technical support
-								management. The system facilitates ticket
+								 management. The system facilitates ticket
 								tracking, issue resolution, and support request
 								management, enhancing communication between IT
 								staff and employees. Deployed through VMWare for
@@ -1249,19 +1258,19 @@
 							</p>
 							<div class="flex flex-wrap gap-2">
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Symfony</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>MySQL</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Transact-SQL (T-SQL)</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>VMWare Deployment</span
 								>
 							</div>
@@ -1269,26 +1278,26 @@
 					</div>
 
 					<!-- LGU Initao HRIS -->
-					<div class="bg-white rounded-lg shadow-md overflow-hidden">
+					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
 						<div class="p-6">
 							<div
 								class="flex flex-col md:flex-row justify-between mb-4"
 							>
 								<h3
-									class="text-2xl font-semibold text-blue-600"
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
 								>
 									Desktop Human Resources Information System
 								</h3>
-								<span class="text-gray-600"
+								<span class="text-gray-600 dark:text-white"
 									>Aug 2023 - Jan 2024</span
 								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-700 font-medium"
+								<span class="text-gray-600 dark:text-gray-300 font-medium"
 									>Associated with LGU - Initao</span
 								>
 							</div>
-							<p class="text-gray-600 mb-6">
+							<p class="text-gray-600 dark:text-white mb-6">
 								HRIS (Human Resource Information System) is a
 								digital platform designed to streamline HR
 								processes, from recruitment to retirement. It
@@ -1303,23 +1312,23 @@
 							</p>
 							<div class="flex flex-wrap gap-2">
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>C# in .NET</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Microsoft SQL Server</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Transact-SQL (T-SQL)</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Agile Methodologies</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Database Design</span
 								>
 							</div>
@@ -1327,27 +1336,27 @@
 					</div>
 
 					<!-- File Repository System -->
-					<div class="bg-white rounded-lg shadow-md overflow-hidden">
+					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
 						<div class="p-6">
 							<div
 								class="flex flex-col md:flex-row justify-between mb-4"
 							>
 								<h3
-									class="text-2xl font-semibold text-blue-600"
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
 								>
 									File Repository System
 								</h3>
-								<span class="text-gray-600"
+								<span class="text-gray-600 dark:text-white"
 									>Aug 2023 - Nov 2023</span
 								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-700 font-medium"
+								<span class="text-gray-600 dark:text-white font-medium"
 									>Associated with Mindanao State
 									University-Naawan</span
 								>
 							</div>
-							<p class="text-gray-600 mb-6">
+							<p class="text-gray-600 dark:text-white mb-6">
 								The File Repository System Project aims to
 								create a centralized platform for storing and
 								managing digital files. It offers users a secure
@@ -1364,23 +1373,23 @@
 							</p>
 							<div class="flex flex-wrap gap-2">
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Node.js</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>MySQL</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>JavaScript</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>React.js</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Database Design</span
 								>
 							</div>
@@ -1388,27 +1397,27 @@
 					</div>
 
 					<!-- Medical Diagnostic Expert System -->
-					<div class="bg-white rounded-lg shadow-md overflow-hidden">
+					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
 						<div class="p-6">
 							<div
 								class="flex flex-col md:flex-row justify-between mb-4"
 							>
 								<h3
-									class="text-2xl font-semibold text-blue-600"
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
 								>
 									Medical Diagnostic Expert System
 								</h3>
-								<span class="text-gray-600"
+								<span class="text-gray-600 dark:text-white"
 									>Jan 2022 - May 2022</span
 								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-700 font-medium"
+								<span class="text-gray-600 dark:text-white font-medium"
 									>Associated with Mindanao State
 									University-Naawan</span
 								>
 							</div>
-							<p class="text-gray-600 mb-6">
+							<p class="text-gray-600 dark:text-white mb-6">
 								The Health Detection Expert System utilizes AI
 								and machine learning to analyze health data,
 								detecting anomalies and potential health issues.
@@ -1419,15 +1428,15 @@
 							</p>
 							<div class="flex flex-wrap gap-2">
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Machine Learning</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Knowledge-based Systems</span
 								>
 								<span
-									class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm"
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
 									>Expert Systems</span
 								>
 							</div>
@@ -1438,10 +1447,10 @@
 		</section>
 
 		<!-- Contact Section -->
-		<section id="contact" class="py-20 bg-white">
+		<section id="contact" class="py-20 bg-white dark:bg-gray-900">
 			<div class="container mx-auto px-6">
 				<h2
-					class="text-3xl font-bold text-center mb-12"
+					class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white"
 					data-aos="fade-down"
 				>
 					Get In Touch
@@ -1453,42 +1462,42 @@
 						<div class="mb-6">
 							<label
 								for="name"
-								class="block text-gray-700 text-sm font-bold mb-2"
+								class="block text-gray-700 dark:text-white text-sm font-bold mb-2"
 								>Name</label
 							>
 							<input
 								type="text"
 								id="name"
 								name="name"
-								class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+								class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white leading-tight focus:outline-none focus:shadow-outline"
 								required
 							/>
 						</div>
 						<div class="mb-6">
 							<label
 								for="email"
-								class="block text-gray-700 text-sm font-bold mb-2"
+								class="block text-gray-700 dark:text-white text-sm font-bold mb-2"
 								>Email</label
 							>
 							<input
 								type="email"
 								id="email"
 								name="email"
-								class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+								class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white leading-tight focus:outline-none focus:shadow-outline"
 								required
 							/>
 						</div>
 						<div class="mb-6">
 							<label
 								for="message"
-								class="block text-gray-700 text-sm font-bold mb-2"
+								class="block text-gray-700 dark:text-white text-sm font-bold mb-2"
 								>Message</label
 							>
 							<textarea
 								id="message"
 								name="message"
 								rows="4"
-								class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+								class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white leading-tight focus:outline-none focus:shadow-outline"
 								required
 							></textarea>
 						</div>
@@ -1622,27 +1631,6 @@
 			tippy('.link', {
 				placement: 'bottom',
 			});
-
-			//Toggle mode
-			const toggle = document.querySelector('.js-change-theme');
-			const body = document.querySelector('body');
-			const profile = document.getElementById('profile');
-
-			toggle.addEventListener('click', () => {
-				if (body.classList.contains('text-gray-900')) {
-					toggle.innerHTML = '☀️';
-					body.classList.remove('text-gray-900');
-					body.classList.add('text-gray-100');
-					profile.classList.remove('bg-white');
-					profile.classList.add('bg-gray-900');
-				} else {
-					toggle.innerHTML = '🌙';
-					body.classList.remove('text-gray-100');
-					body.classList.add('text-gray-900');
-					profile.classList.remove('bg-gray-900');
-					profile.classList.add('bg-white');
-				}
-			});
 		</script>
 
 		<script>
@@ -1709,6 +1697,42 @@
 					});
 
 				return false;
+			}
+		</script>
+
+		<script>
+			// Get the toggle button and icons
+			const themeToggle = document.getElementById('themeToggle');
+			const darkIcon = document.getElementById('darkIcon');
+			const lightIcon = document.getElementById('lightIcon');
+
+			// Function to toggle theme
+			function toggleTheme() {
+				if (document.documentElement.classList.contains('dark')) {
+					// Switch to light mode
+					document.documentElement.classList.remove('dark');
+					localStorage.theme = 'light';
+					darkIcon.classList.remove('hidden');
+					lightIcon.classList.add('hidden');
+				} else {
+					// Switch to dark mode
+					document.documentElement.classList.add('dark');
+					localStorage.theme = 'dark';
+					lightIcon.classList.remove('hidden');
+					darkIcon.classList.add('hidden');
+				}
+			}
+
+			// Add click event listener
+			themeToggle.addEventListener('click', toggleTheme);
+
+			// Set initial icon state
+			if (document.documentElement.classList.contains('dark')) {
+				lightIcon.classList.remove('hidden');
+				darkIcon.classList.add('hidden');
+			} else {
+				darkIcon.classList.remove('hidden');
+				lightIcon.classList.add('hidden');
 			}
 		</script>
 	</body>
