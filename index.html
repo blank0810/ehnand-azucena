@@ -31,10 +31,10 @@
 				<div class="flex items-center justify-between">
 					<!-- Left side - Name -->
 					<div class="text-xl font-semibold text-gray-800 dark:text-white">
-						<a href="#about">Ehnand Azucena</a>
+						Ehnand Azucena
 					</div>
 
-					<!-- Center - Navigation Links -->
+					<!-- Center - Navigation Links (Hidden on mobile) -->
 					<div class="hidden md:flex space-x-8">
 						<a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
 						<a href="#experience" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Experience</a>
@@ -45,41 +45,113 @@
 						<a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
 					</div>
 
-					<!-- Right side - Theme Toggle -->
-					<button id="themeToggle" 
-							class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
-							aria-label="Toggle Dark Mode">
-						<!-- Sun Icon -->
-						<svg id="lightIcon" 
-							 class="w-6 h-6 hidden text-gray-800 dark:text-white" 
-							 fill="none" 
-							 stroke="currentColor" 
-							 viewBox="0 0 24 24">
-							<path stroke-linecap="round" 
-								  stroke-linejoin="round" 
-								  stroke-width="2" 
-								  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-						</svg>
-						<!-- Moon Icon -->
-						<svg id="darkIcon" 
-							 class="w-6 h-6 text-gray-800 dark:text-white" 
-							 fill="none" 
-							 stroke="currentColor" 
-							 viewBox="0 0 24 24">
-							<path stroke-linecap="round" 
-								  stroke-linejoin="round" 
-								  stroke-width="2" 
-								  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-						</svg>
-					</button>
+					<div class="flex items-center space-x-4">
+						<!-- Theme Toggle -->
+						<button id="themeToggle" 
+								class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+								aria-label="Toggle Dark Mode">
+							<svg id="lightIcon" 
+								 class="w-6 h-6 hidden text-gray-800 dark:text-white" 
+								 fill="none" 
+								 stroke="currentColor" 
+								 viewBox="0 0 24 24">
+								<path stroke-linecap="round" 
+									  stroke-linejoin="round" 
+									  stroke-width="2" 
+									  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+							</svg>
+							<svg id="darkIcon" 
+								 class="w-6 h-6 text-gray-800 dark:text-white" 
+								 fill="none" 
+								 stroke="currentColor" 
+								 viewBox="0 0 24 24">
+								<path stroke-linecap="round" 
+									  stroke-linejoin="round" 
+									  stroke-width="2" 
+									  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+							</svg>
+						</button>
 
-					<!-- Mobile menu button -->
-					<button class="md:hidden">
-						<!-- Mobile menu icon -->
-					</button>
+						<!-- Mobile menu button -->
+						<button id="menuButton" 
+								class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+								aria-label="Toggle Menu">
+							<svg class="w-6 h-6 text-gray-800 dark:text-white" 
+								 fill="none" 
+								 stroke="currentColor" 
+								 viewBox="0 0 24 24">
+								<path stroke-linecap="round" 
+									  stroke-linejoin="round" 
+									  stroke-width="2" 
+									  d="M4 6h16M4 12h16M4 18h16" />
+							</svg>
+						</button>
+					</div>
+				</div>
+
+				<!-- Mobile menu (with transition classes) -->
+				<div id="mobileMenu" 
+					 class="hidden transform transition-all duration-300 ease-in-out opacity-0 -translate-y-2 md:hidden mt-4">
+					<div class="flex flex-col space-y-4">
+						<a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
+						<a href="#experience" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Experience</a>
+						<a href="#education" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Education</a>
+						<a href="#skills" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Skills</a>
+						<a href="#certifications" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Certifications</a>
+						<a href="#works" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Works</a>
+						<a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
+					</div>
 				</div>
 			</div>
 		</nav>
+
+		<!-- Update the JavaScript for smooth animation -->
+		<script>
+			const menuButton = document.getElementById('menuButton');
+			const mobileMenu = document.getElementById('mobileMenu');
+
+			menuButton.addEventListener('click', () => {
+				// Toggle visibility
+				mobileMenu.classList.toggle('hidden');
+				
+				// Wait a tiny bit for the display change to take effect
+				setTimeout(() => {
+					// Toggle animation classes
+					mobileMenu.classList.toggle('opacity-0');
+					mobileMenu.classList.toggle('-translate-y-2');
+					mobileMenu.classList.toggle('opacity-100');
+					mobileMenu.classList.toggle('translate-y-0');
+				}, 20);
+			});
+
+			// Close mobile menu when clicking a link
+			document.querySelectorAll('#mobileMenu a').forEach(link => {
+					link.addEventListener('click', () => {
+						// Reverse animation
+						mobileMenu.classList.add('opacity-0', '-translate-y-2');
+						mobileMenu.classList.remove('opacity-100', 'translate-y-0');
+						
+						// Hide after animation completes
+						setTimeout(() => {
+							mobileMenu.classList.add('hidden');
+						}, 300);
+					});
+			});
+
+			// Close mobile menu when clicking outside
+			document.addEventListener('click', (e) => {
+				if (!menuButton.contains(e.target) && !mobileMenu.contains(e.target) && !mobileMenu.classList.contains('hidden')) {
+					// Reverse animation
+					mobileMenu.classList.add('opacity-0', '-translate-y-2');
+					mobileMenu.classList.remove('opacity-100', 'translate-y-0');
+					
+					// Hide after animation completes
+					setTimeout(() => {
+						mobileMenu.classList.add('hidden');
+					}, 300);
+				}
+			});
+		</script>
 
 		<!-- About Section -->
 		<section id="about" class="pt-20 bg-white dark:bg-gray-900">
@@ -297,7 +369,7 @@
 									</div>
 									<div
 										id="moresco1Content"
-										class="hidden transition-all duration-300 overflow-hidden"
+										class="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out"
 									>
 										<p
 											class="text-gray-600 dark:text-gray-300 mb-4 text-justify"
@@ -410,11 +482,11 @@
 									</div>
 									<div
 										id="company2Content"
-										class="hidden transition-all duration-300 overflow-hidden"
+										class="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out"
 									>
 										<p
 											class="text-gray-600 dark:text-gray-300 mb-4 text-justify"
-										>
+											>
 											Spearheaded system maintenance, user
 											support, and comprehensive
 											documentation for the Learning
@@ -476,10 +548,8 @@
 			<script>
 				function toggleContent(contentId) {
 					// Get all content divs and arrows
-					const allContents =
-						document.querySelectorAll('[id$="Content"]');
-					const allArrows =
-						document.querySelectorAll('[id$="Arrow"]');
+					const allContents = document.querySelectorAll('[id$="Content"]');
+					const allArrows = document.querySelectorAll('[id$="Arrow"]');
 
 					// Get the clicked content and its arrow
 					const clickedContent = document.getElementById(contentId);
@@ -487,10 +557,16 @@
 						contentId.replace('Content', 'Arrow')
 					);
 
-					// First, close all contents and reset all arrows
+					// First, close all other contents and reset their arrows
 					allContents.forEach((content) => {
 						if (content.id !== contentId) {
-							content.classList.add('hidden');
+							// Animate closing
+							content.style.maxHeight = '0px';
+							content.style.opacity = '0';
+							// Add hidden class after animation
+							setTimeout(() => {
+								content.classList.add('hidden');
+							}, 300);
 						}
 					});
 
@@ -500,9 +576,33 @@
 						}
 					});
 
-					// Then toggle the clicked content and arrow
-					clickedContent.classList.toggle('hidden');
-					clickedArrow.classList.toggle('rotate-180');
+					// Initialize maxHeight if it hasn't been set yet
+					if (!clickedContent.style.maxHeight) {
+						clickedContent.style.maxHeight = '0px';
+					}
+
+					// Then toggle the clicked content
+					if (clickedContent.classList.contains('hidden') || clickedContent.style.maxHeight === '0px') {
+						// Show content
+						clickedContent.classList.remove('hidden');
+						// Toggle arrow immediately
+						clickedArrow.classList.add('rotate-180');
+						// Trigger animation
+						setTimeout(() => {
+							clickedContent.style.maxHeight = clickedContent.scrollHeight + 'px';
+							clickedContent.style.opacity = '1';
+						}, 20);
+					} else {
+						// Hide content with animation
+						clickedContent.style.maxHeight = '0px';
+						clickedContent.style.opacity = '0';
+						// Remove arrow rotation immediately
+						clickedArrow.classList.remove('rotate-180');
+						// Add hidden class after animation
+						setTimeout(() => {
+							clickedContent.classList.add('hidden');
+						}, 300);
+					}
 				}
 			</script>
 		</section>
@@ -990,10 +1090,6 @@
 							</h4>
 							<p class="text-gray-600 dark:text-gray-300">Cybrary</p>
 							<p class="text-gray-600 dark:text-gray-300">August 2023</p>
-							<p class="text-gray-500 text-sm dark:text-gray-300">
-								Credential ID:
-								CC-900adb08-fcfc-4837-b719-e9dcbf3129e4
-							</p>
 							<a
 								href="https://app.cybrary.it/profile/SimpleCanidae0202?tab=cert-completion&cert=CC-900adb08-fcfc-4837-b719-e9dcbf3129e4"
 								target="_blank"
