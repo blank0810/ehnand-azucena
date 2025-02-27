@@ -9,7 +9,7 @@
 			tailwind.config = {
 				darkMode: 'class',
 				// ... rest of your config
-			}
+			};
 		</script>
 
 		<!-- Add custom fonts -->
@@ -24,82 +24,160 @@
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 		/>
 	</head>
-	<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-white font-['Poppins']">
+	<body
+		class="bg-white dark:bg-gray-900 text-gray-800 dark:text-white font-['Poppins']"
+	>
 		<!-- Navigation -->
 		<nav class="fixed w-full bg-white dark:bg-gray-800 shadow-md z-50">
 			<div class="container mx-auto px-6 py-4">
 				<div class="flex items-center justify-between">
 					<!-- Left side - Name -->
-					<div class="text-xl font-semibold text-gray-800 dark:text-white">
+					<div
+						class="text-xl font-semibold text-gray-800 dark:text-white"
+					>
 						<a href="#about">Ehnand Azucena</a>
 					</div>
 
 					<!-- Center - Navigation Links (Hidden on mobile) -->
 					<div class="hidden md:flex space-x-8">
-						<a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
-						<a href="#experience" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Experience</a>
-						<a href="#education" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Education</a>
-						<a href="#skills" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Skills</a>
-						<a href="#certifications" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Certifications</a>
-						<a href="#works" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Works</a>
-						<a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
+						<a
+							href="#about"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>About</a
+						>
+						<a
+							href="#experience"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Experience</a
+						>
+						<a
+							href="#education"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Education</a
+						>
+						<a
+							href="#skills"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Skills</a
+						>
+						<a
+							href="#certifications"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Certifications</a
+						>
+						<a
+							href="#works"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Works</a
+						>
+						<a
+							href="#contact"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Contact</a
+						>
 					</div>
 
 					<div class="flex items-center space-x-4">
 						<!-- Theme Toggle -->
-						<button id="themeToggle" 
-								class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
-								aria-label="Toggle Dark Mode">
-							<svg id="lightIcon" 
-								 class="w-6 h-6 hidden text-gray-800 dark:text-white" 
-								 fill="none" 
-								 stroke="currentColor" 
-								 viewBox="0 0 24 24">
-								<path stroke-linecap="round" 
-									  stroke-linejoin="round" 
-									  stroke-width="2" 
-									  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+						<button
+							id="themeToggle"
+							class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+							aria-label="Toggle Dark Mode"
+						>
+							<svg
+								id="lightIcon"
+								class="w-6 h-6 hidden text-gray-800 dark:text-white"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+								/>
 							</svg>
-							<svg id="darkIcon" 
-								 class="w-6 h-6 text-gray-800 dark:text-white" 
-								 fill="none" 
-								 stroke="currentColor" 
-								 viewBox="0 0 24 24">
-								<path stroke-linecap="round" 
-									  stroke-linejoin="round" 
-									  stroke-width="2" 
-									  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+							<svg
+								id="darkIcon"
+								class="w-6 h-6 text-gray-800 dark:text-white"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+								/>
 							</svg>
 						</button>
 
 						<!-- Mobile menu button -->
-						<button id="menuButton" 
-								class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
-								aria-label="Toggle Menu">
-							<svg class="w-6 h-6 text-gray-800 dark:text-white" 
-								 fill="none" 
-								 stroke="currentColor" 
-								 viewBox="0 0 24 24">
-								<path stroke-linecap="round" 
-									  stroke-linejoin="round" 
-									  stroke-width="2" 
-									  d="M4 6h16M4 12h16M4 18h16" />
+						<button
+							id="menuButton"
+							class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+							aria-label="Toggle Menu"
+						>
+							<svg
+								class="w-6 h-6 text-gray-800 dark:text-white"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 6h16M4 12h16M4 18h16"
+								/>
 							</svg>
 						</button>
 					</div>
 				</div>
 
 				<!-- Mobile menu (with transition classes) -->
-				<div id="mobileMenu" 
-					 class="hidden transform transition-all duration-300 ease-in-out opacity-0 -translate-y-2 md:hidden mt-4">
+				<div
+					id="mobileMenu"
+					class="hidden transform transition-all duration-300 ease-in-out opacity-0 -translate-y-2 md:hidden mt-4"
+				>
 					<div class="flex flex-col space-y-4">
-						<a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">About</a>
-						<a href="#experience" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Experience</a>
-						<a href="#education" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Education</a>
-						<a href="#skills" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Skills</a>
-						<a href="#certifications" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Certifications</a>
-						<a href="#works" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Works</a>
-						<a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Contact</a>
+						<a
+							href="#about"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>About</a
+						>
+						<a
+							href="#experience"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Experience</a
+						>
+						<a
+							href="#education"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Education</a
+						>
+						<a
+							href="#skills"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Skills</a
+						>
+						<a
+							href="#certifications"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Certifications</a
+						>
+						<a
+							href="#works"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Works</a
+						>
+						<a
+							href="#contact"
+							class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+							>Contact</a
+						>
 					</div>
 				</div>
 			</div>
@@ -113,7 +191,7 @@
 			menuButton.addEventListener('click', () => {
 				// Toggle visibility
 				mobileMenu.classList.toggle('hidden');
-				
+
 				// Wait a tiny bit for the display change to take effect
 				setTimeout(() => {
 					// Toggle animation classes
@@ -125,26 +203,30 @@
 			});
 
 			// Close mobile menu when clicking a link
-			document.querySelectorAll('#mobileMenu a').forEach(link => {
-					link.addEventListener('click', () => {
-						// Reverse animation
-						mobileMenu.classList.add('opacity-0', '-translate-y-2');
-						mobileMenu.classList.remove('opacity-100', 'translate-y-0');
-						
-						// Hide after animation completes
-						setTimeout(() => {
-							mobileMenu.classList.add('hidden');
-						}, 300);
-					});
+			document.querySelectorAll('#mobileMenu a').forEach((link) => {
+				link.addEventListener('click', () => {
+					// Reverse animation
+					mobileMenu.classList.add('opacity-0', '-translate-y-2');
+					mobileMenu.classList.remove('opacity-100', 'translate-y-0');
+
+					// Hide after animation completes
+					setTimeout(() => {
+						mobileMenu.classList.add('hidden');
+					}, 300);
+				});
 			});
 
 			// Close mobile menu when clicking outside
 			document.addEventListener('click', (e) => {
-				if (!menuButton.contains(e.target) && !mobileMenu.contains(e.target) && !mobileMenu.classList.contains('hidden')) {
+				if (
+					!menuButton.contains(e.target) &&
+					!mobileMenu.contains(e.target) &&
+					!mobileMenu.classList.contains('hidden')
+				) {
 					// Reverse animation
 					mobileMenu.classList.add('opacity-0', '-translate-y-2');
 					mobileMenu.classList.remove('opacity-100', 'translate-y-0');
-					
+
 					// Hide after animation completes
 					setTimeout(() => {
 						mobileMenu.classList.add('hidden');
@@ -163,14 +245,16 @@
 					id="profile"
 					class="w-full lg:w-3/5 rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-2xl bg-white opacity-75 mx-6 lg:mx-0"
 				>
-					<div class="p-4 md:p-12 text-center lg:text-left ">
+					<div class="p-4 md:p-12 text-center lg:text-left">
 						<!-- Image for mobile view-->
 						<div
 							class="block lg:hidden rounded-full shadow-xl mx-auto -mt-16 h-48 w-48 bg-cover bg-center"
 							style="background-image: url('assets/profile.png')"
 						></div>
 
-						<h1 class="text-3xl font-bold pt-8 lg:pt-0 dark:text-gray-600">
+						<h1
+							class="text-3xl font-bold pt-8 lg:pt-0 dark:text-gray-600"
+						>
 							Ehnand A. Azucena
 						</h1>
 						<div
@@ -322,14 +406,18 @@
 		<!-- Professional Experience Section -->
 		<section id="experience" class="py-20 bg-gray-50 dark:bg-gray-800">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+				<h2
+					class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white"
+				>
 					Professional Experience
 				</h2>
 				<!-- Changed to regular block layout -->
 				<div class="block md:flex md:flex-row gap-8 justify-center">
-					<!-- Experience Item 1 -->
+					<!-- Experience Item 1 MORESCO-1 -->
 					<div class="md:w-1/3 mb-8 md:mb-0">
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="flex flex-col">
 								<!-- Company Logo -->
 								<div class="mb-2 flex justify-center">
@@ -360,10 +448,14 @@
 											/>
 										</svg>
 									</h3>
-									<p class="text-gray-600 dark:text-gray-300 font-medium mb-2">
+									<p
+										class="text-gray-600 dark:text-gray-300 font-medium mb-2"
+									>
 										MORESCO-1
 									</p>
-									<div class="text-gray-600 dark:text-gray-400 mb-4">
+									<div
+										class="text-gray-600 dark:text-gray-400 mb-4"
+									>
 										Jan 2024 - June 2024 | Laguindingan,
 										Misamis Oriental, Philippines
 									</div>
@@ -377,7 +469,7 @@
 											I contributed to the development of
 											the M1-HRIS employee module and
 											M1-Helpdesk system, optimized
-											 databases, ensured system
+											databases, ensured system
 											reliability through maintenance and
 											testing, supported security
 											measures, and documented processes
@@ -440,9 +532,11 @@
 						</div>
 					</div>
 
-					<!-- Experience Item 2 -->
+					<!-- Experience Item 2 EduQuest -->
 					<div class="md:w-1/3 mb-8 md:mb-0">
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="flex flex-col">
 								<!-- Company Logo -->
 								<div class="mb-2 flex justify-center">
@@ -473,12 +567,16 @@
 											/>
 										</svg>
 									</h3>
-									<p class="dark:text-white text-gray-600 dark:text-gray-300 font-medium mb-2">
+									<p
+										class="dark:text-white text-gray-600 dark:text-gray-300 font-medium mb-2"
+									>
 										Eduquest Inc.
 									</p>
-									<div class="text-gray-600 dark:text-gray-400 mb-4">
-										July 2024 - January 2025 | Cagayan De Oro
-										City, Philippines
+									<div
+										class="text-gray-600 dark:text-gray-400 mb-4"
+									>
+										July 2024 - January 2025 | Cagayan De
+										Oro City, Philippines
 									</div>
 									<div
 										id="company2Content"
@@ -486,7 +584,7 @@
 									>
 										<p
 											class="text-gray-600 dark:text-gray-300 mb-4 text-justify"
-											>
+										>
 											Spearheaded system maintenance, user
 											support, and comprehensive
 											documentation for the Learning
@@ -537,10 +635,23 @@
 												through comprehensive testing
 											</li>
 											<li>
-												Developed the EduTracker system, which monitors course dissemination to school clients and automates report generation based on parameters, reducing manual reporting time by 40% and enhancing efficiency in course distribution and monitoring.
+												Developed the EduTracker system,
+												which monitors course
+												dissemination to school clients
+												and automates report generation
+												based on parameters, reducing
+												manual reporting time by 40% and
+												enhancing efficiency in course
+												distribution and monitoring.
 											</li>
 											<li>
-												Created a custom Python script utilizing the MXroute API to automate email creation for bulk user accounts in our LMS, reducing setup time by 70% and ensuring consistent account configuration.
+												Created a custom Python script
+												utilizing the MXroute API to
+												automate email creation for bulk
+												user accounts in our LMS,
+												reducing setup time by 70% and
+												ensuring consistent account
+												configuration.
 											</li>
 										</ul>
 									</div>
@@ -549,9 +660,11 @@
 						</div>
 					</div>
 
-					<!-- Experience Item 3 -->
+					<!-- Experience Item 3 CloudDesk -->
 					<div class="md:w-1/3 mb-8 md:mb-0">
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="flex flex-col">
 								<!-- Company Logo -->
 								<div class="mb-2 flex justify-center">
@@ -582,25 +695,31 @@
 											/>
 										</svg>
 									</h3>
-									<p class="dark:text-white text-gray-600 dark:text-gray-300 font-medium mb-2">
+									<p
+										class="dark:text-white text-gray-600 dark:text-gray-300 font-medium mb-2"
+									>
 										Cloudesk Pty Ltd
 									</p>
-									<div class="text-gray-600 dark:text-gray-400 mb-4">
-										January 2025 - Present|11-17 York St, Sydney NSW 2000, Australia
+									<div
+										class="text-gray-600 dark:text-gray-400 mb-4"
+									>
+										January 2025 - Present| 11-17 York St,
+										Sydney NSW 2000, Australia
 									</div>
 									<div
 										id="company3Content"
 										class="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out"
-									>
-									</div>
+									></div>
 								</div>
 							</div>
 						</div>
 					</div>
 
-					<!-- Experience Item 4 -->
+					<!-- Experience Item 4 Whitetower -->
 					<div class="md:w-1/3 mb-8 md:mb-0">
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="flex flex-col">
 								<!-- Company Logo -->
 								<div class="mb-2 flex justify-center">
@@ -631,17 +750,21 @@
 											/>
 										</svg>
 									</h3>
-									<p class="dark:text-white text-gray-600 dark:text-gray-300 font-medium mb-2">
+									<p
+										class="dark:text-white text-gray-600 dark:text-gray-300 font-medium mb-2"
+									>
 										Whitetower Digital Pty Ltd.
 									</p>
-									<div class="text-gray-600 dark:text-gray-400 mb-4">
-										January 2025 - Present|11-17 York St, Sydney NSW 2000, Australia
+									<div
+										class="text-gray-600 dark:text-gray-400 mb-4"
+									>
+										January 2025 - Present| Kent Street
+										,Sydney, NSW Australia 2000
 									</div>
 									<div
 										id="company4Content"
 										class="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out"
-									>
-									</div>
+									></div>
 								</div>
 							</div>
 						</div>
@@ -652,8 +775,10 @@
 			<script>
 				function toggleContent(contentId) {
 					// Get all content divs and arrows
-					const allContents = document.querySelectorAll('[id$="Content"]');
-					const allArrows = document.querySelectorAll('[id$="Arrow"]');
+					const allContents =
+						document.querySelectorAll('[id$="Content"]');
+					const allArrows =
+						document.querySelectorAll('[id$="Arrow"]');
 
 					// Get the clicked content and its arrow
 					const clickedContent = document.getElementById(contentId);
@@ -686,14 +811,18 @@
 					}
 
 					// Then toggle the clicked content
-					if (clickedContent.classList.contains('hidden') || clickedContent.style.maxHeight === '0px') {
+					if (
+						clickedContent.classList.contains('hidden') ||
+						clickedContent.style.maxHeight === '0px'
+					) {
 						// Show content
 						clickedContent.classList.remove('hidden');
 						// Toggle arrow immediately
 						clickedArrow.classList.add('rotate-180');
 						// Trigger animation
 						setTimeout(() => {
-							clickedContent.style.maxHeight = clickedContent.scrollHeight + 'px';
+							clickedContent.style.maxHeight =
+								clickedContent.scrollHeight + 'px';
 							clickedContent.style.opacity = '1';
 						}, 20);
 					} else {
@@ -714,16 +843,22 @@
 		<!-- Education Section -->
 		<section id="education" class="py-20 bg-white dark:bg-gray-900">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+				<h2
+					class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white"
+				>
 					Education
 				</h2>
 				<div class="max-w-4xl mx-auto space-y-8">
 					<!-- College -->
-					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+					>
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
+							<h3
+								class="text-xl font-semibold text-blue-600 dark:text-white"
+							>
 								Bachelor of Science in Information Technology
 							</h3>
 							<span class="text-gray-600 dark:text-white"
@@ -741,11 +876,15 @@
 					</div>
 
 					<!-- Senior High School -->
-					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+					>
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
+							<h3
+								class="text-xl font-semibold text-blue-600 dark:text-white"
+							>
 								Senior High School - HUMSS
 							</h3>
 							<span class="text-gray-600 dark:text-white"
@@ -763,11 +902,15 @@
 					</div>
 
 					<!-- Junior High School -->
-					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+					>
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
+							<h3
+								class="text-xl font-semibold text-blue-600 dark:text-white"
+							>
 								Junior High School
 							</h3>
 							<span class="text-gray-600 dark:text-white"
@@ -785,11 +928,15 @@
 					</div>
 
 					<!-- Elementary -->
-					<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+					>
 						<div
 							class="flex flex-col md:flex-row justify-between mb-4"
 						>
-							<h3 class="text-xl font-semibold text-blue-600 dark:text-white">
+							<h3
+								class="text-xl font-semibold text-blue-600 dark:text-white"
+							>
 								Elementary Education
 							</h3>
 							<span class="text-gray-600 dark:text-white"
@@ -812,13 +959,17 @@
 		<!-- Skills Section -->
 		<section id="skills" class="py-20 bg-gray-50 dark:bg-gray-800">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+				<h2
+					class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white"
+				>
 					Skills & Expertise
 				</h2>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 					<!-- Programming & Frameworks -->
-					<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+					<div
+						class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+					>
 						<h3 class="text-xl font-semibold mb-4">
 							Programming & Frameworks
 						</h3>
@@ -828,7 +979,9 @@
 									<span class="dark:text-white text-gray-700"
 										>PHP/Laravel</span
 									>
-									<span class="text-gray-600 dark:text-white">90%</span>
+									<span class="text-gray-600 dark:text-white"
+										>90%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -844,7 +997,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>Tailwind CSS</span
 									>
-									<span class="text-gray-600 dark:text-white">70%</span>
+									<span class="text-gray-600 dark:text-white"
+										>70%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -860,7 +1015,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>React JS</span
 									>
-									<span class="text-gray-600 dark:text-white">70%</span>
+									<span class="text-gray-600 dark:text-white"
+										>70%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -876,7 +1033,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>JavaScript</span
 									>
-									<span class="text-gray-600 dark:text-white">85%</span>
+									<span class="text-gray-600 dark:text-white"
+										>85%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -889,8 +1048,12 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700 dark:text-white">HTML/CSS</span>
-									<span class="text-gray-600 dark:text-white">95%</span>
+									<span class="text-gray-700 dark:text-white"
+										>HTML/CSS</span
+									>
+									<span class="text-gray-600 dark:text-white"
+										>95%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -903,8 +1066,12 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700 dark:text-white">C#/.NET</span>
-									<span class="text-gray-600 dark:text-white">80%</span>
+									<span class="text-gray-700 dark:text-white"
+										>C#/.NET</span
+									>
+									<span class="text-gray-600 dark:text-white"
+										>80%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -919,7 +1086,9 @@
 					</div>
 
 					<!-- Databases -->
-					<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+					<div
+						class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+					>
 						<h3 class="text-xl font-semibold mb-4">
 							Database Technologies
 						</h3>
@@ -929,7 +1098,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>SQL Server</span
 									>
-									<span class="text-gray-600 dark:text-white">90%</span>
+									<span class="text-gray-600 dark:text-white"
+										>90%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -942,8 +1113,12 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700 dark:text-white">MySQL</span>
-									<span class="text-gray-600 dark:text-white">95%</span>
+									<span class="text-gray-700 dark:text-white"
+										>MySQL</span
+									>
+									<span class="text-gray-600 dark:text-white"
+										>95%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -959,7 +1134,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>PostgreSQL</span
 									>
-									<span class="text-gray-600 dark:text-white">85%</span>
+									<span class="text-gray-600 dark:text-white"
+										>85%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -972,8 +1149,12 @@
 							</div>
 							<div class="skill-bar">
 								<div class="flex justify-between mb-1">
-									<span class="text-gray-700 dark:text-white">SQLite</span>
-									<span class="text-gray-600 dark:text-white">80%</span>
+									<span class="text-gray-700 dark:text-white"
+										>SQLite</span
+									>
+									<span class="text-gray-600 dark:text-white"
+										>80%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -988,7 +1169,9 @@
 					</div>
 
 					<!-- Other Technical Skills -->
-					<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+					<div
+						class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+					>
 						<h3 class="text-xl font-semibold mb-4">
 							Other Technical Skills
 						</h3>
@@ -998,7 +1181,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>Database Design</span
 									>
-									<span class="text-gray-600 dark:text-white">95%</span>
+									<span class="text-gray-600 dark:text-white"
+										>95%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -1014,7 +1199,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>Network Design</span
 									>
-									<span class="text-gray-600 dark:text-white">85%</span>
+									<span class="text-gray-600 dark:text-white"
+										>85%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -1030,7 +1217,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>System Security</span
 									>
-									<span class="text-gray-600 dark:text-white">90%</span>
+									<span class="text-gray-600 dark:text-white"
+										>90%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -1046,7 +1235,9 @@
 									<span class="text-gray-700 dark:text-white"
 										>Cloud Technology</span
 									>
-									<span class="text-gray-600 dark:text-white">85%</span>
+									<span class="text-gray-600 dark:text-white"
+										>85%</span
+									>
 								</div>
 								<div
 									class="w-full bg-gray-200 rounded-full h-2"
@@ -1066,16 +1257,24 @@
 		<!-- Certifications & Awards Section -->
 		<section id="certifications" class="py-20 bg-white dark:bg-gray-900">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+				<h2
+					class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white"
+				>
 					Certifications & Awards
 				</h2>
 
 				<!-- Academic Awards -->
 				<div class="mb-12">
-					<h3 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Academic Awards</h3>
+					<h3
+						class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white"
+					>
+						Academic Awards
+					</h3>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 						<!-- Latin Honor -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="flex items-center gap-4">
 								<i
 									class="fas fa-award text-4xl text-yellow-500"
@@ -1089,13 +1288,17 @@
 									<p class="text-gray-600 dark:text-gray-300">
 										Mindanao State University - Naawan
 									</p>
-									<p class="text-gray-600 dark:text-gray-300">July 2024</p>
+									<p class="text-gray-600 dark:text-gray-300">
+										July 2024
+									</p>
 								</div>
 							</div>
 						</div>
 
 						<!-- High School Honor -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="flex items-center gap-4">
 								<i
 									class="fas fa-award text-4xl text-yellow-500"
@@ -1110,7 +1313,9 @@
 										Initao National Comprehensive High
 										School
 									</p>
-									<p class="text-gray-600 dark:text-gray-300">July 2019</p>
+									<p class="text-gray-600 dark:text-gray-300">
+										July 2019
+									</p>
 								</div>
 							</div>
 						</div>
@@ -1119,14 +1324,18 @@
 
 				<!-- Professional Certifications -->
 				<div>
-					<h3 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
+					<h3
+						class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white"
+					>
 						Professional Certifications
 					</h3>
 					<div
 						class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
 					>
-					<!-- Advanced React Basic Certficate -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<!-- Advanced React Basic Certficate -->
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Advanced React.png"
@@ -1142,11 +1351,17 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								Advanced React
 							</h4>
-							<p class="text-gray-600 dark:text-gray-300">Meta <i class="fab fa-meta"></i></p>
-							<p class="text-gray-600 dark:text-gray-300">January 2025</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								Meta <i class="fab fa-meta"></i>
+							</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								January 2025
+							</p>
 							<a
 								href="https://coursera.org/verify/2PPLPYD9SZ8B"
 								target="_blank"
@@ -1157,7 +1372,9 @@
 						</div>
 
 						<!-- React Basic Certficate -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/React Basics.png"
@@ -1173,11 +1390,17 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								React Basics
 							</h4>
-							<p class="text-gray-600 dark:text-gray-300">Meta <i class="fab fa-meta"></i></p>
-							<p class="text-gray-600 dark:text-gray-300">January 2025</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								Meta <i class="fab fa-meta"></i>
+							</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								January 2025
+							</p>
 							<a
 								href="https://coursera.org/verify/SUL3C9D7GZK3"
 								target="_blank"
@@ -1188,7 +1411,9 @@
 						</div>
 
 						<!-- JavaScript Algorithms Certificate -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/JavaScript Algorithms and Data Structures Certificate.png"
@@ -1204,17 +1429,30 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								JavaScript Algorithms and Data Structures (Beta)
 							</h4>
-							<p class="text-gray-600 dark:text-gray-300 flex items-center">
-								freeCodeCamp 
-								<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 ml-2">
+							<p
+								class="text-gray-600 dark:text-gray-300 flex items-center"
+							>
+								freeCodeCamp
+								<svg
+									role="img"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+									class="w-6 h-6 ml-2"
+								>
 									<title>freeCodeCamp</title>
-									<path d="M23.967 12.317c0 2.5-.854 4.718-2.598 6.681-.635.729-1.143 1.076-1.488 1.076-.121 0-.256-.033-.346-.125-.092-.096-.15-.223-.15-.35 0-.188.225-.475.674-.889 1.814-1.736 2.727-3.895 2.727-6.456 0-2.846-.943-5.152-2.816-6.936-.374-.342-.57-.627-.57-.852 0-.12.061-.256.164-.345.105-.09.225-.149.346-.149.418 0 1.049.509 1.842 1.527C23.25 7.402 24 9.694 24 12.345l-.033-.028zM0 11.682c0-2.499.854-4.719 2.598-6.681.635-.729 1.143-1.076 1.49-1.076.119 0 .254.033.344.125.09.095.15.189.15.314 0 .188-.225.477-.674.918-1.781 1.744-2.711 3.895-2.711 6.462 0 2.847.951 5.158 2.821 6.935.38.344.569.633.569.854 0 .127-.061.256-.16.348-.099.094-.225.16-.352.16-.436 0-1.033-.51-1.828-1.518C.734 16.654 0 14.373 0 11.682zm17.699 6.869H6.715c-.35 0-.668-.287-.668-.666 0-.383.285-.668.668-.668h10.984c.348 0 .668.285.668.668-.006.385-.287.666-.668.666zm-6-8.919c.197-.025.344.615.361.749.046.353-.071.693-.231 1.003-.597 1.165-1.978 2.104-1.612 3.575.166.635.494 1.076 1.514 1.619-.345.119-.824-.111-1.094-.301-1.199-.816-1.963-2.156-1.888-3.619.03-.464.12-.92.239-1.368.375-1.281 1.139-2.401 1.588-3.647.225-.599.39-1.324.211-1.953-.09-.309-.255-.599-.465-.849-.061-.076-.404-.465-.539-.42.6-.225 1.139-.016 1.662.299.404.24.72.585.959.975.449.719.629 1.542.719 2.381.031.345-.015 1.184.39 1.35.419.179.749-.525.839-.81.195-.645-.06-1.259-.314-1.858.061.121.285.255.389.346l.36.344c.435.449.704 1.004.884 1.604.164.539.24 1.093.27 1.633.074 1.123-.18 2.278-.629 3.311-.195.463-.449.898-.779 1.273-.319.373-.748.613-1.093.957.808-.809 1.238-2.127 1.123-3.131-.06-.553-.239-1.063-.659-1.572 0 0 .045.358.087.583.075.495-.255 1.02-.644.959-.285-.029-.136-.643-.105-.838.105-.584-.03-1.154-.244-1.693-.209-.509-.6-.914-1.198-.823l-.101-.079z"/>
+									<path
+										d="M23.967 12.317c0 2.5-.854 4.718-2.598 6.681-.635.729-1.143 1.076-1.488 1.076-.121 0-.256-.033-.346-.125-.092-.096-.15-.223-.15-.35 0-.188.225-.475.674-.889 1.814-1.736 2.727-3.895 2.727-6.456 0-2.846-.943-5.152-2.816-6.936-.374-.342-.57-.627-.57-.852 0-.12.061-.256.164-.345.105-.09.225-.149.346-.149.418 0 1.049.509 1.842 1.527C23.25 7.402 24 9.694 24 12.345l-.033-.028zM0 11.682c0-2.499.854-4.719 2.598-6.681.635-.729 1.143-1.076 1.49-1.076.119 0 .254.033.344.125.09.095.15.189.15.314 0 .188-.225.477-.674.918-1.781 1.744-2.711 3.895-2.711 6.462 0 2.847.951 5.158 2.821 6.935.38.344.569.633.569.854 0 .127-.061.256-.16.348-.099.094-.225.16-.352.16-.436 0-1.033-.51-1.828-1.518C.734 16.654 0 14.373 0 11.682zm17.699 6.869H6.715c-.35 0-.668-.287-.668-.666 0-.383.285-.668.668-.668h10.984c.348 0 .668.285.668.668-.006.385-.287.666-.668.666zm-6-8.919c.197-.025.344.615.361.749.046.353-.071.693-.231 1.003-.597 1.165-1.978 2.104-1.612 3.575.166.635.494 1.076 1.514 1.619-.345.119-.824-.111-1.094-.301-1.199-.816-1.963-2.156-1.888-3.619.03-.464.12-.92.239-1.368.375-1.281 1.139-2.401 1.588-3.647.225-.599.39-1.324.211-1.953-.09-.309-.255-.599-.465-.849-.061-.076-.404-.465-.539-.42.6-.225 1.139-.016 1.662.299.404.24.72.585.959.975.449.719.629 1.542.719 2.381.031.345-.015 1.184.39 1.35.419.179.749-.525.839-.81.195-.645-.06-1.259-.314-1.858.061.121.285.255.389.346l.36.344c.435.449.704 1.004.884 1.604.164.539.24 1.093.27 1.633.074 1.123-.18 2.278-.629 3.311-.195.463-.449.898-.779 1.273-.319.373-.748.613-1.093.957.808-.809 1.238-2.127 1.123-3.131-.06-.553-.239-1.063-.659-1.572 0 0 .045.358.087.583.075.495-.255 1.02-.644.959-.285-.029-.136-.643-.105-.838.105-.584-.03-1.154-.244-1.693-.209-.509-.6-.914-1.198-.823l-.101-.079z"
+									/>
 								</svg>
 							</p>
-							<p class="text-gray-600 dark:text-gray-300">December 2024</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								December 2024
+							</p>
 							<a
 								href="https://www.freecodecamp.org/certification/Ehnand/javascript-algorithms-and-data-structures-v8"
 								target="_blank"
@@ -1225,7 +1463,9 @@
 						</div>
 
 						<!-- Responsive Web Design -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Responsive Web Design Certificate - FreeCode Camp.png"
@@ -1241,17 +1481,30 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								Responsive Web Design
 							</h4>
-							<p class="text-gray-600 dark:text-gray-300 flex items-center">
-								freeCodeCamp 
-								<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 ml-2">
+							<p
+								class="text-gray-600 dark:text-gray-300 flex items-center"
+							>
+								freeCodeCamp
+								<svg
+									role="img"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+									class="w-6 h-6 ml-2"
+								>
 									<title>freeCodeCamp</title>
-									<path d="M23.967 12.317c0 2.5-.854 4.718-2.598 6.681-.635.729-1.143 1.076-1.488 1.076-.121 0-.256-.033-.346-.125-.092-.096-.15-.223-.15-.35 0-.188.225-.475.674-.889 1.814-1.736 2.727-3.895 2.727-6.456 0-2.846-.943-5.152-2.816-6.936-.374-.342-.57-.627-.57-.852 0-.12.061-.256.164-.345.105-.09.225-.149.346-.149.418 0 1.049.509 1.842 1.527C23.25 7.402 24 9.694 24 12.345l-.033-.028zM0 11.682c0-2.499.854-4.719 2.598-6.681.635-.729 1.143-1.076 1.49-1.076.119 0 .254.033.344.125.09.095.15.189.15.314 0 .188-.225.477-.674.918-1.781 1.744-2.711 3.895-2.711 6.462 0 2.847.951 5.158 2.821 6.935.38.344.569.633.569.854 0 .127-.061.256-.16.348-.099.094-.225.16-.352.16-.436 0-1.033-.51-1.828-1.518C.734 16.654 0 14.373 0 11.682zm17.699 6.869H6.715c-.35 0-.668-.287-.668-.666 0-.383.285-.668.668-.668h10.984c.348 0 .668.285.668.668-.006.385-.287.666-.668.666zm-6-8.919c.197-.025.344.615.361.749.046.353-.071.693-.231 1.003-.597 1.165-1.978 2.104-1.612 3.575.166.635.494 1.076 1.514 1.619-.345.119-.824-.111-1.094-.301-1.199-.816-1.963-2.156-1.888-3.619.03-.464.12-.92.239-1.368.375-1.281 1.139-2.401 1.588-3.647.225-.599.39-1.324.211-1.953-.09-.309-.255-.599-.465-.849-.061-.076-.404-.465-.539-.42.6-.225 1.139-.016 1.662.299.404.24.72.585.959.975.449.719.629 1.542.719 2.381.031.345-.015 1.184.39 1.35.419.179.749-.525.839-.81.195-.645-.06-1.259-.314-1.858.061.121.285.255.389.346l.36.344c.435.449.704 1.004.884 1.604.164.539.24 1.093.27 1.633.074 1.123-.18 2.278-.629 3.311-.195.463-.449.898-.779 1.273-.319.373-.748.613-1.093.957.808-.809 1.238-2.127 1.123-3.131-.06-.553-.239-1.063-.659-1.572 0 0 .045.358.087.583.075.495-.255 1.02-.644.959-.285-.029-.136-.643-.105-.838.105-.584-.03-1.154-.244-1.693-.209-.509-.6-.914-1.198-.823l-.101-.079z"/>
+									<path
+										d="M23.967 12.317c0 2.5-.854 4.718-2.598 6.681-.635.729-1.143 1.076-1.488 1.076-.121 0-.256-.033-.346-.125-.092-.096-.15-.223-.15-.35 0-.188.225-.475.674-.889 1.814-1.736 2.727-3.895 2.727-6.456 0-2.846-.943-5.152-2.816-6.936-.374-.342-.57-.627-.57-.852 0-.12.061-.256.164-.345.105-.09.225-.149.346-.149.418 0 1.049.509 1.842 1.527C23.25 7.402 24 9.694 24 12.345l-.033-.028zM0 11.682c0-2.499.854-4.719 2.598-6.681.635-.729 1.143-1.076 1.49-1.076.119 0 .254.033.344.125.09.095.15.189.15.314 0 .188-.225.477-.674.918-1.781 1.744-2.711 3.895-2.711 6.462 0 2.847.951 5.158 2.821 6.935.38.344.569.633.569.854 0 .127-.061.256-.16.348-.099.094-.225.16-.352.16-.436 0-1.033-.51-1.828-1.518C.734 16.654 0 14.373 0 11.682zm17.699 6.869H6.715c-.35 0-.668-.287-.668-.666 0-.383.285-.668.668-.668h10.984c.348 0 .668.285.668.668-.006.385-.287.666-.668.666zm-6-8.919c.197-.025.344.615.361.749.046.353-.071.693-.231 1.003-.597 1.165-1.978 2.104-1.612 3.575.166.635.494 1.076 1.514 1.619-.345.119-.824-.111-1.094-.301-1.199-.816-1.963-2.156-1.888-3.619.03-.464.12-.92.239-1.368.375-1.281 1.139-2.401 1.588-3.647.225-.599.39-1.324.211-1.953-.09-.309-.255-.599-.465-.849-.061-.076-.404-.465-.539-.42.6-.225 1.139-.016 1.662.299.404.24.72.585.959.975.449.719.629 1.542.719 2.381.031.345-.015 1.184.39 1.35.419.179.749-.525.839-.81.195-.645-.06-1.259-.314-1.858.061.121.285.255.389.346l.36.344c.435.449.704 1.004.884 1.604.164.539.24 1.093.27 1.633.074 1.123-.18 2.278-.629 3.311-.195.463-.449.898-.779 1.273-.319.373-.748.613-1.093.957.808-.809 1.238-2.127 1.123-3.131-.06-.553-.239-1.063-.659-1.572 0 0 .045.358.087.583.075.495-.255 1.02-.644.959-.285-.029-.136-.643-.105-.838.105-.584-.03-1.154-.244-1.693-.209-.509-.6-.914-1.198-.823l-.101-.079z"
+									/>
 								</svg>
 							</p>
-							<p class="text-gray-600 dark:text-gray-300">December 2024</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								December 2024
+							</p>
 							<a
 								href="https://www.freecodecamp.org/certification/Ehnand/responsive-web-design"
 								target="_blank"
@@ -1262,7 +1515,9 @@
 						</div>
 
 						<!-- CSX Cybersecurity -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Cybersecurity Fundamentals.png"
@@ -1278,13 +1533,23 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
-								CSX Cybersecurity Fundamentals Certificate (CSXF)
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
+								CSX Cybersecurity Fundamentals Certificate
+								(CSXF)
 							</h4>
-							<p class="text-gray-600 dark:text-gray-300">Cybrary
-								<img src="https://cdn.brandfetch.io/idZbGRvs2y/w/400/h/400/theme/dark/icon.png?c=1dxbfHSJFAPEGdCLU4o5B" alt="Cybrary" class="w-6 h-6 ml-2 inline-block">
+							<p class="text-gray-600 dark:text-gray-300">
+								Cybrary
+								<img
+									src="https://cdn.brandfetch.io/idZbGRvs2y/w/400/h/400/theme/dark/icon.png?c=1dxbfHSJFAPEGdCLU4o5B"
+									alt="Cybrary"
+									class="w-6 h-6 ml-2 inline-block"
+								/>
 							</p>
-							<p class="text-gray-600 dark:text-gray-300">August 2023</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								August 2023
+							</p>
 							<a
 								href="https://app.cybrary.it/profile/SimpleCanidae0202?tab=cert-completion&cert=CC-900adb08-fcfc-4837-b719-e9dcbf3129e4"
 								target="_blank"
@@ -1295,23 +1560,31 @@
 						</div>
 
 						<!-- Civil Service -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4">
 								<i
 									class="fas fa-certificate text-5xl text-blue-600"
 								></i>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								Civil Service Eligibility
 							</h4>
 							<p class="text-gray-600 dark:text-gray-300">
 								Civil Service Commission
 							</p>
-							<p class="text-gray-600 dark:text-gray-300">July 2023</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								July 2023
+							</p>
 						</div>
 
 						<!-- Blue Teaming -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Blue Teaming Internship Certificate.png"
@@ -1327,14 +1600,22 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								Blue Teaming Internship
 							</h4>
 							<p class="text-gray-600 dark:text-gray-300">
 								Virtual Cyber Labs Academy
-								<img src="assets/virtualcyberlabs.png" alt="Virtual Cyber Labs Academy" class="w-6 h-6 ml-2 inline-block">
+								<img
+									src="assets/virtualcyberlabs.png"
+									alt="Virtual Cyber Labs Academy"
+									class="w-6 h-6 ml-2 inline-block"
+								/>
 							</p>
-							<p class="text-gray-600 dark:text-gray-300">January 2023</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								January 2023
+							</p>
 							<a
 								href="https://verification.givemycertificate.com/v/944bf71e-ac18-468c-ad61-637f7cd7d10a"
 								target="_blank"
@@ -1345,7 +1626,9 @@
 						</div>
 
 						<!-- Technical Support -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Technical Support.png"
@@ -1361,11 +1644,17 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								Technical Support Fundamentals
 							</h4>
-							<p class="text-gray-600 dark:text-gray-300">Google <i class="fab fa-google"></i></p>
-							<p class="text-gray-600 dark:text-gray-300">November 2022</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								Google <i class="fab fa-google"></i>
+							</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								November 2022
+							</p>
 							<a
 								href="https://www.coursera.org/account/accomplishments/verify/SWNULUC8VLYL"
 								target="_blank"
@@ -1376,7 +1665,9 @@
 						</div>
 
 						<!-- Intrusion Detection -->
-						<div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+						<div
+							class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md"
+						>
 							<div class="mb-4 relative group">
 								<a
 									href="assets/Intrusion Detection Setup - Virtual CyberLabs.png"
@@ -1392,13 +1683,22 @@
 									></div>
 								</a>
 							</div>
-							<h4 class="text-lg font-semibold text-blue-600 dark:text-white">
+							<h4
+								class="text-lg font-semibold text-blue-600 dark:text-white"
+							>
 								Intrusion Detection Setup
 							</h4>
-							<p class="text-gray-600 dark:text-gray-300">Virtual Cyber Labs
-								<img src="assets/virtualcyberlabs.png" alt="Virtual Cyber Labs Academy" class="w-6 h-6 ml-2 inline-block">
+							<p class="text-gray-600 dark:text-gray-300">
+								Virtual Cyber Labs
+								<img
+									src="assets/virtualcyberlabs.png"
+									alt="Virtual Cyber Labs Academy"
+									class="w-6 h-6 ml-2 inline-block"
+								/>
 							</p>
-							<p class="text-gray-600 dark:text-gray-300">October 2022</p>
+							<p class="text-gray-600 dark:text-gray-300">
+								October 2022
+							</p>
 							<a
 								href="https://academy.virtualcyberlabs.com/verify-certificate?serialno=BKS2KRNH"
 								target="_blank"
@@ -1451,209 +1751,481 @@
 		<!-- Projects Section -->
 		<section id="works" class="py-20 bg-gray-50 dark:bg-gray-800">
 			<div class="container mx-auto px-6">
-				<h2 class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white">
+				<h2
+					class="text-3xl font-bold text-center mb-12 text-gray-800 dark:text-white"
+				>
 					Recent Projects
 				</h2>
 				<div class="space-y-12">
 					<!-- Weather Forecasting Application -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white underline">
-									<a href="https://ehnand-weather-app.vercel.app/" target="_blank" rel="noopener noreferrer">
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white underline"
+								>
+									<a
+										href="https://ehnand-weather-app.vercel.app/"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
 										Weather Forecasting Application
 									</a>
-								</h3>								
-								<span class="text-gray-600 dark:text-white">Jan 2025 - Feb 2025</span>
+								</h3>
+								<span class="text-gray-600 dark:text-white"
+									>Jan 2025 - Feb 2025</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-white font-medium">Independent Project</span>
+								<span
+									class="text-gray-600 dark:text-white font-medium"
+									>Independent Project</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								Developed a Weather Forecasting Application to provide real-time weather updates and a 5-day forecast. 
-								Built with React (TSX), OpenWeather API, and ShadCN for a modern UI. 
-								Utilized GitHub for version control and deployed on Vercel.
+								Developed a Weather Forecasting Application to
+								provide real-time weather updates and a 5-day
+								forecast. Built with React (TSX), OpenWeather
+								API, and ShadCN for a modern UI. Utilized GitHub
+								for version control and deployed on Vercel.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">React (TSX)</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Vite</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">TypeScript</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">OpenWeather API</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">ShadCN</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Tailwind CSS</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">GitHub</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Vercel</span>
-							</div>							
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>React (TSX)</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Vite</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>TypeScript</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>OpenWeather API</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>ShadCN</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Tailwind CSS</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>GitHub</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Vercel</span
+								>
+							</div>
 						</div>
 					</div>
 
 					<!-- EduTracker System -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white">
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
+								>
 									EduTracker System
 								</h3>
-								<span class="text-gray-600 dark:text-white">Jul 2024 - Present</span>
+								<span class="text-gray-600 dark:text-white"
+									>Jul 2024 - Present</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-white font-medium">Associated with EduQuest</span>
+								<span
+									class="text-gray-600 dark:text-white font-medium"
+									>Associated with EduQuest</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								Developed the EduTracker system to monitor course dissemination to school clients and automate report generation based on parameters. This system reduced manual reporting time by 40% and enhanced efficiency in course distribution and monitoring. Utilized GitHub for version control, Apache for local deployment, Google Sheets API, Gmail API, Laravel, and MySQL.
+								Developed the EduTracker system to monitor
+								course dissemination to school clients and
+								automate report generation based on parameters.
+								This system reduced manual reporting time by 40%
+								and enhanced efficiency in course distribution
+								and monitoring. Utilized GitHub for version
+								control, Apache for local deployment, Google
+								Sheets API, Gmail API, Laravel, and MySQL.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">GitHub</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Apache</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Google Sheets API</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Gmail API</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Laravel</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">MySQL</span>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>GitHub</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Apache</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Google Sheets API</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Gmail API</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Laravel</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>MySQL</span
+								>
 							</div>
 						</div>
 					</div>
 
 					<!-- Email Automation Script -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white">
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
+								>
 									Email Automation Script
 								</h3>
-								<span class="text-gray-600 dark:text-white">Jul 2024 - Present</span>
+								<span class="text-gray-600 dark:text-white"
+									>Jul 2024 - Present</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-white font-medium">Associated with EduQuest</span>
+								<span
+									class="text-gray-600 dark:text-white font-medium"
+									>Associated with EduQuest</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								Created a custom Python script utilizing the MXroute API to automate email creation for bulk user accounts in our LMS. This script reduced setup time by 70% and ensured consistent account configuration. Implemented using native Python and the MXroute API.
+								Created a custom Python script utilizing the
+								MXroute API to automate email creation for bulk
+								user accounts in our LMS. This script reduced
+								setup time by 70% and ensured consistent account
+								configuration. Implemented using native Python
+								and the MXroute API.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Python</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">MXroute API</span>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Python</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>MXroute API</span
+								>
 							</div>
 						</div>
 					</div>
 
 					<!-- MORESCO-1 Web HRIS -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white">
-									M1-Web HRIS (MORESCO-1 Human Resource Information System)
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
+								>
+									M1-Web HRIS (MORESCO-1 Human Resource
+									Information System)
 								</h3>
-								<span class="text-gray-600 dark:text-white">Jan 2024 - May 2024</span>
+								<span class="text-gray-600 dark:text-white"
+									>Jan 2024 - May 2024</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-white font-medium">Associated with MORESCO-1</span>
+								<span
+									class="text-gray-600 dark:text-white font-medium"
+									>Associated with MORESCO-1</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								A comprehensive web-based Human Resource Information System specifically developed for MORESCO-1's HR department. This cloud-hosted platform streamlines HR operations from recruitment to retirement, featuring integrated modules for payroll processing, attendance tracking, performance evaluation, and employee data management. Deployed via VMWare for optimal performance and accessibility across the organization's network infrastructure.
+								A comprehensive web-based Human Resource
+								Information System specifically developed for
+								MORESCO-1's HR department. This cloud-hosted
+								platform streamlines HR operations from
+								recruitment to retirement, featuring integrated
+								modules for payroll processing, attendance
+								tracking, performance evaluation, and employee
+								data management. Deployed via VMWare for optimal
+								performance and accessibility across the
+								organization's network infrastructure.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Laravel</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Microsoft SQL Server</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Transact-SQL (T-SQL)</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Database Design</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Bootstrap</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">VMWare Deployment</span>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Laravel</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Microsoft SQL Server</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Transact-SQL (T-SQL)</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Database Design</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Bootstrap</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>VMWare Deployment</span
+								>
 							</div>
 						</div>
 					</div>
 
 					<!-- MORESCO-1 Helpdesk -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white">
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
+								>
 									M1-Helpdesk System
 								</h3>
-								<span class="text-gray-600 dark:text-white">Jan 2024 - May 2024</span>
+								<span class="text-gray-600 dark:text-white"
+									>Jan 2024 - May 2024</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-white font-medium">Associated with MORESCO-1</span>
+								<span
+									class="text-gray-600 dark:text-white font-medium"
+									>Associated with MORESCO-1</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								A centralized helpdesk solution designed for MORESCO-1's internal technical support management. The system facilitates ticket tracking, issue resolution, and support request management, enhancing communication between IT staff and employees. Deployed through VMWare for seamless integration with existing infrastructure.
+								A centralized helpdesk solution designed for
+								MORESCO-1's internal technical support
+								management. The system facilitates ticket
+								tracking, issue resolution, and support request
+								management, enhancing communication between IT
+								staff and employees. Deployed through VMWare for
+								seamless integration with existing
+								infrastructure.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Symfony</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">MySQL</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Transact-SQL (T-SQL)</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">VMWare Deployment</span>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Symfony</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>MySQL</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Transact-SQL (T-SQL)</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>VMWare Deployment</span
+								>
 							</div>
 						</div>
 					</div>
 
 					<!-- LGU Initao HRIS -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white">
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
+								>
 									Desktop Human Resources Information System
 								</h3>
-								<span class="text-gray-600 dark:text-white">Aug 2023 - Jan 2024</span>
+								<span class="text-gray-600 dark:text-white"
+									>Aug 2023 - Jan 2024</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-gray-300 font-medium">Associated with LGU - Initao</span>
+								<span
+									class="text-gray-600 dark:text-gray-300 font-medium"
+									>Associated with LGU - Initao</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								HRIS (Human Resource Information System) is a digital platform designed to streamline HR processes, from recruitment to retirement. It integrates various HR functions like payroll, attendance tracking, performance evaluation, and employee data management into a single system. HRIS enhances efficiency, accuracy, and compliance while providing valuable insights through data analytics, ultimately empowering organizations to make informed decisions and optimize their workforce management strategies.
+								HRIS (Human Resource Information System) is a
+								digital platform designed to streamline HR
+								processes, from recruitment to retirement. It
+								integrates various HR functions like payroll,
+								attendance tracking, performance evaluation, and
+								employee data management into a single system.
+								HRIS enhances efficiency, accuracy, and
+								compliance while providing valuable insights
+								through data analytics, ultimately empowering
+								organizations to make informed decisions and
+								optimize their workforce management strategies.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">C# in .NET</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Microsoft SQL Server</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Transact-SQL (T-SQL)</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Agile Methodologies</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Database Design</span>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>C# in .NET</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Microsoft SQL Server</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Transact-SQL (T-SQL)</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Agile Methodologies</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Database Design</span
+								>
 							</div>
 						</div>
 					</div>
 
 					<!-- File Repository System -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white">
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
+								>
 									File Repository System
 								</h3>
-								<span class="text-gray-600 dark:text-white">Aug 2023 - Nov 2023</span>
+								<span class="text-gray-600 dark:text-white"
+									>Aug 2023 - Nov 2023</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-white font-medium">Associated with Mindanao State University-Naawan</span>
+								<span
+									class="text-gray-600 dark:text-white font-medium"
+									>Associated with Mindanao State
+									University-Naawan</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								The File Repository System Project aims to create a centralized platform for storing and managing digital files. It offers users a secure and organized way to upload, access, and share documents, images, videos, and other file types. With features like version control, access permissions, and search functionality, the system ensures efficient file management and collaboration. This project enhances productivity by eliminating the hassle of scattered files and providing a centralized repository for easy retrieval and sharing of information.
+								The File Repository System Project aims to
+								create a centralized platform for storing and
+								managing digital files. It offers users a secure
+								and organized way to upload, access, and share
+								documents, images, videos, and other file types.
+								With features like version control, access
+								permissions, and search functionality, the
+								system ensures efficient file management and
+								collaboration. This project enhances
+								productivity by eliminating the hassle of
+								scattered files and providing a centralized
+								repository for easy retrieval and sharing of
+								information.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Node.js</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">MySQL</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">JavaScript</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">React.js</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Database Design</span>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Node.js</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>MySQL</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>JavaScript</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>React.js</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Database Design</span
+								>
 							</div>
 						</div>
 					</div>
 
 					<!-- Medical Diagnostic Expert System -->
-					<div class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden">
+					<div
+						class="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden"
+					>
 						<div class="p-6">
-							<div class="flex flex-col md:flex-row justify-between mb-4">
-								<h3 class="text-2xl font-semibold text-blue-600 dark:text-white">
+							<div
+								class="flex flex-col md:flex-row justify-between mb-4"
+							>
+								<h3
+									class="text-2xl font-semibold text-blue-600 dark:text-white"
+								>
 									Medical Diagnostic Expert System
 								</h3>
-								<span class="text-gray-600 dark:text-white">Jan 2022 - May 2022</span>
+								<span class="text-gray-600 dark:text-white"
+									>Jan 2022 - May 2022</span
+								>
 							</div>
 							<div class="mb-4">
-								<span class="text-gray-600 dark:text-white font-medium">Associated with Mindanao State University-Naawan</span>
+								<span
+									class="text-gray-600 dark:text-white font-medium"
+									>Associated with Mindanao State
+									University-Naawan</span
+								>
 							</div>
 							<p class="text-gray-600 dark:text-white mb-6">
-								The Health Detection Expert System utilizes AI and machine learning to analyze health data, detecting anomalies and potential health issues. By assessing vital signs, symptoms, and medical history, it provides accurate assessments, enabling proactive healthcare interventions and improved patient outcomes.
+								The Health Detection Expert System utilizes AI
+								and machine learning to analyze health data,
+								detecting anomalies and potential health issues.
+								By assessing vital signs, symptoms, and medical
+								history, it provides accurate assessments,
+								enabling proactive healthcare interventions and
+								improved patient outcomes.
 							</p>
 							<div class="flex flex-wrap gap-2">
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Machine Learning</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Knowledge-based Systems</span>
-								<span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm">Expert Systems</span>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Machine Learning</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Knowledge-based Systems</span
+								>
+								<span
+									class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-white rounded-full text-sm"
+									>Expert Systems</span
+								>
 							</div>
 						</div>
 					</div>
