@@ -30,7 +30,7 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="relative"
           >
-            <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
+            <div className="relative w-full h-full md:h-96 overflow-hidden rounded-lg">
               <Image
                 src="/images/profile.jpg"
                 alt="Ehnand Azucena"
