@@ -35,7 +35,7 @@ export default function About() {
                 src="/images/profile.jpg"
                 alt="Ehnand Azucena"
                 fill
-                className="object-cover object-center"
+                className="object-contain object-center"
                 priority
               />
             </div>
