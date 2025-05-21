@@ -6,13 +6,13 @@ import { GraduationCap, Calendar, MapPin, Award } from "lucide-react"
 
 const education = [
   {
-    degree: "Bachelor of Science in Information Technology",
-    institution: "University of Science and Technology of Southern Philippines",
-    location: "Cagayan de Oro City, Philippines",
+    degree: "Bachelor of Science in Information Technology Major in Database Systems",
+    institution: "Mindanao State University - Naawan",
+    location: "Naawan, Misamis Oriental, Philippines",
     period: "2020 - 2024",
     description:
-      "Specialized in Web Development and Database Management. Graduated with honors and completed several notable projects including a Human Resources Information System and IT Helpdesk System.",
-    achievements: ["Dean's Lister", "Academic Excellence Award", "Best Capstone Project"],
+      "Specialized in Database Systems and Web Development. Completed several notable projects including a Human Resources Information System and IT Helpdesk System.",
+    achievements: ["Cum Laude", "Dean's Lister", "Best Capstone 3rd Place"],
   },
   {
     degree: "Senior High School - STEM",

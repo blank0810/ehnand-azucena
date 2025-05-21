@@ -31,7 +31,13 @@ export default function About() {
             className="relative"
           >
             <div className="relative w-full h-80 md:h-96 overflow-hidden rounded-lg">
-              <Image src="/placeholder.svg?height=400&width=300" alt="Ehnand Azucena" fill className="object-cover" />
+              <Image
+                src="/images/profile.jpg"
+                alt="Ehnand Azucena"
+                fill
+                className="object-cover object-center"
+                priority
+              />
             </div>
             <div className="absolute -bottom-5 -right-5 w-40 h-40 bg-primary/10 rounded-full blur-3xl -z-10"></div>
             <div className="absolute -top-5 -left-5 w-40 h-40 bg-secondary/10 rounded-full blur-3xl -z-10"></div>
@@ -65,11 +71,11 @@ export default function About() {
               </div>
               <div>
                 <h4 className="font-semibold mb-2">Study</h4>
-                <p className="text-gray-400">University of Science and Technology of Southern Philippines</p>
+                <p className="text-gray-400">Mindanao State University - Naawan</p>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">Employment</h4>
-                <p className="text-gray-400">Whitetower Digital Pty Ltd.</p>
+                <p className="text-gray-400">Cloudesk Pty. Ltd. and WhiteTower</p>
               </div>
             </div>
 

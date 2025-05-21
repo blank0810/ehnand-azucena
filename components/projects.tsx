@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { ExternalLink, Github, Calendar, X } from "lucide-react"
+import { Calendar, X } from "lucide-react"
 import Image from "next/image"
 
 const projects = [
@@ -14,12 +14,8 @@ const projects = [
       "React-based app with OpenWeather API, hitting 95% uptime and geolocation support, deployed on Vercel.",
     longDescription:
       "A comprehensive weather application built with React that provides real-time weather data and forecasts. The app uses the OpenWeather API to fetch accurate weather information and implements geolocation to automatically detect the user's location. With a 95% uptime rate, the application ensures reliable access to weather data. The responsive design makes it accessible on various devices, and the intuitive UI provides a seamless user experience.",
-    image: "/placeholder.svg?height=300&width=500",
+    image: "/images/weather_app.png",
     tags: ["React", "OpenWeather API", "Vercel", "Geolocation"],
-    links: {
-      demo: "#",
-      github: "#",
-    },
   },
   {
     title: "EduTracker System",
@@ -27,12 +23,8 @@ const projects = [
     description: "Laravel/MySQL tool with Google Sheets/Gmail APIs, slashing reporting time by 40%.",
     longDescription:
       "EduTracker is a comprehensive education management system built with Laravel and MySQL. It integrates with Google Sheets and Gmail APIs to streamline data management and communication. The system reduced reporting time by 40% by automating data collection, processing, and report generation. Features include student tracking, attendance management, grade recording, and automated notifications to parents and teachers.",
-    image: "/placeholder.svg?height=300&width=500",
+    image: "/images/edutracker.jpg",
     tags: ["Laravel", "MySQL", "Google APIs", "Reporting"],
-    links: {
-      demo: "#",
-      github: "#",
-    },
   },
   {
     title: "Email Automation Script",
@@ -41,12 +33,8 @@ const projects = [
       "Python script leveraging MXroute API to automate creation of 500+ email accounts, cutting manual setup time by 70% and ensuring config consistency.",
     longDescription:
       "Developed a Python automation script that interfaces with the MXroute API to create and configure email accounts at scale. The script successfully automated the creation of over 500 email accounts, reducing the manual setup time by 70%. It ensures configuration consistency across all accounts and includes error handling and logging for troubleshooting. The solution also provides a simple interface for administrators to manage bulk email account creation.",
-    image: "/placeholder.svg?height=300&width=500",
+    image: "/images/email_auto.jpg",
     tags: ["Python", "MXroute API", "Automation"],
-    links: {
-      demo: "#",
-      github: "#",
-    },
   },
   {
     title: "M1 – WEB HRIS",
@@ -56,10 +44,6 @@ const projects = [
       "M1-HRIS is a cloud-based Human Resource Information System developed for MORESCO-1. The system centralizes employee data management, streamlines HR processes, and ensures data integrity and security compliance. Key features include employee profile management, attendance tracking, leave management, payroll processing, and performance evaluation. The system implements role-based access control and data encryption to protect sensitive information.",
     image: "/placeholder.svg?height=300&width=500",
     tags: ["Cloud", "HR System", "Security", "Data Integrity"],
-    links: {
-      demo: "#",
-      github: "#",
-    },
   },
   {
     title: "M1-Helpdesk System",
@@ -69,10 +53,6 @@ const projects = [
       "M1-Helpdesk is a centralized IT support platform developed for MORESCO-1 using VMware. The system streamlined the ticket management process, resulting in a 50% reduction in response times. Features include ticket creation and tracking, automated assignment based on expertise, knowledge base integration, and performance analytics. The system also provides real-time notifications and escalation procedures for critical issues.",
     image: "/placeholder.svg?height=300&width=500",
     tags: ["IT Helpdesk", "VMware", "Response Time"],
-    links: {
-      demo: "#",
-      github: "#",
-    },
   },
   {
     title: "DESKTOP HUMAN RESOURCES INFORMATION SYSTEM",
@@ -80,12 +60,26 @@ const projects = [
     description: "C#.NET-based desktop app, securing payroll and employee records while speeding processing by 30%.",
     longDescription:
       "A comprehensive desktop Human Resources Information System developed using C#.NET. The application secures payroll and employee records while providing efficient HR management tools. It improved processing speed by 30% through optimized database queries and efficient UI design. Features include employee management, attendance tracking, payroll processing, leave management, and reporting. The system implements data encryption and role-based access control to ensure security.",
-    image: "/placeholder.svg?height=300&width=500",
+    image: "/images/lgu_hris.jpg",
     tags: ["C#.NET", "Desktop", "HR", "Payroll"],
-    links: {
-      demo: "#",
-      github: "#",
-    },
+  },
+  {
+    title: "File Repository System",
+    period: "Jun 2023 - Aug 2023",
+    description: "Secure document management system with role-based access control and version tracking.",
+    longDescription:
+      "Developed a comprehensive file repository system that allows organizations to securely store, manage, and share documents. The system features role-based access control, document versioning, advanced search capabilities, and audit logging. It significantly improved document organization and accessibility while maintaining strict security protocols. The intuitive interface makes it easy for users to navigate and find the documents they need quickly.",
+    image: "/images/file_repo.jpg",
+    tags: ["Document Management", "Security", "Version Control", "PHP"],
+  },
+  {
+    title: "Medical Diagnostic Expert System",
+    period: "Mar 2023 - May 2023",
+    description: "AI-powered diagnostic tool using rule-based inference to assist medical professionals.",
+    longDescription:
+      "Created an expert system that assists medical professionals in diagnosing conditions based on symptoms and patient data. The system uses rule-based inference and knowledge representation techniques to provide diagnostic suggestions and treatment recommendations. It includes a comprehensive database of medical conditions, symptoms, and treatments, regularly updated with the latest medical research. The system serves as a decision support tool, helping healthcare providers make more informed diagnoses.",
+    image: "/images/expert_sys.jpg",
+    tags: ["AI", "Expert Systems", "Healthcare", "Diagnostics"],
   },
 ]
 
@@ -195,24 +189,6 @@ export default function Projects() {
                   </span>
                 ))}
               </div>
-              <div className="flex space-x-4 mt-auto">
-                <a
-                  href={project.links.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-white flex items-center transition-colors duration-300"
-                >
-                  <ExternalLink className="h-4 w-4 mr-1" /> Demo
-                </a>
-                <a
-                  href={project.links.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-white flex items-center transition-colors duration-300"
-                >
-                  <Github className="h-4 w-4 mr-1" /> Code
-                </a>
-              </div>
             </motion.div>
           ))}
         </div>
@@ -284,25 +260,6 @@ export default function Projects() {
                       </span>
                     ))}
                   </div>
-                </div>
-
-                <div className="flex space-x-4">
-                  <a
-                    href={selectedProject.links.demo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary flex items-center"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" /> View Demo
-                  </a>
-                  <a
-                    href={selectedProject.links.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-outline flex items-center"
-                  >
-                    <Github className="h-4 w-4 mr-2" /> View Code
-                  </a>
                 </div>
               </div>
             </motion.div>

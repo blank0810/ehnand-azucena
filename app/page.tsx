@@ -7,6 +7,7 @@ import Skills from "@/components/skills"
 import Experience from "@/components/experience"
 import Projects from "@/components/projects"
 import Education from "@/components/education"
+import Certificates from "@/components/certificates" // Add this import
 import Contact from "@/components/contact"
 import Footer from "@/components/footer"
 import LoadingScreen from "@/components/loading-screen"
@@ -14,8 +15,6 @@ import AnimatedBackground from "@/components/animated-background"
 import ParallaxBackground from "@/components/parallax-background"
 import ThemeSwitcher from "@/components/theme-switcher"
 import ScrollProgress from "@/components/scroll-progress"
-import BlogSection from "@/components/blog-section"
-import Testimonials from "@/components/testimonials"
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function Home() {
@@ -46,9 +45,8 @@ export default function Home() {
             <Skills />
             <Experience />
             <Projects />
-            <Testimonials />
             <Education />
-            <BlogSection />
+            <Certificates /> {/* Add this line */}
             <Contact />
             <Footer />
           </motion.div>

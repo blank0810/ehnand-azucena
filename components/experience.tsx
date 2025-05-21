@@ -7,7 +7,7 @@ import Timeline from "./timeline"
 const experiences = [
   {
     title: "Full Stack Developer",
-    company: "Whitetower Digital Pty Ltd. & ClouDesk Pty. Ltd",
+    company: "Cloudesk Pty. Ltd. and WhiteTower",
     location: "Kent Street, Sydney, NSW Australia 2000",
     period: "Jan 2025 – Present",
     description: [
