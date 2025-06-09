@@ -6,8 +6,8 @@ import About from "@/components/about"
 import Skills from "@/components/skills"
 import Experience from "@/components/experience"
 import Projects from "@/components/projects"
+import Certificates from "@/components/certificates"
 import Education from "@/components/education"
-import Certificates from "@/components/certificates" // Add this import
 import Contact from "@/components/contact"
 import Footer from "@/components/footer"
 import LoadingScreen from "@/components/loading-screen"
@@ -44,8 +44,8 @@ export default function Home() {
             <About />
             <Skills />
             <Experience />
-            <Certificates />
             <Projects />
+            <Certificates />
             <Education />
             <Contact />
             <Footer />

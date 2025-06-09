@@ -77,13 +77,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#certificates" className="text-gray-400 hover:text-primary transition-colors duration-300">
-                  Certificates
+                <Link href="#projects" className="text-gray-400 hover:text-primary transition-colors duration-300">
+                  Projects
                 </Link>
               </li>
               <li>
-                <Link href="#projects" className="text-gray-400 hover:text-primary transition-colors duration-300">
-                  Projects
+                <Link href="#certificates" className="text-gray-400 hover:text-primary transition-colors duration-300">
+                  Certificates
                 </Link>
               </li>
               <li>
