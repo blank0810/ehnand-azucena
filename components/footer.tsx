@@ -72,6 +72,16 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="#experience" className="text-gray-400 hover:text-primary transition-colors duration-300">
+                  Experience
+                </Link>
+              </li>
+              <li>
+                <Link href="#certificates" className="text-gray-400 hover:text-primary transition-colors duration-300">
+                  Certificates
+                </Link>
+              </li>
+              <li>
                 <Link href="#projects" className="text-gray-400 hover:text-primary transition-colors duration-300">
                   Projects
                 </Link>
@@ -79,11 +89,6 @@ export default function Footer() {
               <li>
                 <Link href="#education" className="text-gray-400 hover:text-primary transition-colors duration-300">
                   Education
-                </Link>
-              </li>
-              <li>
-                <Link href="#certificates" className="text-gray-400 hover:text-primary transition-colors duration-300">
-                  Certificates
                 </Link>
               </li>
               <li>

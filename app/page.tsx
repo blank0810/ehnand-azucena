@@ -44,9 +44,9 @@ export default function Home() {
             <About />
             <Skills />
             <Experience />
+            <Certificates />
             <Projects />
             <Education />
-            <Certificates /> {/* Add this line */}
             <Contact />
             <Footer />
           </motion.div>

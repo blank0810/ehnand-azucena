@@ -50,14 +50,13 @@ export default function About() {
           >
             <h3 className="text-2xl font-bold mb-4">Full Stack Systems Engineer</h3>
             <p className="text-gray-300 mb-6">
-              I'm a passionate Full Stack Systems Engineer with expertise in web development, database management, and
-              cloud infrastructure. With a strong foundation in both frontend and backend technologies, I create
-              scalable, secure, and user-friendly applications.
+              I'm a driven Full Stack Systems Engineer with deep expertise in web development, database management, and
+              cloud infrastructure. I craft scalable, secure, and user-focused applications by mastering both frontend
+              and backend technologies.
             </p>
             <p className="text-gray-300 mb-6">
-              My approach combines technical excellence with a deep understanding of business needs, ensuring that the
-              solutions I develop not only meet but exceed expectations. I'm constantly learning and adapting to new
-              technologies to stay at the forefront of the industry.
+              By fusing technical precision with a keen understanding of business goals, I deliver solutions that exceed
+              expectations while staying ahead through embracing cutting-edge technologies.
             </p>
 
             <div className="grid grid-cols-2 gap-4 mb-8">
