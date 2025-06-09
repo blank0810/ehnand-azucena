@@ -80,7 +80,7 @@ export default function About() {
 
             <motion.a
               href="/resume.pdf"
-              download
+              download="Ehnand_Azucena_CV.pdf"
               className="btn-primary inline-flex items-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
