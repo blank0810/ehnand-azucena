@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Github, Linkedin, Mail, ArrowUp } from "lucide-react"
+import { PerformanceWidget } from "./performance-widget"
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -17,7 +18,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-950 text-white py-12 relative">
       <div className="section-container">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-2xl font-bold mb-4 gradient-text">Ehnand Azucena</h3>
             <p className="text-gray-400 mb-4">
@@ -104,6 +105,11 @@ export default function Footer() {
             <p className="text-gray-400 mb-2">Initao, Northern Mindanao, Philippines</p>
             <p className="text-gray-400 mb-2">ehnand.azucena00@gmail.com</p>
             <p className="text-gray-400">09534678287 / 09128956168</p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-4">Performance</h3>
+            <PerformanceWidget />
           </div>
         </div>
 
