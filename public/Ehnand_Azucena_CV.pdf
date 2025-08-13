@@ -1,0 +1,210 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<<
+/Type /Catalog
+/Version /1.4
+/Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+
+3 0 obj
+<<
+/Type /Page
+/MediaBox [0.0 0.0 612.0 792.0]
+/Parent 2 0 R
+/Contents 4 0 R
+/Resources 5 0 R
+>>
+endobj
+
+4 0 obj
+<<
+/Length 2847
+>>
+stream
+BT
+/F1 16 Tf
+306 756 Td
+(Ehnand Azucena) Tj
+0 -20 Td
+/F2 12 Tf
+(Full Stack Systems Engineer) Tj
+0 -16 Td
+(Initao, Northern Mindanao 9022) Tj
+0 -16 Td
+(09534678287 | ehnand.azucena00@gmail.com) Tj
+0 -16 Td
+(Portfolio | LinkedIn | GitHub) Tj
+
+0 -30 Td
+/F1 14 Tf
+(PROFESSIONAL SUMMARY) Tj
+0 -20 Td
+/F2 10 Tf
+(Backend-focused Full Stack Engineer with production experience across Laravel, Symfony, NestJS, and) Tj
+0 -12 Td
+(SQL optimization. Built and maintained multi-tenant SaaS platforms, enterprise-grade internal tools, and) Tj
+0 -12 Td
+(mission-critical systems for schools, e-commerce, and associations.) Tj
+0 -12 Td
+(Skilled in delivering robust APIs, scalable backend systems, and optimized databases, with growing) Tj
+0 -12 Td
+(experience in Docker-based DevOps and CI/CD.) Tj
+
+0 -30 Td
+/F1 14 Tf
+(CORE TECHNICAL SKILLS) Tj
+0 -20 Td
+/F1 12 Tf
+(Languages and Frameworks:) Tj
+0 -16 Td
+/F2 10 Tf
+(• Backend: Laravel, Symfony, NestJS, Node.js, C#.NET, CodeIgniter) Tj
+0 -12 Td
+(• Frontend: React.js, Next.js, Bootstrap, Tailwind CSS, ShadCN UI) Tj
+
+0 -16 Td
+/F1 12 Tf
+(Databases and Data:) Tj
+0 -16 Td
+/F2 10 Tf
+(• MySQL, PostgreSQL, SQL Server, SQLite, T-SQL) Tj
+
+0 -16 Td
+/F1 12 Tf
+(Infrastructure and DevOps:) Tj
+0 -16 Td
+/F2 10 Tf
+(• Docker (dev), Bitbucket CI/CD, Vultr, AWS (basic), UNIX/Linux, Git, Bitbucket) Tj
+
+0 -16 Td
+/F1 12 Tf
+(APIs & Integrations:) Tj
+0 -16 Td
+/F2 10 Tf
+(• REST, GraphQL, OAuth2, Google APIs, Xero, Stripe, HubSpot, Twillio) Tj
+
+0 -16 Td
+/F1 12 Tf
+(Systems and Tools:) Tj
+0 -16 Td
+/F2 10 Tf
+(• GitHub, VS Code, Cursor AI, Ubuntu, Agile (light)) Tj
+
+0 -30 Td
+/F1 14 Tf
+(PROFESSIONAL EXPERIENCE) Tj
+
+0 -20 Td
+/F1 12 Tf
+(Full Stack Developer) Tj
+200 0 Td
+(Jan 2025 – Present) Tj
+-200 -16 Td
+/F2 10 Tf
+(ClouDesk Pty. Ltd | Remote | Sydney, NSW Australia 2000) Tj
+0 -16 Td
+(• Maintained and patched educational platform for ICOM International School (Malaysia) and its) Tj
+0 -12 Td
+(  China-based internal platform.) Tj
+0 -12 Td
+(• Enhanced stability for PG Pay, a high-value e-commerce platform for precious metals.) Tj
+0 -12 Td
+(• Led backend development for MemberPulse, a multi-tenant SaaS platform supporting CPD) Tj
+0 -12 Td
+(  points, job boards, events, sponsorships, and directories.) Tj
+0 -12 Td
+(• Integrated third-party APIs (Xero, Stripe, HubSpot) into key features, supporting scalable) Tj
+0 -12 Td
+(  payments and CRM workflows.) Tj
+0 -12 Td
+(• Stack: Symfony, PostgreSQL, Bootstrap, Vultr, OAuth2, Bitbucket CI/CD.) Tj
+
+0 -20 Td
+/F1 12 Tf
+(IT Specialist) Tj
+200 0 Td
+(Jul 2024 – Jan 2025) Tj
+-200 -16 Td
+/F2 10 Tf
+(EduQuest Inc. | Cagayan De Oro City, Northern Mindanao, Philippines) Tj
+0 -16 Td
+(• Re-architected LMS infrastructure, reducing downtime by 20% and boosting user engagement by 30%.) Tj
+0 -12 Td
+(• Automated reporting using Google Sheets & Gmail APIs, cutting manual work by 40%.) Tj
+0 -12 Td
+(• Trained teachers, students, and parents on the updated LMS, increasing platform adoption by 50%.) Tj
+
+0 -20 Td
+/F1 12 Tf
+(System And Database Specialist | Internship) Tj
+200 0 Td
+(Jan 2024 - May 2024) Tj
+-200 -16 Td
+/F2 10 Tf
+(MORESCO-1 | Poblacion, Laguindingan, Misamis Oriental) Tj
+0 -16 Td
+(• Delivered M1-HRIS, reducing HR processing time by 40%, and M1-Helpdesk, reducing ticket) Tj
+0 -12 Td
+(  resolution by 35%.) Tj
+0 -12 Td
+(• Optimized SQL queries, improving data retrieval speed by 20%.) Tj
+0 -12 Td
+(• Hardened data security, decreasing vulnerability reports by 50%.) Tj
+
+ET
+endstream
+endobj
+
+5 0 obj
+<<
+/Font <<
+/F1 6 0 R
+/F2 7 0 R
+>>
+>>
+endobj
+
+6 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica-Bold
+>>
+endobj
+
+7 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000074 00000 n 
+0000000131 00000 n 
+0000000244 00000 n 
+0000003145 00000 n 
+0000003188 00000 n 
+0000003258 00000 n 
+trailer
+<<
+/Size 8
+/Root 1 0 R
+>>
+startxref
+3323
+%%EOF

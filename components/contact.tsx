@@ -1,57 +1,69 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
-import { Phone, Mail, MapPin, Send, Check } from "lucide-react"
+import { Phone, Mail, MapPin, Linkedin, Github, ExternalLink, Copy, Check } from "lucide-react"
+import { useState } from "react"
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  })
+  const [copiedItem, setCopiedItem] = useState<string | null>(null)
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<null | "success" | "error">(null)
-  const [submitMessage, setSubmitMessage] = useState("")
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  // This function will be called when the form is submitted
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitStatus(null)
-
+  const copyToClipboard = async (text: string, item: string) => {
     try {
-      // Replace "YOUR_FORM_ID" with your actual Formspree form ID
-      const response = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        setSubmitStatus("success")
-        setSubmitMessage("Thank you for your message! I'll get back to you soon.")
-        setFormData({ name: "", email: "", subject: "", message: "" })
-      } else {
-        throw new Error("Failed to submit form")
-      }
-    } catch (error) {
-      console.error("Error sending email:", error)
-      setSubmitStatus("error")
-      setSubmitMessage("Oops! Something went wrong. Please try again later.")
-    } finally {
-      setIsSubmitting(false)
+      await navigator.clipboard.writeText(text)
+      setCopiedItem(item)
+      setTimeout(() => setCopiedItem(null), 2000)
+    } catch (err) {
+      console.error("Failed to copy text: ", err)
     }
   }
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      label: "Email",
+      value: "ehnand.azucena00@gmail.com",
+      href: "mailto:ehnand.azucena00@gmail.com",
+      copyable: true,
+      id: "email",
+      description: "Send me a direct email",
+    },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: "09534678287 / 09128956168",
+      href: "tel:+639534678287",
+      copyable: true,
+      id: "phone",
+      description: "Call or text me directly",
+    },
+    {
+      icon: Linkedin,
+      label: "LinkedIn",
+      value: "Connect with me professionally",
+      href: "https://www.linkedin.com/in/ehnand-azucena-3028a7194",
+      external: true,
+      id: "linkedin",
+      description: "Professional networking",
+    },
+  ]
+
+  const additionalInfo = [
+    {
+      icon: Github,
+      label: "GitHub",
+      value: "View my projects and code",
+      href: "https://github.com/blank0810",
+      external: true,
+      id: "github",
+    },
+    {
+      icon: MapPin,
+      label: "Location",
+      value: "Initao, Northern Mindanao 9022, Philippines",
+      copyable: true,
+      id: "location",
+    },
+  ]
 
   return (
     <section id="contact" className="py-20 bg-gray-950 relative">
@@ -66,184 +78,215 @@ export default function Contact() {
           Get In Touch
         </motion.h2>
 
-        <div className="grid md:grid-cols-2 gap-12 mt-12">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
-            <p className="text-gray-300 mb-8">
-              Feel free to reach out to me for any inquiries, collaboration opportunities, or just to say hello!
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-center text-gray-300 mb-16 max-w-2xl mx-auto text-lg"
+        >
+          Ready to collaborate or discuss opportunities? Here are the best ways to reach me directly.
+        </motion.p>
+
+        {/* Primary Contact Methods */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {contactInfo.map((contact, index) => {
+            const Icon = contact.icon
+            return (
+              <motion.div
+                key={contact.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="card group hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
+              >
+                <div className="text-center">
+                  <div className="bg-gradient-to-br from-primary/20 to-secondary/20 p-6 rounded-full w-20 h-20 mx-auto mb-6 group-hover:from-primary/30 group-hover:to-secondary/30 transition-all duration-300 group-hover:scale-110">
+                    <Icon className="h-8 w-8 text-primary mx-auto mt-2" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2 text-white">{contact.label}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{contact.description}</p>
+                  <p className="text-gray-200 mb-6 font-medium">{contact.value}</p>
+
+                  <div className="flex gap-3 justify-center">
+                    {contact.href && (
+                      <motion.a
+                        href={contact.href}
+                        target={contact.external ? "_blank" : undefined}
+                        rel={contact.external ? "noopener noreferrer" : undefined}
+                        className="btn-primary flex items-center gap-2 text-sm px-4 py-2"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {contact.external ? (
+                          <>
+                            Connect <ExternalLink className="h-4 w-4" />
+                          </>
+                        ) : contact.label === "Email" ? (
+                          <>
+                            <Mail className="h-4 w-4" />
+                            Email Me
+                          </>
+                        ) : (
+                          <>
+                            <Phone className="h-4 w-4" />
+                            Call Now
+                          </>
+                        )}
+                      </motion.a>
+                    )}
+
+                    {contact.copyable && (
+                      <motion.button
+                        onClick={() => copyToClipboard(contact.value, contact.id)}
+                        className="btn-outline flex items-center gap-2 text-sm px-4 py-2"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {copiedItem === contact.id ? (
+                          <>
+                            Copied! <Check className="h-4 w-4 text-green-400" />
+                          </>
+                        ) : (
+                          <>
+                            Copy <Copy className="h-4 w-4" />
+                          </>
+                        )}
+                      </motion.button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* Additional Contact Information */}
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          {additionalInfo.map((contact, index) => {
+            const Icon = contact.icon
+            return (
+              <motion.div
+                key={contact.id}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                className="flex items-center p-6 bg-gradient-to-r from-gray-800/50 to-gray-700/30 rounded-lg border border-gray-700 hover:border-primary/50 transition-all duration-300 group hover:shadow-lg"
+              >
+                <div className="bg-primary/20 p-4 rounded-full mr-6 group-hover:bg-primary/30 transition-colors duration-300 group-hover:scale-110">
+                  <Icon className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-xl mb-2 text-white">{contact.label}</h4>
+                  <p className="text-gray-300">{contact.value}</p>
+                </div>
+                <div className="flex gap-3">
+                  {contact.href && (
+                    <motion.a
+                      href={contact.href}
+                      target={contact.external ? "_blank" : undefined}
+                      rel={contact.external ? "noopener noreferrer" : undefined}
+                      className="p-3 bg-primary/20 rounded-full hover:bg-primary/30 transition-colors duration-300"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title={`Visit ${contact.label}`}
+                    >
+                      <ExternalLink className="h-5 w-5 text-primary" />
+                    </motion.a>
+                  )}
+
+                  {contact.copyable && (
+                    <motion.button
+                      onClick={() => copyToClipboard(contact.value, contact.id)}
+                      className="p-3 bg-primary/20 rounded-full hover:bg-primary/30 transition-colors duration-300"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="Copy to clipboard"
+                    >
+                      {copiedItem === contact.id ? (
+                        <Check className="h-5 w-5 text-green-400" />
+                      ) : (
+                        <Copy className="h-5 w-5 text-primary" />
+                      )}
+                    </motion.button>
+                  )}
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* Contact Summary Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="text-center"
+        >
+          <div className="bg-gradient-to-r from-primary/10 via-secondary/5 to-accent/10 p-8 rounded-xl border border-primary/20 backdrop-blur-sm">
+            <h3 className="text-3xl font-bold mb-4 gradient-text">Let's Connect</h3>
+            <p className="text-gray-300 mb-8 max-w-2xl mx-auto text-lg">
+              I'm always open to discussing new opportunities, collaborations, or just having a conversation about
+              technology and development.
             </p>
 
-            <div className="space-y-6">
-              <motion.div className="flex items-start" whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                <div className="bg-primary/20 p-3 rounded-full mr-4">
-                  <Phone className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold">Phone</h4>
-                  <p className="text-gray-300">09534678287 / 09128956168</p>
-                </div>
-              </motion.div>
-
-              <motion.div className="flex items-start" whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                <div className="bg-primary/20 p-3 rounded-full mr-4">
-                  <Mail className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold">Email</h4>
-                  <p className="text-gray-300">ehnand.azucena00@gmail.com</p>
-                </div>
-              </motion.div>
-
-              <motion.div className="flex items-start" whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
-                <div className="bg-primary/20 p-3 rounded-full mr-4">
-                  <MapPin className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold">Location</h4>
-                  <p className="text-gray-300">Initao, Northern Mindanao 9022, Philippines</p>
-                </div>
-              </motion.div>
+            {/* Quick Contact Actions */}
+            <div className="flex flex-wrap gap-4 justify-center mb-6">
+              <motion.a
+                href="mailto:ehnand.azucena00@gmail.com"
+                className="btn-primary flex items-center gap-2 px-6 py-3"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Mail className="h-5 w-5" />
+                Email Me
+              </motion.a>
+              <motion.a
+                href="https://www.linkedin.com/in/ehnand-azucena-3028a7194"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline flex items-center gap-2 px-6 py-3"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Linkedin className="h-5 w-5" />
+                LinkedIn
+              </motion.a>
+              <motion.a
+                href="tel:+639534678287"
+                className="btn-outline flex items-center gap-2 px-6 py-3"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Phone className="h-5 w-5" />
+                Call Me
+              </motion.a>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="mt-12"
-            >
-              <div className="terminal-window">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex space-x-1">
-                    <div className="w-3 h-3 rounded-full bg-terminal-red"></div>
-                    <div className="w-3 h-3 rounded-full bg-terminal-yellow"></div>
-                    <div className="w-3 h-3 rounded-full bg-terminal-green"></div>
-                  </div>
-                  <div className="text-xs text-gray-400">contact.sh</div>
-                </div>
-                <div className="text-sm">
-                  <p className="terminal-prompt">
-                    <span className="text-terminal-green">send_email</span> --to ehnand.azucena00@gmail.com
-                  </p>
-                  <p className="terminal-output">Connecting to mail server...</p>
-                  <p className="terminal-output terminal-success">Connection established!</p>
-                  <p className="terminal-output">
-                    Ready to send your message <span className="animate-pulse">_</span>
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+            {/* Response Time Info */}
+            <div className="text-sm text-gray-400">
+              <p>📧 Email responses within 24 hours</p>
+              <p>📱 Phone calls welcome during business hours (GMT+8)</p>
+            </div>
+          </div>
+        </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-                  Your Name
-                </label>
-                <motion.input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  whileFocus={{ scale: 1.01 }}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                  Your Email
-                </label>
-                <motion.input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  whileFocus={{ scale: 1.01 }}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-1">
-                  Subject
-                </label>
-                <motion.input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  whileFocus={{ scale: 1.01 }}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-1">
-                  Message
-                </label>
-                <motion.textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={5}
-                  className="w-full px-4 py-3 bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  whileFocus={{ scale: 1.01 }}
-                ></motion.textarea>
-              </div>
-
-              <motion.button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-primary w-full flex items-center justify-center"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                {isSubmitting ? (
-                  "Sending..."
-                ) : (
-                  <>
-                    {submitStatus === "success" ? (
-                      <Check className="h-4 w-4 mr-2" />
-                    ) : (
-                      <Send className="h-4 w-4 mr-2" />
-                    )}
-                    {submitStatus === "success" ? "Message Sent" : "Send Message"}
-                  </>
-                )}
-              </motion.button>
-
-              {submitStatus && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`text-center mt-4 ${submitStatus === "success" ? "text-green-400" : "text-red-400"}`}
-                >
-                  {submitMessage}
-                </motion.div>
-              )}
-            </form>
-          </motion.div>
-        </div>
+        {/* Availability Status */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="text-center mt-12"
+        >
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-green-900/30 border border-green-700 rounded-full backdrop-blur-sm">
+            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-green-400 font-semibold text-lg">Available for new opportunities</span>
+          </div>
+        </motion.div>
       </div>
     </section>
   )
