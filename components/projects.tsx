@@ -5,13 +5,14 @@ import { useInView } from "react-intersection-observer"
 import { ExternalLink, Github, Calendar, MapPin, ChevronDown } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
+import ProjectDetailsModal from "./project-details-modal"
 
 const projects = [
   {
     title: "MemberPulse (SaaS CPD Platform)",
     description:
       "Built from ground up: courses, events, subscriptions, job boards, directories, sponsorship system. Supports individual and organizational members. Multi-tenant design, live infrastructure.",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/memberpulse-vNte4EfiWa9GzHUdOJzwC2RCOAgW99.png",
     technologies: ["Symfony", "Bootstrap", "Vultr", "PostgreSQL", "OAuth2"],
     period: "Feb 2025 – Present",
     role: "Lead Developer",
@@ -23,7 +24,7 @@ const projects = [
     title: "PlayNow",
     description:
       "Beta version of a SaaS marketplace for merchants to sell coupons for goods/venues/activities (Project Handed Off).",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/playnow-OhNmKY5rAMiAdxrwuhl3rxLo7Ps5dM.png",
     technologies: ["Next.js", "NestJS", "Vercel"],
     period: "Mar 2025 – Apr 2025",
     role: "Solo Developer",
@@ -125,6 +126,8 @@ export default function Projects() {
 
   const [selectedFilter, setSelectedFilter] = useState("All")
   const [showMore, setShowMore] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<(typeof projects)[0] | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Get all unique technologies for filter buttons
   const allTechnologies = ["All", ...new Set(projects.flatMap((project) => project.technologies))]
@@ -150,6 +153,16 @@ export default function Projects() {
       default:
         return "bg-gray-900/30 text-gray-400 border-gray-700"
     }
+  }
+
+  const handleProjectClick = (project: (typeof projects)[0]) => {
+    setSelectedProject(project)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedProject(null)
   }
 
   return (
@@ -194,19 +207,36 @@ export default function Projects() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="card overflow-hidden flex flex-col h-full group hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
             >
-              {/* Project Image with Enhanced Hover Effect */}
-              <div className="relative h-48 w-full mb-4 overflow-hidden rounded-md cursor-pointer">
+              {/* Project Image with Enhanced Hover Effect and Click Handler */}
+              <div
+                className="relative h-48 w-full mb-4 overflow-hidden rounded-md cursor-pointer"
+                onClick={() => handleProjectClick(project)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    handleProjectClick(project)
+                  }
+                }}
+                aria-label={`View details for ${project.title}`}
+              >
                 <Image
                   src={project.image || "/placeholder.svg"}
                   alt={project.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end justify-center">
-                  <p className="text-white p-4 translate-y-10 group-hover:translate-y-0 transition-transform duration-300">
-                    Click to view details
-                  </p>
+                {/* Hover Overlay with Click Functionality */}
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    whileHover={{ y: 0, opacity: 1 }}
+                    className="text-center text-white p-4"
+                  >
+                    <p className="text-lg font-semibold mb-2">Click to view details</p>
+                    <p className="text-sm text-gray-300">Learn more about this project</p>
+                  </motion.div>
                 </div>
                 {/* Status Badge */}
                 <div className="absolute top-2 right-2">
@@ -254,6 +284,7 @@ export default function Projects() {
                       className="btn-primary flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink className="h-4 w-4" />
                       Live Demo
@@ -268,6 +299,7 @@ export default function Projects() {
                       className="btn-outline flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <Github className="h-4 w-4" />
                       Code
@@ -319,6 +351,9 @@ export default function Projects() {
           </p>
         </motion.div>
       </div>
+
+      {/* Project Details Modal */}
+      <ProjectDetailsModal project={selectedProject} isOpen={isModalOpen} onClose={handleCloseModal} />
     </section>
   )
 }
