@@ -31,21 +31,12 @@ const projects = [
     liveUrl: "https://dev.playnow.ae",
   },
   {
-    title: "EduTracker System",
-    description: "Reduced reporting time by 40% via automation and data consolidation.",
-    image: "/images/edutracker.jpg",
-    technologies: ["Laravel", "MySQL", "Google APIs"],
-    period: "Jul 2024 - Aug 2024",
-    role: "Solo Developer",
-    status: "Deployed",
-    category: "Education",
-  },
-  {
-    title: "Weather App",
-    description: "A responsive weather application with real-time data and forecasts.",
+    title: "Weather Forecasting Application",
+    description:
+      "React-based app with OpenWeather API, hitting 95% uptime and geolocation support, deployed on Vercel.",
     image: "/images/weather_app.png",
-    technologies: ["React", "OpenWeather API", "Tailwind CSS"],
-    period: "Dec 2024",
+    technologies: ["React", "OpenWeather API", "Vercel", "Geolocation"],
+    period: "Jan 2025 – Feb 2025",
     role: "Solo Developer",
     status: "Live",
     category: "Web App",
@@ -53,46 +44,75 @@ const projects = [
     githubUrl: "https://github.com/blank0810/weather-app",
   },
   {
-    title: "M1 – HRIS (MORESCO-1)",
-    description: "Internal HR platform deployed in a multi-office environment; improved data integrity and access.",
-    image: "/images/lgu_hris.jpg",
-    technologies: ["Laravel", "SQL Server"],
-    period: "Jan 2024 - Jun 2024",
-    role: "Team Developer",
+    title: "EduTracker System",
+    description: "Laravel/MySQL tool with Google Sheets/Gmail APIs, slashing reporting time by 40%.",
+    image: "/images/edutracker.jpg",
+    technologies: ["Laravel", "MySQL", "Google APIs", "Reporting"],
+    period: "Jul 2024",
+    role: "Solo Developer",
     status: "Deployed",
-    category: "Enterprise",
-  },
-  {
-    title: "M1-Helpdesk",
-    description: "Ticketing system reducing average response time by 35%. Deployed on an internal network.",
-    image: "/placeholder.svg?height=300&width=400",
-    technologies: ["Laravel", "SQL Server"],
-    period: "Jan 2024 - Jun 2024",
-    role: "Lead Developer",
-    status: "Deployed",
-    category: "Internal Tool",
+    category: "Education",
   },
   {
     title: "Email Automation Script",
     description:
       "Python script leveraging MXroute API to automate creation of 500+ email accounts, cutting manual setup time by 70% and ensuring config consistency.",
     image: "/images/email_auto.jpg",
-    technologies: ["Python", "MXroute API"],
-    period: "Jul 2024 - Aug 2024",
+    technologies: ["Python", "MXroute API", "Automation"],
+    period: "Jul 2024",
     role: "Solo Developer",
     status: "Completed",
     category: "Automation",
   },
   {
-    title: "DESKTOP HRIS",
-    description:
-      "C#.NET-based desktop app, securing payroll and employee records while speeding processing by 30%. Legacy HR system with secure role-based access and records protection.",
+    title: "M1 – WEB HRIS",
+    description: "Cloud HR system, enhancing data integrity and security compliance.",
+    image: "/images/lgu_hris.jpg",
+    technologies: ["Laravel", "SQL Server", "Cloud", "Security"],
+    period: "Jan 2024 - Jun 2024",
+    role: "Team Developer",
+    status: "Deployed",
+    category: "Enterprise",
+  },
+  {
+    title: "M1-Helpdesk System",
+    description: "Centralized IT platform with VMware, halving response times.",
     image: "/placeholder.svg?height=300&width=400",
-    technologies: ["C#.NET", "SQL Server"],
+    technologies: ["Laravel", "SQL Server", "VMware"],
+    period: "Jan 2024 - Jun 2024",
+    role: "Lead Developer",
+    status: "Deployed",
+    category: "Internal Tool",
+  },
+  {
+    title: "Desktop Human Resources Information System",
+    description: "C#.NET-based desktop app, securing payroll and employee records while speeding processing by 30%.",
+    image: "/images/lgu_hris.jpg",
+    technologies: ["C#.NET", "SQL Server", "Desktop", "Payroll"],
     period: "Aug 2023 - Jan 2024",
     role: "Lead Developer",
     status: "Deployed",
     category: "Desktop App",
+  },
+  {
+    title: "File Repository System",
+    description: "Secure document management system with role-based access control and version tracking.",
+    image: "/images/file_repo.jpg",
+    technologies: ["PHP", "MySQL", "Document Management", "Security"],
+    period: "Jun 2023 - Aug 2023",
+    role: "Solo Developer",
+    status: "Completed",
+    category: "Document Management",
+  },
+  {
+    title: "Medical Diagnostic Expert System",
+    description: "AI-powered diagnostic tool using rule-based inference to assist medical professionals.",
+    image: "/images/expert_sys.jpg",
+    technologies: ["AI", "Expert Systems", "Healthcare", "Diagnostics"],
+    period: "Mar 2023 - May 2023",
+    role: "Solo Developer",
+    status: "Completed",
+    category: "AI/Healthcare",
   },
 ]
 
@@ -136,8 +156,8 @@ export default function Projects() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-center text-gray-400 mb-12 max-w-2xl mx-auto"
         >
-          Here are some of the projects I've worked on, showcasing my expertise in full-stack development, system
-          architecture, and problem-solving.
+          A comprehensive showcase of my full-stack development expertise, from SaaS platforms and enterprise systems to
+          AI applications and automation tools.
         </motion.p>
 
         <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
