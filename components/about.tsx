@@ -2,21 +2,14 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { Download, Code, Database, Cloud, Users } from "lucide-react"
+import { Download } from "lucide-react"
 import Image from "next/image"
 
-const About = () => {
+export default function About() {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
   })
-
-  const stats = [
-    { icon: Code, label: "Projects Completed", value: "15+" },
-    { icon: Database, label: "Databases Managed", value: "20+" },
-    { icon: Cloud, label: "Systems Deployed", value: "10+" },
-    { icon: Users, label: "Happy Clients", value: "8+" },
-  ]
 
   return (
     <section id="about" className="py-20 bg-gray-900 relative">
@@ -85,30 +78,7 @@ const About = () => {
             </div>
           </motion.div>
         </div>
-
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20"
-        >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon
-            return (
-              <div key={index} className="text-center">
-                <div className="bg-primary/20 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Icon className="h-8 w-8 text-primary" />
-                </div>
-                <h4 className="text-2xl font-bold text-white mb-2">{stat.value}</h4>
-                <p className="text-gray-400">{stat.label}</p>
-              </div>
-            )
-          })}
-        </motion.div>
       </div>
     </section>
   )
 }
-
-export default About
