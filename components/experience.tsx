@@ -8,6 +8,7 @@ const experiences = [
   {
     title: "Full Stack Developer",
     company: "ClouDesk Pty. Ltd",
+    companyUrl: "https://cloudesk.co/",
     location: "Remote | Sydney, NSW Australia",
     period: "Jan 2025 – Present",
     description: [
@@ -21,6 +22,7 @@ const experiences = [
   {
     title: "IT Specialist",
     company: "EduQuest Inc.",
+    companyUrl: "https://eduquestph.com/",
     location: "Cagayan De Oro City, Northern Mindanao, Philippines",
     period: "Jul 2024 – Jan 2025",
     description: [
@@ -32,6 +34,7 @@ const experiences = [
   {
     title: "System And Database Specialist | Internship",
     company: "MORESCO-1",
+    companyUrl: "https://moresco1.com/",
     location: "Poblacion, Laguindingan, Misamis Oriental",
     period: "Jan 2024 - May 2024",
     description: [

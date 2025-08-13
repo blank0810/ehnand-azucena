@@ -2,11 +2,12 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { Briefcase, Calendar, MapPin } from "lucide-react"
+import { Briefcase, Calendar, MapPin, ExternalLink } from "lucide-react"
 
 interface TimelineItem {
   title: string
   company: string
+  companyUrl?: string
   location: string
   period: string
   description: string[]
@@ -17,20 +18,22 @@ interface TimelineProps {
 }
 
 export default function Timeline({ items }: TimelineProps) {
+  const timelineItems = items.map((item, index) => {
+    const [ref, inView] = useInView({
+      triggerOnce: true,
+      threshold: 0.1,
+    })
+
+    return <TimelineItemComponent key={index} item={item} index={index} ref={ref} inView={inView} />
+  })
+
   return (
     <div className="relative">
       {/* Timeline line */}
       <div className="absolute left-0 md:left-1/2 transform md:-translate-x-1/2 h-full w-1 bg-primary"></div>
 
       {/* Timeline items */}
-      {items.map((item, index) => {
-        const [ref, inView] = useInView({
-          triggerOnce: true,
-          threshold: 0.1,
-        })
-
-        return <TimelineItemComponent key={index} item={item} index={index} ref={ref} inView={inView} />
-      })}
+      {timelineItems}
     </div>
   )
 }
@@ -73,7 +76,24 @@ const TimelineItemComponent = ({ item, index, ref, inView }: TimelineItemCompone
         whileHover={{ scale: 1.03 }}
       >
         <h3 className="text-xl font-bold text-white">{item.title}</h3>
-        <h4 className="text-lg font-semibold text-primary mb-2">{item.company}</h4>
+        <h4 className="text-lg font-semibold mb-2">
+          {item.companyUrl ? (
+            <motion.a
+              href={item.companyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:text-secondary transition-colors duration-300 hover:underline decoration-2 underline-offset-4"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              aria-label={`Visit ${item.company} website`}
+            >
+              {item.company}
+              <ExternalLink className="inline h-4 w-4 ml-1 opacity-70" />
+            </motion.a>
+          ) : (
+            <span className="text-primary">{item.company}</span>
+          )}
+        </h4>
         <div className="flex items-center text-gray-400 mb-2">
           <MapPin className="h-4 w-4 mr-2" />
           <span>{item.location}</span>
