@@ -2,64 +2,48 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import SkillProgress from "./skill-progress"
+import { Database, Globe, Cloud, Code, Layers } from "lucide-react"
 
 const skillCategories = [
   {
-    title: "Languages & Frameworks",
-    skills: [
-      { name: "Laravel", percentage: 90, color: "bg-red-500" },
-      { name: "Symfony", percentage: 85, color: "bg-blue-500" },
-      { name: "NestJS", percentage: 80, color: "bg-red-600" },
-      { name: "Node.js", percentage: 85, color: "bg-green-500" },
-      { name: "C#.NET", percentage: 75, color: "bg-purple-500" },
-      { name: "React.js", percentage: 80, color: "bg-cyan-500" },
-      { name: "Next.js", percentage: 75, color: "bg-gray-800" },
-      { name: "CodeIgniter", percentage: 70, color: "bg-orange-500" },
-    ],
+    title: "Backend",
+    icon: Database,
+    skills: ["Symfony", "Laravel", "CodeIgniter", "Node.js", "C#.NET"],
   },
   {
-    title: "Databases & Data",
-    skills: [
-      { name: "MySQL", percentage: 90, color: "bg-blue-600" },
-      { name: "PostgreSQL", percentage: 85, color: "bg-blue-700" },
-      { name: "SQL Server", percentage: 80, color: "bg-red-700" },
-      { name: "SQLite", percentage: 75, color: "bg-gray-600" },
-      { name: "T-SQL", percentage: 80, color: "bg-indigo-600" },
-    ],
+    title: "Frontend",
+    icon: Globe,
+    skills: ["React.js", "Next.js", "Tailwind CSS", "JavaScript", "TSX", "Bootstrap", "ShadCN UI"],
   },
   {
-    title: "Infrastructure & DevOps",
-    skills: [
-      { name: "Docker", percentage: 70, color: "bg-blue-500" },
-      { name: "Bitbucket CI/CD", percentage: 75, color: "bg-blue-600" },
-      { name: "Vultr", percentage: 80, color: "bg-purple-600" },
-      { name: "AWS", percentage: 60, color: "bg-orange-600" },
-      { name: "UNIX/Linux", percentage: 85, color: "bg-yellow-600" },
-      { name: "Git", percentage: 90, color: "bg-red-600" },
-    ],
+    title: "Databases",
+    icon: Database,
+    skills: ["MySQL", "PostgreSQL", "SQLite", "SQL Server", "Transact-SQL"],
   },
   {
-    title: "APIs & Integrations",
-    skills: [
-      { name: "REST APIs", percentage: 90, color: "bg-green-600" },
-      { name: "GraphQL", percentage: 75, color: "bg-pink-600" },
-      { name: "OAuth2", percentage: 80, color: "bg-indigo-500" },
-      { name: "Google APIs", percentage: 85, color: "bg-red-500" },
-      { name: "Stripe", percentage: 80, color: "bg-purple-600" },
-      { name: "HubSpot", percentage: 70, color: "bg-orange-500" },
-    ],
+    title: "Cloud & DevOps",
+    icon: Cloud,
+    skills: ["AWS", "CI/CD", "Docker", "UNIX/Linux", "Virtual Machines"],
   },
   {
-    title: "Frontend Technologies",
-    skills: [
-      { name: "Bootstrap", percentage: 85, color: "bg-purple-500" },
-      { name: "Tailwind CSS", percentage: 80, color: "bg-cyan-500" },
-      { name: "ShadCN UI", percentage: 75, color: "bg-gray-700" },
-      { name: "JavaScript", percentage: 85, color: "bg-yellow-500" },
-      { name: "TypeScript", percentage: 80, color: "bg-blue-600" },
-    ],
+    title: "APIs",
+    icon: Layers,
+    skills: ["REST", "SOAP", "GraphQL", "Google APIs", "Github"],
   },
+  {
+    title: "Programming",
+    icon: Code,
+    skills: ["JavaScript", "TypeScript", "PHP", "Python", "C#", "SQL"],
+  },
+]
+
+const proficiencyLevels = [
+  { name: "Frontend Development", percentage: 90, color: "bg-blue-500" },
+  { name: "Backend Development", percentage: 95, color: "bg-green-500" },
+  { name: "Database Management", percentage: 85, color: "bg-yellow-500" },
+  { name: "Cloud Infrastructure", percentage: 80, color: "bg-blue-600" },
+  { name: "DevOps", percentage: 75, color: "bg-green-600" },
+  { name: "UI/UX Design", percentage: 70, color: "bg-orange-500" },
 ]
 
 export default function Skills() {
@@ -75,38 +59,82 @@ export default function Skills() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="section-title gradient-text"
+          className="section-title gradient-text mb-16"
         >
           Technical Skills
         </motion.h2>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-center text-gray-400 mb-12 max-w-2xl mx-auto"
-        >
-          A comprehensive overview of my technical expertise across various technologies, frameworks, and tools.
-        </motion.p>
+        {/* Skills Categories Grid */}
+        <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          {skillCategories.map((category, index) => {
+            const Icon = category.icon
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-700/50 hover:border-primary/50 transition-all duration-300 group hover:shadow-lg hover:shadow-primary/10"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors duration-300">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{category.title}</h3>
+                </div>
 
-        <div ref={ref} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {skillCategories.map((category, categoryIndex) => (
-            <motion.div
-              key={categoryIndex}
-              initial={{ opacity: 0, y: 50 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
-              className="card"
-            >
-              <h3 className="section-subtitle mb-6">{category.title}</h3>
-              <div className="space-y-4">
-                {category.skills.map((skill, skillIndex) => (
-                  <SkillProgress key={skillIndex} name={skill.name} percentage={skill.percentage} color={skill.color} />
-                ))}
-              </div>
-            </motion.div>
-          ))}
+                <div className="flex flex-wrap gap-2">
+                  {category.skills.map((skill, skillIndex) => (
+                    <motion.span
+                      key={skillIndex}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={inView ? { opacity: 1, scale: 1 } : {}}
+                      transition={{ duration: 0.3, delay: index * 0.1 + skillIndex * 0.05 }}
+                      className="px-3 py-1 bg-gray-700/80 text-gray-300 text-sm rounded-full border border-gray-600/50 hover:border-primary/50 hover:text-primary transition-all duration-300 cursor-default"
+                    >
+                      {skill}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
+
+        {/* Proficiency Levels */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="mt-16"
+        >
+          <h3 className="text-3xl font-bold text-center mb-12 text-white">Proficiency Levels</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {proficiencyLevels.map((skill, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                animate={inView ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 0.5, delay: 1 + index * 0.1 }}
+                className="space-y-3"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 font-medium">{skill.name}</span>
+                  <span className="text-white font-bold">{skill.percentage}%</span>
+                </div>
+                <div className="w-full bg-gray-700/50 rounded-full h-3 overflow-hidden">
+                  <motion.div
+                    className={`h-full rounded-full ${skill.color}`}
+                    initial={{ width: 0 }}
+                    animate={inView ? { width: `${skill.percentage}%` } : { width: 0 }}
+                    transition={{ duration: 1.5, delay: 1.2 + index * 0.1, ease: "easeOut" }}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   )
