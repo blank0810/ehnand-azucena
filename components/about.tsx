@@ -1,22 +1,113 @@
-import { Download } from "lucide-react"
+"use client"
+
+import { motion } from "framer-motion"
+import { useInView } from "react-intersection-observer"
+import { Download, Code, Database, Cloud, Users } from "lucide-react"
+import Image from "next/image"
 
 const About = () => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  })
+
+  const stats = [
+    { icon: Code, label: "Projects Completed", value: "15+" },
+    { icon: Database, label: "Databases Managed", value: "20+" },
+    { icon: Cloud, label: "Systems Deployed", value: "10+" },
+    { icon: Users, label: "Happy Clients", value: "8+" },
+  ]
+
   return (
-    <div className="about-section">
-      <h1>About Me</h1>
-      <p>{/* Description about yourself here */}</p>
-      <div className="download-button">
-        <a
-          href="/Ehnand_Azucena_CV.pdf"
-          download="Ehnand_Azucena_CV.pdf"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+    <section id="about" className="py-20 bg-gray-900 relative">
+      <div className="section-container">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="section-title gradient-text"
         >
-          <Download className="w-5 h-5" />
-          Download Resume
-        </a>
+          About Me
+        </motion.h2>
+
+        <div ref={ref} className="grid md:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="relative">
+              <div className="w-80 h-80 mx-auto relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20"></div>
+                <Image
+                  src="/images/profile.jpg"
+                  alt="Ehnand Azucena"
+                  fill
+                  className="rounded-full object-cover border-4 border-primary/30 relative z-10"
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="space-y-6"
+          >
+            <h3 className="text-2xl font-bold mb-4">Backend-focused Full Stack Engineer with production experience</h3>
+            <p className="text-gray-300 leading-relaxed">
+              I specialize in building robust backend systems and scalable web applications using modern technologies
+              like Laravel, Symfony, NestJS, and various database systems. With hands-on experience in multi-tenant SaaS
+              platforms, enterprise-grade internal tools, and mission-critical systems for schools, e-commerce, and
+              associations.
+            </p>
+            <p className="text-gray-300 leading-relaxed">
+              My expertise spans across delivering robust APIs, scalable backend systems, and optimized databases, with
+              growing experience in Docker-based DevOps and CI/CD pipelines. I'm passionate about creating efficient
+              solutions that solve real-world problems.
+            </p>
+
+            <div className="flex flex-wrap gap-4 mt-8">
+              <motion.a
+                href="/Ehnand_Azucena_CV.pdf"
+                download="Ehnand_Azucena_CV.pdf"
+                className="btn-primary flex items-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Download className="h-5 w-5" />
+                Download Resume
+              </motion.a>
+              <motion.a href="#contact" className="btn-outline" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                Get In Touch
+              </motion.a>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Stats Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20"
+        >
+          {stats.map((stat, index) => {
+            const Icon = stat.icon
+            return (
+              <div key={index} className="text-center">
+                <div className="bg-primary/20 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Icon className="h-8 w-8 text-primary" />
+                </div>
+                <h4 className="text-2xl font-bold text-white mb-2">{stat.value}</h4>
+                <p className="text-gray-400">{stat.label}</p>
+              </div>
+            )
+          })}
+        </motion.div>
       </div>
-      {/* ** rest of code here **/}
-    </div>
+    </section>
   )
 }
 
