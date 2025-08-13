@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, ExternalLink, Github, Calendar, User, MapPin, Award, Layers } from "lucide-react"
 import Image from "next/image"
 import { useEffect } from "react"
+import EnhancedStatusBadge from "./enhanced-status-badge"
 
 interface Project {
   title: string
@@ -45,22 +46,6 @@ export default function ProjectDetailsModal({ project, isOpen, onClose }: Projec
   }, [isOpen, onClose])
 
   if (!project) return null
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "live production":
-      case "live":
-        return "bg-green-900/30 text-green-400 border-green-700"
-      case "deployed":
-        return "bg-blue-900/30 text-blue-400 border-blue-700"
-      case "beta":
-        return "bg-yellow-900/30 text-yellow-400 border-yellow-700"
-      case "completed":
-        return "bg-purple-900/30 text-purple-400 border-purple-700"
-      default:
-        return "bg-gray-900/30 text-gray-400 border-gray-700"
-    }
-  }
 
   const getDetailedDescription = (title: string) => {
     const descriptions: { [key: string]: string } = {
@@ -141,11 +126,9 @@ export default function ProjectDetailsModal({ project, isOpen, onClose }: Projec
               <Image src={project.image || "/placeholder.svg"} alt={project.title} fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
 
-              {/* Status Badge */}
+              {/* Enhanced Status Badge */}
               <div className="absolute top-4 left-4">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(project.status)}`}>
-                  {project.status}
-                </span>
+                <EnhancedStatusBadge status={project.status} size="md" />
               </div>
             </div>
 

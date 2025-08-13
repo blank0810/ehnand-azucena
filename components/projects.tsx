@@ -6,6 +6,7 @@ import { ExternalLink, Github, Calendar, MapPin, ChevronDown } from "lucide-reac
 import Image from "next/image"
 import { useState } from "react"
 import ProjectDetailsModal from "./project-details-modal"
+import EnhancedStatusBadge from "./enhanced-status-badge"
 
 const projects = [
   {
@@ -139,22 +140,6 @@ export default function Projects() {
   // Show only first 6 projects initially, or all if showMore is true
   const displayedProjects = showMore ? filteredProjects : filteredProjects.slice(0, 6)
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "live production":
-      case "live":
-        return "bg-green-900/30 text-green-400 border-green-700"
-      case "deployed":
-        return "bg-blue-900/30 text-blue-400 border-blue-700"
-      case "beta":
-        return "bg-yellow-900/30 text-yellow-400 border-yellow-700"
-      case "completed":
-        return "bg-purple-900/30 text-purple-400 border-purple-700"
-      default:
-        return "bg-gray-900/30 text-gray-400 border-gray-700"
-    }
-  }
-
   const handleProjectClick = (project: (typeof projects)[0]) => {
     setSelectedProject(project)
     setIsModalOpen(true)
@@ -238,13 +223,9 @@ export default function Projects() {
                     <p className="text-sm text-gray-300">Learn more about this project</p>
                   </motion.div>
                 </div>
-                {/* Status Badge */}
-                <div className="absolute top-2 right-2">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(project.status)}`}
-                  >
-                    {project.status}
-                  </span>
+                {/* Enhanced Status Badge */}
+                <div className="absolute top-3 right-3">
+                  <EnhancedStatusBadge status={project.status} size="sm" />
                 </div>
               </div>
 
