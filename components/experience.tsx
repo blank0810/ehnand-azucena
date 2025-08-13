@@ -51,6 +51,9 @@ export default function Experience() {
     threshold: 0.1,
   })
 
+  // Debug logging for production
+  console.log("Experience component rendering:", { inView, experiencesCount: experiences.length })
+
   return (
     <section id="experience" className="py-20 bg-gray-950 relative">
       <div className="section-container">
@@ -74,7 +77,13 @@ export default function Experience() {
         </motion.p>
 
         <div ref={ref}>
-          <Timeline items={experiences} />
+          {experiences && experiences.length > 0 ? (
+            <Timeline items={experiences} />
+          ) : (
+            <div className="text-center text-gray-400 py-12">
+              <p>Experience data is loading...</p>
+            </div>
+          )}
         </div>
       </div>
     </section>

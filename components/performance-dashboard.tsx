@@ -1,249 +1,215 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
+import { motion } from "framer-motion"
+import { X, RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react"
 
-interface PerformanceMetrics {
-  cls: number
-  fid: number
-  fcp: number
-  lcp: number
-  ttfb: number
+interface PerformanceMetric {
+  name: string
+  value: number
   timestamp: number
-  url: string
+  rating: "good" | "needs-improvement" | "poor"
 }
 
 interface PerformanceStats {
-  cls: { avg: number; median: number; p95: number; min: number; max: number }
-  fid: { avg: number; median: number; p95: number; min: number; max: number }
-  fcp: { avg: number; median: number; p95: number; min: number; max: number }
-  lcp: { avg: number; median: number; p95: number; min: number; max: number }
-  ttfb: { avg: number; median: number; p95: number; min: number; max: number }
+  count: number
+  average: number
+  median: number
+  p95: number
+  min: number
+  max: number
 }
 
-export function PerformanceDashboard() {
-  const [data, setData] = useState<PerformanceMetrics[]>([])
-  const [stats, setStats] = useState<PerformanceStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+interface PerformanceDashboardProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function PerformanceDashboard({ isOpen, onClose }: PerformanceDashboardProps) {
+  const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
+  const [statistics, setStatistics] = useState<Record<string, PerformanceStats>>({})
+  const [loading, setLoading] = useState(false)
 
   const fetchData = async () => {
+    setLoading(true)
     try {
-      setLoading(true)
       const response = await fetch("/api/analytics/performance")
-      const result = await response.json()
-      setData(result.data || [])
-      setStats(result.stats || null)
-      setLastUpdated(new Date())
+      const data = await response.json()
+      setMetrics(data.metrics || [])
+      setStatistics(data.statistics || {})
     } catch (error) {
-      console.error("Error fetching performance data:", error)
+      console.error("Failed to fetch performance data:", error)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchData()
-    const interval = setInterval(fetchData, 5 * 60 * 1000) // Refresh every 5 minutes
-    return () => clearInterval(interval)
-  }, [])
+    if (isOpen) {
+      fetchData()
+      const interval = setInterval(fetchData, 5 * 60 * 1000) // Refresh every 5 minutes
+      return () => clearInterval(interval)
+    }
+  }, [isOpen])
 
-  const getMetricStatus = (value: number, thresholds: { good: number; poor: number }) => {
-    if (value <= thresholds.good) return "good"
-    if (value <= thresholds.poor) return "needs-improvement"
-    return "poor"
+  const getLatestMetrics = () => {
+    const latest: Record<string, PerformanceMetric> = {}
+
+    for (const metric of metrics) {
+      if (!latest[metric.name] || metric.timestamp > latest[metric.name].timestamp) {
+        latest[metric.name] = metric
+      }
+    }
+
+    return latest
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getRatingColor = (rating: string) => {
+    switch (rating) {
       case "good":
-        return "bg-green-500"
+        return "text-green-500"
       case "needs-improvement":
-        return "bg-yellow-500"
+        return "text-yellow-500"
       case "poor":
-        return "bg-red-500"
+        return "text-red-500"
       default:
-        return "bg-gray-500"
+        return "text-gray-500"
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getRatingIcon = (rating: string) => {
+    switch (rating) {
       case "good":
-        return <Badge className="bg-green-100 text-green-800">Good</Badge>
+        return <TrendingUp className="h-4 w-4" />
       case "needs-improvement":
-        return <Badge className="bg-yellow-100 text-yellow-800">Needs Improvement</Badge>
+        return <Minus className="h-4 w-4" />
       case "poor":
-        return <Badge className="bg-red-100 text-red-800">Poor</Badge>
+        return <TrendingDown className="h-4 w-4" />
       default:
-        return <Badge>Unknown</Badge>
+        return <Minus className="h-4 w-4" />
     }
   }
 
-  const formatMetric = (value: number, unit: string) => {
-    if (value === 0) return "0" + unit
-    if (unit === "ms") return Math.round(value) + unit
-    if (unit === "s") return (value / 1000).toFixed(2) + unit
-    return value.toFixed(3)
+  const formatValue = (name: string, value: number) => {
+    if (name === "CLS") return value.toFixed(3)
+    return `${Math.round(value)}ms`
   }
 
-  const metricConfigs = [
-    {
-      key: "cls" as keyof PerformanceMetrics,
-      name: "Cumulative Layout Shift",
-      description: "Visual stability of the page",
-      unit: "",
-      thresholds: { good: 0.1, poor: 0.25 },
-    },
-    {
-      key: "fid" as keyof PerformanceMetrics,
-      name: "First Input Delay",
-      description: "Responsiveness to user interactions",
-      unit: "ms",
-      thresholds: { good: 100, poor: 300 },
-    },
-    {
-      key: "fcp" as keyof PerformanceMetrics,
-      name: "First Contentful Paint",
-      description: "Time to first content render",
-      unit: "s",
-      thresholds: { good: 1800, poor: 3000 },
-    },
-    {
-      key: "lcp" as keyof PerformanceMetrics,
-      name: "Largest Contentful Paint",
-      description: "Loading performance",
-      unit: "s",
-      thresholds: { good: 2500, poor: 4000 },
-    },
-    {
-      key: "ttfb" as keyof PerformanceMetrics,
-      name: "Time to First Byte",
-      description: "Server response time",
-      unit: "ms",
-      thresholds: { good: 800, poor: 1800 },
-    },
-  ]
+  const getProgressPercentage = (name: string, value: number) => {
+    const thresholds = {
+      CLS: { good: 0.1, poor: 0.25, max: 0.5 },
+      FID: { good: 100, poor: 300, max: 500 },
+      FCP: { good: 1800, poor: 3000, max: 5000 },
+      LCP: { good: 2500, poor: 4000, max: 6000 },
+      TTFB: { good: 800, poor: 1800, max: 3000 },
+    }
 
-  if (loading && !stats) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Performance Dashboard</h2>
-          <RefreshCw className="h-5 w-5 animate-spin" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(5)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
-                <div className="h-2 bg-gray-200 rounded w-full"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
+    const threshold = thresholds[name as keyof typeof thresholds]
+    if (!threshold) return 0
+
+    return Math.min((value / threshold.max) * 100, 100)
   }
+
+  const latestMetrics = getLatestMetrics()
+
+  if (!isOpen) return null
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Performance Dashboard</h2>
-          <p className="text-muted-foreground">
-            Real-time Core Web Vitals monitoring
-            {lastUpdated && <span className="ml-2">• Last updated: {lastUpdated.toLocaleTimeString()}</span>}
-          </p>
-        </div>
-        <Button onClick={fetchData} disabled={loading} size="sm">
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {metricConfigs.map((config) => {
-          const latestValue = data.length > 0 ? data[data.length - 1][config.key] : 0
-          const avgValue = stats?.[config.key]?.avg || 0
-          const status = getMetricStatus(avgValue, config.thresholds)
-          const progress = Math.min((avgValue / config.thresholds.poor) * 100, 100)
-
-          return (
-            <Card key={config.key}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium">{config.name}</CardTitle>
-                  {getStatusBadge(status)}
-                </div>
-                <CardDescription className="text-xs">{config.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">{formatMetric(avgValue, config.unit)}</span>
-                    <div className="text-right text-sm text-muted-foreground">
-                      <div>Latest: {formatMetric(latestValue, config.unit)}</div>
-                    </div>
-                  </div>
-                  <Progress value={progress} className="h-2" />
-                  {stats && (
-                    <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                      <div>
-                        <div className="font-medium">P95</div>
-                        <div>{formatMetric(stats[config.key].p95, config.unit)}</div>
-                      </div>
-                      <div>
-                        <div className="font-medium">Median</div>
-                        <div>{formatMetric(stats[config.key].median, config.unit)}</div>
-                      </div>
-                      <div>
-                        <div className="font-medium">Min/Max</div>
-                        <div>
-                          {formatMetric(stats[config.key].min, config.unit)}/
-                          {formatMetric(stats[config.key].max, config.unit)}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-
-      {data.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Summary</CardTitle>
-            <CardDescription>Based on {data.length} measurements collected over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-              {metricConfigs.map((config) => {
-                const avgValue = stats?.[config.key]?.avg || 0
-                const status = getMetricStatus(avgValue, config.thresholds)
-                return (
-                  <div key={config.key} className="space-y-2">
-                    <div className={`w-4 h-4 rounded-full mx-auto ${getStatusColor(status)}`}></div>
-                    <div className="text-sm font-medium">{config.name}</div>
-                    <div className="text-lg font-bold">{formatMetric(avgValue, config.unit)}</div>
-                  </div>
-                )
-              })}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6 border-b border-gray-700">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white">Performance Dashboard</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={fetchData}
+                disabled={loading}
+                className="p-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+              </button>
+              <button onClick={onClose} className="p-2 text-gray-400 hover:text-white transition-colors">
+                <X className="h-5 w-5" />
+              </button>
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {Object.entries(latestMetrics).map(([name, metric]) => (
+              <div key={name} className="bg-gray-800 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-white">{name}</h3>
+                  <div className={`flex items-center gap-1 ${getRatingColor(metric.rating)}`}>
+                    {getRatingIcon(metric.rating)}
+                    <span className="text-sm capitalize">{metric.rating.replace("-", " ")}</span>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-white mb-2">{formatValue(name, metric.value)}</div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      metric.rating === "good"
+                        ? "bg-green-500"
+                        : metric.rating === "needs-improvement"
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                    }`}
+                    style={{ width: `${getProgressPercentage(name, metric.value)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {Object.keys(statistics).length > 0 && (
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-4">Detailed Statistics</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left py-2 text-gray-300">Metric</th>
+                      <th className="text-right py-2 text-gray-300">Count</th>
+                      <th className="text-right py-2 text-gray-300">Average</th>
+                      <th className="text-right py-2 text-gray-300">Median</th>
+                      <th className="text-right py-2 text-gray-300">95th %</th>
+                      <th className="text-right py-2 text-gray-300">Min</th>
+                      <th className="text-right py-2 text-gray-300">Max</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(statistics).map(([name, stats]) => (
+                      <tr key={name} className="border-b border-gray-700/50">
+                        <td className="py-2 text-white font-medium">{name}</td>
+                        <td className="text-right py-2 text-gray-300">{stats.count}</td>
+                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.average)}</td>
+                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.median)}</td>
+                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.p95)}</td>
+                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.min)}</td>
+                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.max)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
