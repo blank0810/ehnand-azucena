@@ -14,8 +14,8 @@ export default function About() {
   const handleDownload = () => {
     // Create a link element and trigger download
     const link = document.createElement("a")
-    link.href = "/Ehnand_Azucena_CV.pdf" // Using your original file
-    link.download = "Ehnand_Azucena_CV.pdf" // Using your original filename
+    link.href = "/Ehnand CV.pdf" // Using your original file
+    link.download = "Ehnand CV.pdf" // Using your original filename
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
