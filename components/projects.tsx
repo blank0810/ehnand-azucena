@@ -16,6 +16,7 @@ const projects = [
     role: "Lead Developer",
     status: "Live Production",
     category: "SaaS Platform",
+    liveUrl: "https://platform.memberpulse.com.au",
   },
   {
     title: "PlayNow",
@@ -27,6 +28,7 @@ const projects = [
     role: "Solo Developer",
     status: "Beta",
     category: "Marketplace",
+    liveUrl: "https://dev.playnow.ae",
   },
   {
     title: "EduTracker System",
