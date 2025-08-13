@@ -11,6 +11,16 @@ export default function About() {
     threshold: 0.1,
   })
 
+  const handleDownload = () => {
+    // Create a link element and trigger download
+    const link = document.createElement("a")
+    link.href = "/Ehnand_Azucena_CV.pdf" // Using your original file
+    link.download = "Ehnand_Azucena_CV.pdf" // Using your original filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <section id="about" className="py-20 bg-gray-900 relative">
       <div className="section-container">
@@ -62,16 +72,15 @@ export default function About() {
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
-              <motion.a
-                href="/Ehnand_Azucena_CV.pdf"
-                download="Ehnand_Azucena_CV.pdf"
+              <motion.button
+                onClick={handleDownload}
                 className="btn-primary flex items-center gap-2"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Download className="h-5 w-5" />
                 Download Resume
-              </motion.a>
+              </motion.button>
               <motion.a href="#contact" className="btn-outline" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 Get In Touch
               </motion.a>

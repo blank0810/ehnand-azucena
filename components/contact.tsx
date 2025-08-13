@@ -105,8 +105,9 @@ export default function Contact() {
                 className="card group hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
               >
                 <div className="text-center">
-                  <div className="bg-gradient-to-br from-primary/20 to-secondary/20 p-6 rounded-full w-20 h-20 mx-auto mb-6 group-hover:from-primary/30 group-hover:to-secondary/30 transition-all duration-300 group-hover:scale-110">
-                    <Icon className="h-8 w-8 text-primary mx-auto mt-2" />
+                  {/* Fixed icon centering with proper flexbox */}
+                  <div className="bg-gradient-to-br from-primary/20 to-secondary/20 w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center group-hover:from-primary/30 group-hover:to-secondary/30 transition-all duration-300 group-hover:scale-110">
+                    <Icon className="h-8 w-8 text-primary" />
                   </div>
                   <h3 className="text-2xl font-bold mb-2 text-white">{contact.label}</h3>
                   <p className="text-gray-400 text-sm mb-3">{contact.description}</p>
@@ -187,7 +188,8 @@ export default function Contact() {
                 transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                 className="flex items-center p-6 bg-gradient-to-r from-gray-800/50 to-gray-700/30 rounded-lg border border-gray-700 hover:border-primary/50 transition-all duration-300 group hover:shadow-lg"
               >
-                <div className="bg-primary/20 p-4 rounded-full mr-6 group-hover:bg-primary/30 transition-colors duration-300 group-hover:scale-110">
+                {/* Fixed icon centering with proper flexbox */}
+                <div className="bg-primary/20 w-16 h-16 rounded-full flex items-center justify-center mr-6 group-hover:bg-primary/30 transition-colors duration-300 group-hover:scale-110">
                   <Icon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
