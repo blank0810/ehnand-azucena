@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Phone, Mail, MapPin, Linkedin, Github, ExternalLink, Copy, Check } from "lucide-react"
+import { Phone, Mail, MapPin, Linkedin, Github, ExternalLink, Copy, Check, MessageCircle } from "lucide-react"
 import { useState } from "react"
 
 export default function Contact() {
@@ -28,13 +28,16 @@ export default function Contact() {
       description: "Send me a direct email",
     },
     {
-      icon: Phone,
-      label: "Phone",
-      value: "09534678287 / 09128956168",
-      href: "tel:+639534678287",
+      icon: MessageCircle,
+      label: "WhatsApp",
+      value: "+63 953 467 8287",
+      displayValue: "+63 953 467 8287",
+      copyValue: "+639534678287",
+      href: "https://wa.me/639534678287",
       copyable: true,
-      id: "phone",
-      description: "Call or text me directly",
+      id: "whatsapp",
+      description: "Message me on WhatsApp",
+      external: true,
     },
     {
       icon: Linkedin,
@@ -107,7 +110,7 @@ export default function Contact() {
                   </div>
                   <h3 className="text-2xl font-bold mb-2 text-white">{contact.label}</h3>
                   <p className="text-gray-400 text-sm mb-3">{contact.description}</p>
-                  <p className="text-gray-200 mb-6 font-medium">{contact.value}</p>
+                  <p className="text-gray-200 mb-6 font-medium">{contact.displayValue || contact.value}</p>
 
                   <div className="flex gap-3 justify-center">
                     {contact.href && (
@@ -121,7 +124,16 @@ export default function Contact() {
                       >
                         {contact.external ? (
                           <>
-                            Connect <ExternalLink className="h-4 w-4" />
+                            {contact.label === "WhatsApp" ? (
+                              <>
+                                <MessageCircle className="h-4 w-4" />
+                                Chat Now
+                              </>
+                            ) : (
+                              <>
+                                Connect <ExternalLink className="h-4 w-4" />
+                              </>
+                            )}
                           </>
                         ) : contact.label === "Email" ? (
                           <>
@@ -139,7 +151,7 @@ export default function Contact() {
 
                     {contact.copyable && (
                       <motion.button
-                        onClick={() => copyToClipboard(contact.value, contact.id)}
+                        onClick={() => copyToClipboard(contact.copyValue || contact.value, contact.id)}
                         className="btn-outline flex items-center gap-2 text-sm px-4 py-2"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -245,6 +257,17 @@ export default function Contact() {
                 Email Me
               </motion.a>
               <motion.a
+                href="https://wa.me/639534678287"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <MessageCircle className="h-5 w-5" />
+                WhatsApp
+              </motion.a>
+              <motion.a
                 href="https://www.linkedin.com/in/ehnand-azucena-3028a7194"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -255,21 +278,12 @@ export default function Contact() {
                 <Linkedin className="h-5 w-5" />
                 LinkedIn
               </motion.a>
-              <motion.a
-                href="tel:+639534678287"
-                className="btn-outline flex items-center gap-2 px-6 py-3"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Phone className="h-5 w-5" />
-                Call Me
-              </motion.a>
             </div>
 
             {/* Response Time Info */}
             <div className="text-sm text-gray-400">
               <p>📧 Email responses within 24 hours</p>
-              <p>📱 Phone calls welcome during business hours (GMT+8)</p>
+              <p>💬 WhatsApp messages during business hours (GMT+8)</p>
             </div>
           </div>
         </motion.div>
