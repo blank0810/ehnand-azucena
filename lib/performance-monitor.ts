@@ -1,8 +1,11 @@
-interface PerformanceMetric {
-  name: string
-  value: number
+interface PerformanceMetrics {
+  cls: number
+  fid: number
+  fcp: number
+  lcp: number
+  ttfb: number
   timestamp: number
-  rating: "good" | "needs-improvement" | "poor"
+  url: string
 }
 
 interface ResourceTiming {
@@ -13,178 +16,197 @@ interface ResourceTiming {
 }
 
 class PerformanceMonitor {
-  private metrics: PerformanceMetric[] = []
-  private observers: PerformanceObserver[] = []
+  private metrics: PerformanceMetrics[] = []
+  private observer: PerformanceObserver | null = null
 
   constructor() {
     if (typeof window !== "undefined") {
-      this.initializeObservers()
+      this.initializeObserver()
+      this.collectInitialMetrics()
     }
   }
 
-  private initializeObservers() {
-    // Core Web Vitals Observer
-    if ("PerformanceObserver" in window) {
-      const observer = new PerformanceObserver((list) => {
+  private initializeObserver() {
+    try {
+      this.observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           this.processEntry(entry)
         }
       })
 
-      try {
-        observer.observe({
-          entryTypes: ["navigation", "paint", "largest-contentful-paint", "layout-shift", "first-input"],
-        })
-        this.observers.push(observer)
-      } catch (e) {
-        console.warn("Performance Observer not supported:", e)
-      }
-    }
-
-    // Resource timing observer
-    if ("PerformanceObserver" in window) {
-      const resourceObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          this.processResourceEntry(entry as PerformanceResourceTiming)
-        }
+      this.observer.observe({
+        entryTypes: ["navigation", "paint", "largest-contentful-paint", "first-input", "layout-shift"],
       })
-
-      try {
-        resourceObserver.observe({ entryTypes: ["resource"] })
-        this.observers.push(resourceObserver)
-      } catch (e) {
-        console.warn("Resource Performance Observer not supported:", e)
-      }
+    } catch (error) {
+      console.warn("Performance Observer not supported:", error)
     }
   }
 
   private processEntry(entry: PerformanceEntry) {
-    const timestamp = Date.now()
+    const currentMetrics = this.getCurrentMetrics()
 
     switch (entry.entryType) {
-      case "navigation":
-        const navEntry = entry as PerformanceNavigationTiming
-        this.addMetric("TTFB", navEntry.responseStart - navEntry.requestStart, timestamp)
+      case "largest-contentful-paint":
+        currentMetrics.lcp = entry.startTime
         break
-
+      case "first-input":
+        currentMetrics.fid = (entry as any).processingStart - entry.startTime
+        break
+      case "layout-shift":
+        if (!(entry as any).hadRecentInput) {
+          currentMetrics.cls += (entry as any).value
+        }
+        break
       case "paint":
         if (entry.name === "first-contentful-paint") {
-          this.addMetric("FCP", entry.startTime, timestamp)
+          currentMetrics.fcp = entry.startTime
         }
         break
-
-      case "largest-contentful-paint":
-        this.addMetric("LCP", entry.startTime, timestamp)
+      case "navigation":
+        currentMetrics.ttfb = (entry as PerformanceNavigationTiming).responseStart
         break
+    }
 
-      case "layout-shift":
-        const layoutEntry = entry as any
-        if (!layoutEntry.hadRecentInput) {
-          this.addMetric("CLS", layoutEntry.value, timestamp)
+    this.updateMetrics(currentMetrics)
+  }
+
+  private getCurrentMetrics(): PerformanceMetrics {
+    const latest = this.metrics[this.metrics.length - 1]
+    return latest
+      ? { ...latest }
+      : {
+          cls: 0,
+          fid: 0,
+          fcp: 0,
+          lcp: 0,
+          ttfb: 0,
+          timestamp: Date.now(),
+          url: typeof window !== "undefined" ? window.location.href : "",
         }
-        break
-
-      case "first-input":
-        const fidEntry = entry as any
-        this.addMetric("FID", fidEntry.processingStart - fidEntry.startTime, timestamp)
-        break
-    }
   }
 
-  private processResourceEntry(entry: PerformanceResourceTiming) {
-    const duration = entry.responseEnd - entry.requestStart
+  private updateMetrics(metrics: PerformanceMetrics) {
+    metrics.timestamp = Date.now()
+    metrics.url = typeof window !== "undefined" ? window.location.href : ""
 
-    // Log slow resources
-    if (duration > 1000) {
-      console.warn(`Slow resource detected: ${entry.name} took ${duration.toFixed(2)}ms`)
+    this.metrics.push(metrics)
+
+    // Keep only last 100 entries
+    if (this.metrics.length > 100) {
+      this.metrics = this.metrics.slice(-100)
     }
-  }
-
-  private addMetric(name: string, value: number, timestamp: number) {
-    const rating = this.getRating(name, value)
-
-    this.metrics.push({
-      name,
-      value,
-      timestamp,
-      rating,
-    })
 
     // Send to analytics
-    this.sendToAnalytics({ name, value, timestamp, rating })
+    this.sendToAnalytics(metrics)
   }
 
-  private getRating(name: string, value: number): "good" | "needs-improvement" | "poor" {
-    const thresholds = {
-      CLS: { good: 0.1, poor: 0.25 },
-      FID: { good: 100, poor: 300 },
-      FCP: { good: 1800, poor: 3000 },
-      LCP: { good: 2500, poor: 4000 },
-      TTFB: { good: 800, poor: 1800 },
-    }
+  private collectInitialMetrics() {
+    if (typeof window === "undefined") return
 
-    const threshold = thresholds[name as keyof typeof thresholds]
-    if (!threshold) return "good"
+    setTimeout(() => {
+      const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming
+      const paint = performance.getEntriesByType("paint")
+      const lcp = performance.getEntriesByType("largest-contentful-paint")
 
-    if (value <= threshold.good) return "good"
-    if (value <= threshold.poor) return "needs-improvement"
-    return "poor"
+      const metrics: PerformanceMetrics = {
+        cls: 0,
+        fid: 0,
+        fcp: paint.find((entry) => entry.name === "first-contentful-paint")?.startTime || 0,
+        lcp: lcp[lcp.length - 1]?.startTime || 0,
+        ttfb: navigation?.responseStart || 0,
+        timestamp: Date.now(),
+        url: window.location.href,
+      }
+
+      this.metrics.push(metrics)
+      this.sendToAnalytics(metrics)
+    }, 1000)
   }
 
-  private async sendToAnalytics(metric: PerformanceMetric) {
+  private async sendToAnalytics(metrics: PerformanceMetrics) {
     try {
       await fetch("/api/analytics/performance", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(metric),
+        body: JSON.stringify(metrics),
       })
     } catch (error) {
-      console.warn("Failed to send performance metric:", error)
+      console.warn("Failed to send analytics:", error)
     }
   }
 
-  public getMetrics(): PerformanceMetric[] {
+  public getMetrics(): PerformanceMetrics[] {
     return [...this.metrics]
   }
 
-  public getLatestMetrics(): Record<string, PerformanceMetric> {
-    const latest: Record<string, PerformanceMetric> = {}
-
-    for (const metric of this.metrics) {
-      if (!latest[metric.name] || metric.timestamp > latest[metric.name].timestamp) {
-        latest[metric.name] = metric
-      }
-    }
-
-    return latest
+  public getLatestMetrics(): PerformanceMetrics | null {
+    return this.metrics[this.metrics.length - 1] || null
   }
 
-  public calculateScore(): number {
+  public getPerformanceScore(): number {
     const latest = this.getLatestMetrics()
-    const weights = { CLS: 0.15, FID: 0.25, FCP: 0.15, LCP: 0.25, TTFB: 0.2 }
+    if (!latest) return 0
 
-    let totalScore = 0
-    let totalWeight = 0
+    // Calculate score based on Core Web Vitals thresholds
+    let score = 100
 
-    for (const [name, weight] of Object.entries(weights)) {
-      const metric = latest[name]
-      if (metric) {
-        const score = metric.rating === "good" ? 100 : metric.rating === "needs-improvement" ? 50 : 0
-        totalScore += score * weight
-        totalWeight += weight
-      }
-    }
+    // CLS scoring (0-25 points)
+    if (latest.cls > 0.25) score -= 25
+    else if (latest.cls > 0.1) score -= 15
+    else score -= Math.max(0, latest.cls * 150)
 
-    return totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0
+    // FID scoring (0-25 points)
+    if (latest.fid > 300) score -= 25
+    else if (latest.fid > 100) score -= 15
+    else score -= Math.max(0, latest.fid / 20)
+
+    // FCP scoring (0-25 points)
+    if (latest.fcp > 3000) score -= 25
+    else if (latest.fcp > 1800) score -= 15
+    else score -= Math.max(0, latest.fcp / 120)
+
+    // LCP scoring (0-25 points)
+    if (latest.lcp > 4000) score -= 25
+    else if (latest.lcp > 2500) score -= 15
+    else score -= Math.max(0, latest.lcp / 160)
+
+    return Math.max(0, Math.round(score))
+  }
+
+  public getResourceTimings(): ResourceTiming[] {
+    if (typeof window === "undefined") return []
+
+    const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[]
+
+    return resources
+      .filter((resource) => resource.duration > 100) // Only slow resources
+      .map((resource) => ({
+        name: resource.name.split("/").pop() || resource.name,
+        duration: Math.round(resource.duration),
+        size: resource.transferSize,
+        type: this.getResourceType(resource.name),
+      }))
+      .sort((a, b) => b.duration - a.duration)
+      .slice(0, 10) // Top 10 slowest
+  }
+
+  private getResourceType(url: string): string {
+    if (url.includes(".js")) return "script"
+    if (url.includes(".css")) return "stylesheet"
+    if (url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) return "image"
+    if (url.includes(".woff") || url.includes(".ttf")) return "font"
+    return "other"
   }
 
   public destroy() {
-    this.observers.forEach((observer) => observer.disconnect())
-    this.observers = []
-    this.metrics = []
+    if (this.observer) {
+      this.observer.disconnect()
+      this.observer = null
+    }
   }
 }
 
-export default PerformanceMonitor
+export const performanceMonitor = new PerformanceMonitor()
+export type { PerformanceMetrics, ResourceTiming }

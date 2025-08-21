@@ -2,22 +2,26 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { X, RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { X, Activity, Clock, Zap, Eye, Server, TrendingUp, RefreshCw } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
 
-interface PerformanceMetric {
-  name: string
-  value: number
+interface PerformanceMetrics {
+  cls: number
+  fid: number
+  fcp: number
+  lcp: number
+  ttfb: number
   timestamp: number
-  rating: "good" | "needs-improvement" | "poor"
+  url: string
 }
 
 interface PerformanceStats {
   count: number
-  average: number
-  median: number
-  p95: number
-  min: number
-  max: number
+  averages: Record<string, number>
+  medians: Record<string, number>
+  percentiles: Record<string, number>
+  min: Record<string, number>
+  max: Record<string, number>
 }
 
 interface PerformanceDashboardProps {
@@ -26,17 +30,26 @@ interface PerformanceDashboardProps {
 }
 
 export default function PerformanceDashboard({ isOpen, onClose }: PerformanceDashboardProps) {
-  const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
-  const [statistics, setStatistics] = useState<Record<string, PerformanceStats>>({})
-  const [loading, setLoading] = useState(false)
+  const [metrics, setMetrics] = useState<PerformanceMetrics[]>([])
+  const [stats, setStats] = useState<PerformanceStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
   const fetchData = async () => {
-    setLoading(true)
     try {
-      const response = await fetch("/api/analytics/performance")
-      const data = await response.json()
-      setMetrics(data.metrics || [])
-      setStatistics(data.statistics || {})
+      setLoading(true)
+      const [metricsRes, statsRes] = await Promise.all([
+        fetch("/api/analytics/performance?limit=50"),
+        fetch("/api/analytics/performance?page=stats"),
+      ])
+
+      if (metricsRes.ok && statsRes.ok) {
+        const metricsData = await metricsRes.json()
+        const statsData = await statsRes.json()
+        setMetrics(metricsData)
+        setStats(statsData)
+        setLastUpdated(new Date())
+      }
     } catch (error) {
       console.error("Failed to fetch performance data:", error)
     } finally {
@@ -52,65 +65,90 @@ export default function PerformanceDashboard({ isOpen, onClose }: PerformanceDas
     }
   }, [isOpen])
 
-  const getLatestMetrics = () => {
-    const latest: Record<string, PerformanceMetric> = {}
-
-    for (const metric of metrics) {
-      if (!latest[metric.name] || metric.timestamp > latest[metric.name].timestamp) {
-        latest[metric.name] = metric
-      }
+  const getStatusColor = (metric: string, value: number) => {
+    const thresholds: Record<string, { good: number; poor: number }> = {
+      cls: { good: 0.1, poor: 0.25 },
+      fid: { good: 100, poor: 300 },
+      fcp: { good: 1800, poor: 3000 },
+      lcp: { good: 2500, poor: 4000 },
+      ttfb: { good: 800, poor: 1800 },
     }
 
-    return latest
+    const threshold = thresholds[metric]
+    if (!threshold) return "text-gray-400"
+
+    if (value <= threshold.good) return "text-green-400"
+    if (value <= threshold.poor) return "text-yellow-400"
+    return "text-red-400"
   }
 
-  const getRatingColor = (rating: string) => {
-    switch (rating) {
-      case "good":
-        return "text-green-500"
-      case "needs-improvement":
-        return "text-yellow-500"
-      case "poor":
-        return "text-red-500"
-      default:
-        return "text-gray-500"
-    }
-  }
-
-  const getRatingIcon = (rating: string) => {
-    switch (rating) {
-      case "good":
-        return <TrendingUp className="h-4 w-4" />
-      case "needs-improvement":
-        return <Minus className="h-4 w-4" />
-      case "poor":
-        return <TrendingDown className="h-4 w-4" />
-      default:
-        return <Minus className="h-4 w-4" />
-    }
-  }
-
-  const formatValue = (name: string, value: number) => {
-    if (name === "CLS") return value.toFixed(3)
-    return `${Math.round(value)}ms`
-  }
-
-  const getProgressPercentage = (name: string, value: number) => {
-    const thresholds = {
-      CLS: { good: 0.1, poor: 0.25, max: 0.5 },
-      FID: { good: 100, poor: 300, max: 500 },
-      FCP: { good: 1800, poor: 3000, max: 5000 },
-      LCP: { good: 2500, poor: 4000, max: 6000 },
-      TTFB: { good: 800, poor: 1800, max: 3000 },
+  const getStatusText = (metric: string, value: number) => {
+    const thresholds: Record<string, { good: number; poor: number }> = {
+      cls: { good: 0.1, poor: 0.25 },
+      fid: { good: 100, poor: 300 },
+      fcp: { good: 1800, poor: 3000 },
+      lcp: { good: 2500, poor: 4000 },
+      ttfb: { good: 800, poor: 1800 },
     }
 
-    const threshold = thresholds[name as keyof typeof thresholds]
-    if (!threshold) return 0
+    const threshold = thresholds[metric]
+    if (!threshold) return "Unknown"
 
-    return Math.min((value / threshold.max) * 100, 100)
+    if (value <= threshold.good) return "Good"
+    if (value <= threshold.poor) return "Needs Improvement"
+    return "Poor"
   }
 
-  const latestMetrics = getLatestMetrics()
+  const getProgressValue = (metric: string, value: number) => {
+    const maxValues: Record<string, number> = {
+      cls: 0.5,
+      fid: 500,
+      fcp: 5000,
+      lcp: 6000,
+      ttfb: 3000,
+    }
+
+    const max = maxValues[metric] || 100
+    return Math.min((value / max) * 100, 100)
+  }
+
+  const formatValue = (metric: string, value: number) => {
+    if (metric === "cls") return value.toFixed(3)
+    return Math.round(value).toString()
+  }
+
+  const getUnit = (metric: string) => {
+    if (metric === "cls") return ""
+    return "ms"
+  }
+
+  const metricLabels: Record<string, { name: string; icon: any; description: string }> = {
+    cls: {
+      name: "Cumulative Layout Shift",
+      icon: Activity,
+      description: "Visual stability of the page",
+    },
+    fid: {
+      name: "First Input Delay",
+      icon: Clock,
+      description: "Responsiveness to user interactions",
+    },
+    fcp: {
+      name: "First Contentful Paint",
+      icon: Eye,
+      description: "Time to first visible content",
+    },
+    lcp: {
+      name: "Largest Contentful Paint",
+      icon: Zap,
+      description: "Loading performance",
+    },
+    ttfb: {
+      name: "Time to First Byte",
+      icon: Server,
+      description: "Server response time",
+    },
+  }
 
   if (!isOpen) return null
 
@@ -119,93 +157,193 @@ export default function PerformanceDashboard({ isOpen, onClose }: PerformanceDas
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-gray-900 rounded-xl border border-gray-700 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Performance Dashboard</h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={fetchData}
-                disabled={loading}
-                className="p-2 text-gray-400 hover:text-white transition-colors"
-              >
-                <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
-              </button>
-              <button onClick={onClose} className="p-2 text-gray-400 hover:text-white transition-colors">
-                <X className="h-5 w-5" />
-              </button>
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <div className="flex items-center gap-3">
+            <TrendingUp className="h-6 w-6 text-primary" />
+            <div>
+              <h2 className="text-2xl font-bold text-white">Performance Dashboard</h2>
+              <p className="text-gray-400 text-sm">Last updated: {lastUpdated.toLocaleTimeString()}</p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchData}
+              disabled={loading}
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200"
+              title="Refresh data"
+            >
+              <RefreshCw className={`h-4 w-4 text-gray-300 ${loading ? "animate-spin" : ""}`} />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200"
+            >
+              <X className="h-4 w-4 text-gray-300" />
+            </button>
           </div>
         </div>
 
+        {/* Content */}
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {Object.entries(latestMetrics).map(([name, metric]) => (
-              <div key={name} className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-white">{name}</h3>
-                  <div className={`flex items-center gap-1 ${getRatingColor(metric.rating)}`}>
-                    {getRatingIcon(metric.rating)}
-                    <span className="text-sm capitalize">{metric.rating.replace("-", " ")}</span>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading performance data...</p>
+            </div>
+          ) : stats ? (
+            <div className="space-y-8">
+              {/* Overview Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-2">Total Measurements</h3>
+                  <p className="text-3xl font-bold text-primary">{stats.count}</p>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-2">Data Points</h3>
+                  <p className="text-3xl font-bold text-primary">{metrics.length}</p>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-2">Monitoring Since</h3>
+                  <p className="text-lg text-gray-300">
+                    {metrics.length > 0 ? new Date(metrics[0].timestamp).toLocaleDateString() : "No data"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Core Web Vitals */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-6">Core Web Vitals</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {Object.entries(metricLabels).map(([key, { name, icon: Icon, description }]) => {
+                    const avgValue = stats.averages[key] || 0
+                    const medianValue = stats.medians[key] || 0
+                    const p95Value = stats.percentiles[key] || 0
+                    const minValue = stats.min[key] || 0
+                    const maxValue = stats.max[key] || 0
+
+                    return (
+                      <div key={key} className="bg-gray-800/50 rounded-lg p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Icon className="h-5 w-5 text-primary" />
+                          <div>
+                            <h4 className="font-semibold text-white">{name}</h4>
+                            <p className="text-sm text-gray-400">{description}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          {/* Average */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-300">Average</span>
+                              <span className={`text-sm font-medium ${getStatusColor(key, avgValue)}`}>
+                                {formatValue(key, avgValue)}
+                                {getUnit(key)} ({getStatusText(key, avgValue)})
+                              </span>
+                            </div>
+                            <Progress value={getProgressValue(key, avgValue)} className="h-2" />
+                          </div>
+
+                          {/* Statistics */}
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-400">Median:</span>
+                              <span className="ml-2 text-white">
+                                {formatValue(key, medianValue)}
+                                {getUnit(key)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">95th %:</span>
+                              <span className="ml-2 text-white">
+                                {formatValue(key, p95Value)}
+                                {getUnit(key)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Min:</span>
+                              <span className="ml-2 text-white">
+                                {formatValue(key, minValue)}
+                                {getUnit(key)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Max:</span>
+                              <span className="ml-2 text-white">
+                                {formatValue(key, maxValue)}
+                                {getUnit(key)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Recent Measurements */}
+              {metrics.length > 0 && (
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-6">Recent Measurements</h3>
+                  <div className="bg-gray-800/50 rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-700/50">
+                          <tr>
+                            <th className="text-left p-3 text-gray-300">Time</th>
+                            <th className="text-left p-3 text-gray-300">CLS</th>
+                            <th className="text-left p-3 text-gray-300">FID (ms)</th>
+                            <th className="text-left p-3 text-gray-300">FCP (ms)</th>
+                            <th className="text-left p-3 text-gray-300">LCP (ms)</th>
+                            <th className="text-left p-3 text-gray-300">TTFB (ms)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {metrics
+                            .slice(-10)
+                            .reverse()
+                            .map((metric, index) => (
+                              <tr key={index} className="border-t border-gray-700/50">
+                                <td className="p-3 text-gray-300">{new Date(metric.timestamp).toLocaleTimeString()}</td>
+                                <td className={`p-3 ${getStatusColor("cls", metric.cls)}`}>
+                                  {formatValue("cls", metric.cls)}
+                                </td>
+                                <td className={`p-3 ${getStatusColor("fid", metric.fid)}`}>
+                                  {formatValue("fid", metric.fid)}
+                                </td>
+                                <td className={`p-3 ${getStatusColor("fcp", metric.fcp)}`}>
+                                  {formatValue("fcp", metric.fcp)}
+                                </td>
+                                <td className={`p-3 ${getStatusColor("lcp", metric.lcp)}`}>
+                                  {formatValue("lcp", metric.lcp)}
+                                </td>
+                                <td className={`p-3 ${getStatusColor("ttfb", metric.ttfb)}`}>
+                                  {formatValue("ttfb", metric.ttfb)}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-white mb-2">{formatValue(name, metric.value)}</div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      metric.rating === "good"
-                        ? "bg-green-500"
-                        : metric.rating === "needs-improvement"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                    }`}
-                    style={{ width: `${getProgressPercentage(name, metric.value)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {Object.keys(statistics).length > 0 && (
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-white mb-4">Detailed Statistics</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="text-left py-2 text-gray-300">Metric</th>
-                      <th className="text-right py-2 text-gray-300">Count</th>
-                      <th className="text-right py-2 text-gray-300">Average</th>
-                      <th className="text-right py-2 text-gray-300">Median</th>
-                      <th className="text-right py-2 text-gray-300">95th %</th>
-                      <th className="text-right py-2 text-gray-300">Min</th>
-                      <th className="text-right py-2 text-gray-300">Max</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(statistics).map(([name, stats]) => (
-                      <tr key={name} className="border-b border-gray-700/50">
-                        <td className="py-2 text-white font-medium">{name}</td>
-                        <td className="text-right py-2 text-gray-300">{stats.count}</td>
-                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.average)}</td>
-                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.median)}</td>
-                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.p95)}</td>
-                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.min)}</td>
-                        <td className="text-right py-2 text-gray-300">{formatValue(name, stats.max)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400">No performance data available</p>
             </div>
           )}
         </div>

@@ -113,9 +113,16 @@ function TimelineItemComponent({ item, index }: TimelineItemComponentProps) {
           <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
           <span>{item.period}</span>
         </div>
-        <ul className={`list-disc ${index % 2 === 0 ? "md:text-right md:list-none" : ""} pl-5 md:pl-0 text-gray-300`}>
+        <ul
+          className={`list-disc space-y-2 text-gray-300 ${
+            index % 2 === 0 ? "md:text-right md:list-none pl-5 md:pl-0" : "pl-5 md:pl-0"
+          }`}
+        >
           {item.description.map((desc, i) => (
-            <li key={i} className="mb-2">
+            <li
+              key={i}
+              className={`${index % 2 === 0 ? "md:before:content-['•'] md:before:mr-2 md:before:text-primary" : ""}`}
+            >
               {desc}
             </li>
           ))}

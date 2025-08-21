@@ -19,7 +19,7 @@ const projects = [
     role: "Lead Developer",
     status: "Live Production",
     category: "SaaS Platform",
-    liveUrl: "https://platform.memberpulse.com.au",
+    liveUrl: "https://memberpulse.com.au",
   },
   {
     title: "PlayNow",

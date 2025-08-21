@@ -62,6 +62,8 @@ export default function ProjectDetailsModal({ project, isOpen, onClose }: Projec
         • **CPD Points Tracking** - Continuing Professional Development credit system
         
         Built with enterprise-grade security, scalability, and multi-tenancy in mind, supporting both individual professionals and large organizations.
+        
+        Visit the platform at: https://memberpulse.com.au
       `,
       PlayNow: `
         PlayNow is an innovative SaaS marketplace platform that connects merchants with customers through a unique coupon-based system. 

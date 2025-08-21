@@ -7,101 +7,93 @@ import PerformanceWidget from "./performance-widget"
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
-  const socialLinks = [
-    {
-      name: "GitHub",
-      icon: Github,
-      href: "https://github.com/ehnand",
-      color: "hover:text-gray-300",
-    },
-    {
-      name: "LinkedIn",
-      icon: Linkedin,
-      href: "https://linkedin.com/in/ehnand-azucena",
-      color: "hover:text-blue-400",
-    },
-    {
-      name: "Email",
-      icon: Mail,
-      href: "mailto:ehnandazucena@gmail.com",
-      color: "hover:text-green-400",
-    },
-  ]
-
   return (
     <footer className="bg-gray-950 border-t border-gray-800 py-12">
       <div className="section-container">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <motion.h3
-              className="text-xl font-bold gradient-text"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              Ehnand Azucena
-            </motion.h3>
-            <motion.p
-              className="text-gray-400 text-center md:text-left"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Full Stack Developer passionate about creating amazing web experiences
-            </motion.p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {/* Brand */}
+          <div>
+            <h3 className="text-xl font-bold text-white mb-4">Ehnand Azucena</h3>
+            <p className="text-gray-400 mb-4">
+              Full Stack Developer passionate about creating innovative solutions and building scalable applications.
+            </p>
+            <div className="flex gap-4">
+              <motion.a
+                href="https://github.com/blank0810"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors duration-200"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Github className="h-5 w-5" />
+              </motion.a>
+              <motion.a
+                href="https://linkedin.com/in/ehnand-azucena"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary transition-colors duration-200"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Linkedin className="h-5 w-5" />
+              </motion.a>
+              <motion.a
+                href="mailto:ehnand.azucena@gmail.com"
+                className="text-gray-400 hover:text-primary transition-colors duration-200"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Mail className="h-5 w-5" />
+              </motion.a>
+            </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4">
-            <motion.div
-              className="flex items-center gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              {socialLinks.map((link, index) => (
-                <motion.a
-                  key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 bg-gray-800/50 rounded-full border border-gray-700/50 hover:border-primary/50 transition-all duration-300 ${link.color}`}
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-                  aria-label={link.name}
-                >
-                  <link.icon className="h-5 w-5" />
-                </motion.a>
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              {[
+                { name: "About", href: "#about" },
+                { name: "Experience", href: "#experience" },
+                { name: "Projects", href: "#projects" },
+                { name: "Skills", href: "#skills" },
+                { name: "Contact", href: "#contact" },
+              ].map((link) => (
+                <li key={link.name}>
+                  <motion.a
+                    href={link.href}
+                    className="text-gray-400 hover:text-primary transition-colors duration-200"
+                    whileHover={{ x: 5 }}
+                  >
+                    {link.name}
+                  </motion.a>
+                </li>
               ))}
-            </motion.div>
+            </ul>
+          </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-            >
+          {/* Performance & Contact */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-4">Site Performance</h4>
+            <div className="mb-4">
               <PerformanceWidget />
-            </motion.div>
+            </div>
+            <p className="text-gray-400 text-sm">
+              This site is monitored for performance and optimized for the best user experience.
+            </p>
           </div>
         </div>
 
-        <motion.div
-          className="mt-8 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-        >
-          <p className="text-gray-400 text-sm text-center md:text-left">
-            © {currentYear} Ehnand Azucena. All rights reserved.
-          </p>
-          <div className="flex items-center gap-1 text-gray-400 text-sm">
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-400 text-sm mb-4 md:mb-0">© {currentYear} Ehnand Azucena. All rights reserved.</p>
+          <div className="flex items-center gap-2 text-gray-400 text-sm">
             <span>Made with</span>
-            <Heart className="h-4 w-4 text-red-500 fill-current" />
+            <Heart className="h-4 w-4 text-red-500" />
             <span>using Next.js & Tailwind CSS</span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </footer>
   )

@@ -1,24 +1,31 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Inter } from "next/font/google"
 import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Ehnand A.",
-  description: "Ehnand Azucena Portfolio",
-  generator: "v0.dev",
+  title: "Ehnand Azucena - Full Stack Developer",
+  description:
+    "Professional portfolio of Ehnand Azucena, a skilled Full Stack Developer specializing in modern web technologies.",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body>
-        {children}
-        <SpeedInsights />
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          {children}
+          <SpeedInsights />
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -12,9 +12,9 @@ const experiences = [
     location: "Remote | Sydney, NSW Australia",
     period: "Jan 2025 – Present",
     description: [
-      "Maintained and patched educational platform for ICOM International School (Malaysia) and its China-based internal platform",
-      "Enhanced stability for PG Pay, a high-value e-commerce platform for precious metals",
-      "Led backend development for MemberPulse, a multi-tenant SaaS platform supporting CPD points, job boards, events, sponsorships, and directories",
+      "Maintained and patched educational platform for ICOM International School (Malaysia) at https://www.icom.edu.my and its China-based internal platform at https://icom.org.cn/",
+      "Enhanced stability for PG Pay at https://pg-pay.com/, a high-value e-commerce platform for precious metals",
+      "Led backend development for MemberPulse at https://memberpulse.com.au, a multi-tenant SaaS platform supporting CPD points, job boards, events, sponsorships, and directories",
       "Integrated third-party APIs (Xero, Stripe, HubSpot) into key features, supporting scalable payments and CRM workflows",
       "Stack: Symfony, PostgreSQL, Bootstrap, Vultr, OAuth2, Bitbucket CI/CD",
     ],
