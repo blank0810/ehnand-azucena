@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { ExternalLink, Award, Calendar } from "lucide-react"
+import { ExternalLink, Award, Calendar, Globe, Database, Code, Shield, Wrench, Layers } from "lucide-react"
 import Image from "next/image"
 
 const certificates = [
@@ -13,6 +13,7 @@ const certificates = [
     image: "/images/certificates/cosmic-coding-symfony7.png",
     verificationUrl: "https://symfonycasts.com/certificates/1437702CC155",
     category: "Web Development",
+    icon: Globe,
   },
   {
     title: "Doctrine & the Database",
@@ -21,6 +22,7 @@ const certificates = [
     image: "/images/certificates/doctrine-symfony7.png",
     verificationUrl: "https://symfonycasts.com/certificates/1437702CC155",
     category: "Database",
+    icon: Database,
   },
   {
     title: "Symfony 7 Fundamentals",
@@ -29,6 +31,7 @@ const certificates = [
     image: "/images/certificates/symfony7-fundamentals.png",
     verificationUrl: "https://symfonycasts.com/certificates/1437702CC155",
     category: "Web Development",
+    icon: Globe,
   },
   {
     title: "React Basics",
@@ -37,6 +40,7 @@ const certificates = [
     image: "/images/certificates/react-basics.png",
     verificationUrl: "https://coursera.org/verify/SUL3C9D7GZK3",
     category: "Frontend",
+    icon: Layers,
   },
   {
     title: "Advanced React",
@@ -45,6 +49,7 @@ const certificates = [
     image: "/images/certificates/advanced-react.png",
     verificationUrl: "https://coursera.org/verify/2PPLPYD9SZ8B",
     category: "Frontend",
+    icon: Layers,
   },
   {
     title: "Responsive Web Design",
@@ -53,6 +58,7 @@ const certificates = [
     image: "/images/certificates/responsive-web-design.png",
     verificationUrl: "https://www.freecodecamp.org/certification/Ehnand/responsive-web-design",
     category: "Web Development",
+    icon: Globe,
   },
   {
     title: "JavaScript Algorithms and Data Structures",
@@ -61,6 +67,7 @@ const certificates = [
     image: "/images/certificates/javascript-algorithms.png",
     verificationUrl: "https://www.freecodecamp.org/certification/Ehnand/javascript-algorithms-and-data-structures-v8",
     category: "Programming",
+    icon: Code,
   },
   {
     title: "CSX Cybersecurity Fundamentals Certificate (CSXF)",
@@ -70,6 +77,7 @@ const certificates = [
     verificationUrl:
       "https://app.cybrary.it/profile/SimpleCanidae0202?tab=cert-completion&cert=CC-900adb08-fcfc-4837-b719-e9dcbf3129e4",
     category: "Cybersecurity",
+    icon: Shield,
   },
   {
     title: "Intrusion Detection Setup",
@@ -78,6 +86,7 @@ const certificates = [
     image: "/images/certificates/intrusion-detection-setup.png",
     verificationUrl: "https://verification.givemycertificate.com/v/944bf71e-ac18-468c-ad61-637f7cd7d10a",
     category: "Cybersecurity",
+    icon: Shield,
   },
   {
     title: "Blue Teaming Internship",
@@ -86,6 +95,7 @@ const certificates = [
     image: "/images/certificates/blue-teaming-internship.png",
     verificationUrl: "https://academy.virtualcyberlabs.com/verify-certificate?serialno=BKS2KRNH",
     category: "Cybersecurity",
+    icon: Shield,
   },
   {
     title: "Technical Support Fundamentals",
@@ -94,6 +104,7 @@ const certificates = [
     image: "/images/certificates/technical-support-google.png",
     verificationUrl: "https://www.coursera.org/account/accomplishments/verify/SWNULUC8VLYL",
     category: "IT Support",
+    icon: Wrench,
   },
 ]
 
@@ -125,57 +136,74 @@ export default function Certificates() {
         </motion.p>
 
         <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {certificates.map((cert, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="card group hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
-            >
-              <div className="relative h-48 mb-4 overflow-hidden rounded-lg bg-gray-800">
-                <Image
-                  src={cert.image || "/placeholder.svg"}
-                  alt={cert.title}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute top-2 right-2">
-                  <span className="bg-primary/20 text-primary px-2 py-1 rounded-full text-xs font-medium">
-                    {cert.category}
-                  </span>
-                </div>
-              </div>
+          {certificates.map((cert, index) => {
+            const IconComponent = cert.icon
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="card group hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 overflow-hidden flex flex-col h-full"
+              >
+                {/* Certificate Image with Enhanced Category Badge */}
+                <div className="relative h-48 mb-4 overflow-hidden rounded-lg bg-gray-800">
+                  <Image
+                    src={cert.image || "/placeholder.svg"}
+                    alt={cert.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-              <div className="flex-1">
-                <h3 className="text-lg font-bold mb-2 text-white group-hover:text-primary transition-colors duration-300">
-                  {cert.title}
-                </h3>
-
-                <div className="flex items-center gap-2 mb-2 text-gray-400">
-                  <Award className="h-4 w-4" />
-                  <span className="text-sm">{cert.issuer}</span>
-                </div>
-
-                <div className="flex items-center gap-2 mb-4 text-gray-400">
-                  <Calendar className="h-4 w-4" />
-                  <span className="text-sm">{cert.date}</span>
+                  {/* Enhanced Category Badge with Icon - matching project style exactly */}
+                  <div className="absolute top-3 right-3">
+                    <motion.span
+                      className="px-3 py-1.5 bg-primary/20 text-primary border border-primary/30 rounded-full text-xs font-medium backdrop-blur-sm shadow-lg ring-2 ring-black/30 flex items-center gap-1.5 whitespace-nowrap transition-all duration-300 hover:bg-primary/30 hover:scale-105"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      title={`${cert.category} Certificate`}
+                    >
+                      <IconComponent className="h-3 w-3" />
+                      <span className="font-bold tracking-wide">{cert.category}</span>
+                    </motion.span>
+                  </div>
                 </div>
 
-                <motion.a
-                  href={cert.verificationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-outline flex items-center gap-2 text-sm w-full justify-center"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Verify Certificate
-                </motion.a>
-              </div>
-            </motion.div>
-          ))}
+                {/* Certificate Content */}
+                <div className="flex-1 flex flex-col">
+                  <h3 className="text-lg font-bold mb-2 text-white group-hover:text-primary transition-colors duration-300">
+                    {cert.title}
+                  </h3>
+
+                  <div className="flex items-center gap-2 mb-2 text-gray-400">
+                    <Award className="h-4 w-4 flex-shrink-0" />
+                    <span className="text-sm">{cert.issuer}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-4 text-gray-400">
+                    <Calendar className="h-4 w-4 flex-shrink-0" />
+                    <span className="text-sm">{cert.date}</span>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="mt-auto">
+                    <motion.a
+                      href={cert.verificationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-outline flex items-center gap-2 text-sm w-full justify-center py-3"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Verify Certificate
+                    </motion.a>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

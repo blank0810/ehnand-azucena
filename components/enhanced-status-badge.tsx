@@ -56,6 +56,24 @@ export default function EnhancedStatusBadge({ status, size = "md", className = "
           icon: "✅",
           description: "Project completed",
         }
+      case "verified":
+        return {
+          ...baseConfig,
+          background: "bg-gradient-to-r from-emerald-800/95 to-emerald-900/95",
+          text: "text-emerald-50",
+          border: "border-emerald-500/80",
+          icon: "✓",
+          description: "Certificate verified",
+        }
+      case "certified":
+        return {
+          ...baseConfig,
+          background: "bg-gradient-to-r from-indigo-800/95 to-indigo-900/95",
+          text: "text-indigo-50",
+          border: "border-indigo-500/80",
+          icon: "🏆",
+          description: "Officially certified",
+        }
       default:
         return {
           ...baseConfig,
@@ -63,7 +81,7 @@ export default function EnhancedStatusBadge({ status, size = "md", className = "
           text: "text-gray-50",
           border: "border-gray-500/80",
           icon: "📋",
-          description: "Project status",
+          description: "Status",
         }
     }
   }

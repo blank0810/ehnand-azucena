@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 import { Download } from "lucide-react"
-import Image from "next/image"
+import OptimizedImage from "./optimized-image"
 
 export default function About() {
   const [ref, inView] = useInView({
@@ -12,10 +12,9 @@ export default function About() {
   })
 
   const handleDownload = () => {
-    // Create a link element and trigger download
     const link = document.createElement("a")
-    link.href = "/Ehnand CV.pdf" // Using your original file
-    link.download = "Ehnand CV.pdf" // Using your original filename
+    link.href = "/Ehnand CV.pdf"
+    link.download = "Ehnand CV.pdf"
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -42,12 +41,23 @@ export default function About() {
             <div className="relative">
               <div className="w-80 h-80 mx-auto relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20"></div>
-                <Image
-                  src="/images/profile.jpg"
-                  alt="Ehnand Azucena"
-                  fill
-                  className="rounded-full object-cover border-4 border-primary/30 relative z-10"
-                />
+                <div className="absolute inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-2xl"></div>
+
+                <div className="relative z-10 w-full h-full rounded-full overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 group">
+                  <OptimizedImage
+                    src="/images/profile-new.jpg"
+                    alt="Ehnand Azucena - Professional Profile"
+                    width={320}
+                    height={320}
+                    priority={true}
+                    className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-primary/20 rounded-full blur-sm animate-pulse"></div>
+                <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-secondary/15 rounded-full blur-md animate-pulse delay-1000"></div>
               </div>
             </div>
           </motion.div>
