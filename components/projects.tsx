@@ -2,20 +2,33 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { ExternalLink, Github, Calendar, MapPin, ChevronDown } from "lucide-react"
+import { ExternalLink, Github, Calendar, MapPin, ChevronDown, Zap } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import ProjectDetailsModal from "./project-details-modal"
 import EnhancedStatusBadge from "./enhanced-status-badge"
+import AdvancedProjectsFilter from "./advanced-projects-filter"
 
 const projects = [
+  {
+    title: "REPSShield (Real Estate Professional Compliance Platform)",
+    description:
+      "Advanced SaaS compliance platform helping real estate investors maintain IRS REP status and protect $50,000+ in annual tax deductions. Features AI-powered compliance monitoring, intelligent time tracking, audit-ready reporting, and seamless integrations.",
+    image: "/images/projects/repsshield.png",
+    technologies: ["React", "TypeScript", "Vite", "Tailwind CSS", "AI Integration", "IRS Compliance"],
+    period: "Aug 2025 – Present",
+    role: "Backend Developer",
+    status: "Live Production",
+    category: "SaaS Platform",
+    liveUrl: "https://repsshield.com",
+  },
   {
     title: "MemberPulse (SaaS CPD Platform)",
     description:
       "Built from ground up: courses, events, subscriptions, job boards, directories, sponsorship system. Supports individual and organizational members. Multi-tenant design, live infrastructure.",
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/memberpulse-vNte4EfiWa9GzHUdOJzwC2RCOAgW99.png",
     technologies: ["Symfony", "Bootstrap", "Vultr", "PostgreSQL", "OAuth2"],
-    period: "Feb 2025 – Present",
+    period: "Feb 2025 – Aug 2025",
     role: "Lead Developer",
     status: "Live Production",
     category: "SaaS Platform",
@@ -125,17 +138,11 @@ export default function Projects() {
     threshold: 0.1,
   })
 
-  const [selectedFilter, setSelectedFilter] = useState("All")
+  const [filteredProjects, setFilteredProjects] = useState(projects)
+  const [activeFilters, setActiveFilters] = useState([])
   const [showMore, setShowMore] = useState(false)
   const [selectedProject, setSelectedProject] = useState<(typeof projects)[0] | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  // Get all unique technologies for filter buttons
-  const allTechnologies = ["All", ...new Set(projects.flatMap((project) => project.technologies))]
-
-  // Filter projects based on selected technology
-  const filteredProjects =
-    selectedFilter === "All" ? projects : projects.filter((project) => project.technologies.includes(selectedFilter))
 
   // Show only first 6 projects initially, or all if showMore is true
   const displayedProjects = showMore ? filteredProjects : filteredProjects.slice(0, 6)
@@ -162,175 +169,199 @@ export default function Projects() {
           Recent Projects
         </motion.h2>
 
-        {/* Technology Filter Buttons */}
-        <motion.div
+        <motion.p
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex flex-wrap justify-center gap-2 mb-8"
+          className="text-center text-gray-400 mb-8 max-w-3xl mx-auto"
         >
-          {allTechnologies.map((tech) => (
-            <button
-              key={tech}
-              onClick={() => setSelectedFilter(tech)}
-              className={`px-3 py-1 rounded-full text-sm transition-all duration-300 ${
-                selectedFilter === tech ? "bg-primary text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
-            >
-              {tech}
-            </button>
-          ))}
+          Explore my portfolio of innovative solutions, from enterprise SaaS platforms to cutting-edge web applications.
+          Use the advanced filtering system below to discover projects by technology, category, timeline, or create your
+          own custom filters.
+        </motion.p>
+
+        {/* Advanced Filter System */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-12"
+        >
+          <AdvancedProjectsFilter
+            projects={projects}
+            onFilteredProjectsChange={setFilteredProjects}
+            onActiveFiltersChange={setActiveFilters}
+          />
         </motion.div>
 
         {/* Projects Grid */}
-        <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-          {displayedProjects.map((project, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="card overflow-hidden flex flex-col h-full group hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
-            >
-              {/* Project Image with Enhanced Hover Effect and Click Handler */}
-              <div
-                className="relative h-48 w-full mb-4 overflow-hidden rounded-md cursor-pointer"
-                onClick={() => handleProjectClick(project)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault()
-                    handleProjectClick(project)
-                  }
-                }}
-                aria-label={`View details for ${project.title}`}
-              >
-                <Image
-                  src={project.image || "/placeholder.svg"}
-                  alt={project.title}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                {/* Hover Overlay with Click Functionality */}
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+        <div ref={ref}>
+          {filteredProjects.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {displayedProjects.map((project, index) => (
                   <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    whileHover={{ y: 0, opacity: 1 }}
-                    className="text-center text-white p-4"
+                    key={`${project.title}-${index}`}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={inView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="card overflow-hidden flex flex-col h-full group hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
                   >
-                    <p className="text-lg font-semibold mb-2">Click to view details</p>
-                    <p className="text-sm text-gray-300">Learn more about this project</p>
+                    {/* Project Image with Enhanced Hover Effect and Click Handler */}
+                    <div
+                      className="relative h-48 w-full mb-4 overflow-hidden rounded-md cursor-pointer"
+                      onClick={() => handleProjectClick(project)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault()
+                          handleProjectClick(project)
+                        }
+                      }}
+                      aria-label={`View details for ${project.title}`}
+                    >
+                      <Image
+                        src={project.image || "/placeholder.svg"}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      {/* Hover Overlay with Click Functionality */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          whileHover={{ y: 0, opacity: 1 }}
+                          className="text-center text-white p-4"
+                        >
+                          <p className="text-lg font-semibold mb-2">Click to view details</p>
+                          <p className="text-sm text-gray-300">Learn more about this project</p>
+                        </motion.div>
+                      </div>
+                      {/* Enhanced Status Badge */}
+                      <div className="absolute top-3 right-3">
+                        <EnhancedStatusBadge status={project.status} size="sm" />
+                      </div>
+                    </div>
+
+                    {/* Project Content */}
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors duration-300">
+                        {project.title}
+                      </h3>
+
+                      {/* Project Meta */}
+                      <div className="flex items-center text-gray-400 mb-3">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        <span>{project.period}</span>
+                      </div>
+
+                      <p className="text-gray-300 mb-4 flex-grow">{project.description}</p>
+
+                      {/* Technologies */}
+                      <div className="mb-4 flex flex-wrap">
+                        {project.technologies.slice(0, 4).map((tech, techIndex) => (
+                          <span key={techIndex} className="skill-tag mr-2 mb-2">
+                            {tech}
+                          </span>
+                        ))}
+                        {project.technologies.length > 4 && (
+                          <span className="skill-tag mr-2 mb-2 opacity-60">
+                            +{project.technologies.length - 4} more
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 mt-auto">
+                        {project.liveUrl && (
+                          <motion.a
+                            href={project.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-primary flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Live Demo
+                          </motion.a>
+                        )}
+
+                        {project.githubUrl && (
+                          <motion.a
+                            href={project.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-outline flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Github className="h-4 w-4" />
+                            Code
+                          </motion.a>
+                        )}
+
+                        {!project.liveUrl && !project.githubUrl && (
+                          <div className="btn-outline opacity-50 cursor-not-allowed flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center">
+                            <MapPin className="h-4 w-4" />
+                            Internal Project
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </motion.div>
-                </div>
-                {/* Enhanced Status Badge */}
-                <div className="absolute top-3 right-3">
-                  <EnhancedStatusBadge status={project.status} size="sm" />
-                </div>
+                ))}
               </div>
 
-              {/* Project Content */}
-              <div className="flex-1 flex flex-col">
-                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors duration-300">
-                  {project.title}
-                </h3>
-
-                {/* Project Meta */}
-                <div className="flex items-center text-gray-400 mb-3">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span>{project.period}</span>
+              {/* Show More Button */}
+              {filteredProjects.length > 6 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={inView ? { opacity: 1 } : {}}
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                  className="text-center mt-12"
+                >
+                  <motion.button
+                    onClick={() => setShowMore(!showMore)}
+                    className="btn-outline flex items-center gap-2 mx-auto"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {showMore ? "Show Less Projects" : "Show More Projects"}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-300 ${showMore ? "rotate-180" : ""}`}
+                    />
+                  </motion.button>
+                </motion.div>
+              )}
+            </>
+          ) : (
+            /* No Results State */
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gray-800/50 rounded-full flex items-center justify-center">
+                  <Zap className="h-12 w-12 text-gray-600" />
                 </div>
-
-                <p className="text-gray-300 mb-4 flex-grow">{project.description}</p>
-
-                {/* Technologies */}
-                <div className="mb-4 flex flex-wrap">
-                  {project.technologies.slice(0, 4).map((tech, techIndex) => (
-                    <span key={techIndex} className="skill-tag mr-2 mb-2">
-                      {tech}
-                    </span>
-                  ))}
-                  {project.technologies.length > 4 && (
-                    <span className="skill-tag mr-2 mb-2 opacity-60">+{project.technologies.length - 4} more</span>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 mt-auto">
-                  {project.liveUrl && (
-                    <motion.a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Live Demo
-                    </motion.a>
-                  )}
-
-                  {project.githubUrl && (
-                    <motion.a
-                      href={project.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-outline flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Github className="h-4 w-4" />
-                      Code
-                    </motion.a>
-                  )}
-
-                  {!project.liveUrl && !project.githubUrl && (
-                    <div className="btn-outline opacity-50 cursor-not-allowed flex items-center gap-2 text-sm px-4 py-2 flex-1 justify-center">
-                      <MapPin className="h-4 w-4" />
-                      Internal Project
-                    </div>
-                  )}
-                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">No Projects Found</h3>
+                <p className="text-gray-400 mb-6">
+                  No projects match your current filter criteria. Try adjusting your filters or search terms.
+                </p>
+                <button
+                  onClick={() => {
+                    setFilteredProjects(projects)
+                    setActiveFilters([])
+                  }}
+                  className="btn-primary"
+                >
+                  View All Projects
+                </button>
               </div>
             </motion.div>
-          ))}
+          )}
         </div>
-
-        {/* Show More Button */}
-        {filteredProjects.length > 6 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            className="text-center mt-12"
-          >
-            <motion.button
-              onClick={() => setShowMore(!showMore)}
-              className="btn-outline flex items-center gap-2 mx-auto"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {showMore ? "Show Less Projects" : "Show More Projects"}
-              <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showMore ? "rotate-180" : ""}`} />
-            </motion.button>
-          </motion.div>
-        )}
-
-        {/* Project Count Display */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 1 }}
-          className="text-center mt-8"
-        >
-          <p className="text-gray-400">
-            Showing {displayedProjects.length} of {filteredProjects.length} projects
-            {selectedFilter !== "All" && ` filtered by "${selectedFilter}"`}
-          </p>
-        </motion.div>
       </div>
 
       {/* Project Details Modal */}

@@ -6,7 +6,13 @@ import ThreeDCube from "./3d-cube"
 import TypingAnimation from "./typing-animation"
 
 export default function Hero() {
-  const roles = ["Full Stack Systems Engineer", "Web Developer", "Database Specialist", "Cloud Infrastructure Expert"]
+  const roles = [
+    "Full Stack Developer",
+    "Full Stack Systems Engineer",
+    "Laravel & React Specialist",
+    "SaaS Platform Developer",
+    "Database & Cloud Expert",
+  ]
 
   return (
     <section id="home" className="min-h-screen flex items-center justify-center relative">
@@ -26,8 +32,9 @@ export default function Hero() {
               <TypingAnimation texts={roles} typingSpeed={100} deletingSpeed={50} delayBetweenTexts={2000} />
             </h2>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mb-8">
-              Designing and deploying scalable, secure solutions with expertise in full-stack development and cloud
-              infrastructure.
+              Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies.
+              Expert in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade
+              solutions.
             </p>
             <div className="flex flex-wrap gap-4 mb-12">
               <Link

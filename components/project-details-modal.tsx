@@ -49,6 +49,29 @@ export default function ProjectDetailsModal({ project, isOpen, onClose }: Projec
 
   const getDetailedDescription = (title: string) => {
     const descriptions: { [key: string]: string } = {
+      "REPSShield (Real Estate Professional Compliance Platform)": `
+        REPSShield is a purpose-built SaaS solution addressing one of the biggest challenges in the real estate sector: preserving IRS REP status under Section 469(c)(7). Qualifying professionals can save $50,000+ annually in taxes by deducting unlimited rental property losses—but compliance requires 750+ hours of documented real estate activity, material participation, and meticulous recordkeeping.
+
+        **Key Features & Capabilities:**
+        
+        • **Intelligent Time Tracking & Validation** - Real-time logging, activity classification, and voice-to-text entries that meet IRS requirements
+        • **AI Compliance Engine** - Predicts qualification status, detects risks, and auto-classifies activities from emails, invoices, and receipts
+        • **Property & Portfolio Management** - Multi-property activity logs, material participation analysis, and ROI insights
+        • **Audit-Ready Reporting** - Professional, IRS-formatted reports with real-time dashboards and goal tracking
+        • **Seamless Integrations** - Google Calendar, Gmail, property management systems, and export formats for CPAs
+        • **Collaboration Tools** - Secure CPA sharing, role-based team management, and white-label options for firms
+
+        **Target Market & Impact:**
+        The platform serves high-income real estate investors, professionals (agents, managers, attorneys), property management companies, and accounting firms. It not only safeguards tax savings but also boosts operational efficiency, enabling firms to scale client management while delivering premium services.
+
+        **Technical Excellence:**
+        Backed by scalable cloud architecture, bank-level security, and a forward-looking roadmap including international tax support, syndication management, and predictive compliance insights. REPSShield positions itself as the definitive compliance solution in a $500M+ market.
+
+        **ROI & Value Proposition:**
+        At its core, REPSShield provides peace of mind: reducing audit anxiety, saving time, and protecting millions in tax benefits—delivering up to 130x ROI for individual users and major efficiency gains for firms.
+
+        Visit the platform at: https://repsshield.com
+      `,
       "MemberPulse (SaaS CPD Platform)": `
         MemberPulse is a comprehensive multi-tenant SaaS platform designed for professional associations and organizations. 
         The platform features a complete ecosystem including:

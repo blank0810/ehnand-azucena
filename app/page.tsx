@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import Hero from "@/components/hero"
 import About from "@/components/about"
 import Skills from "@/components/skills"
@@ -15,10 +16,22 @@ import AnimatedBackground from "@/components/animated-background"
 import ParallaxBackground from "@/components/parallax-background"
 import ThemeSwitcher from "@/components/theme-switcher"
 import ScrollProgress from "@/components/scroll-progress"
-import { motion, AnimatePresence } from "framer-motion"
+import Navigation from "@/components/navigation"
+import SectionIndicator from "@/components/section-indicator"
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
+
+  const sections = [
+    { id: "home", label: "Home" },
+    { id: "about", label: "About" },
+    { id: "skills", label: "Skills" },
+    { id: "experience", label: "Experience" },
+    { id: "projects", label: "Projects" },
+    { id: "certificates", label: "Certificates" },
+    { id: "education", label: "Education" },
+    { id: "contact", label: "Contact" },
+  ]
 
   useEffect(() => {
     // Simulate loading time
@@ -32,8 +45,20 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950 text-white relative overflow-hidden">
       <AnimatePresence>{isLoading && <LoadingScreen />}</AnimatePresence>
+
+      {/* Navigation */}
+      <Navigation />
+
+      {/* Section Indicator */}
+      <SectionIndicator sections={sections} />
+
+      {/* Progress Bar */}
       <ScrollProgress />
+
+      {/* Theme Switcher */}
       <ThemeSwitcher />
+
+      {/* Background Effects */}
       <AnimatedBackground />
       <ParallaxBackground />
 

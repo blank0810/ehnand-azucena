@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@emotion/is-prop-valid':
         specifier: latest
-        version: 1.3.1
+        version: 1.4.0
       '@radix-ui/react-dialog':
         specifier: ^1.0.5
         version: 1.1.4(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
@@ -20,9 +20,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.0.7
         version: 1.0.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      '@sveltejs/kit':
-        specifier: latest
-        version: 2.36.1(@sveltejs/vite-plugin-svelte@6.1.1(svelte@5.38.2)(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0)))(svelte@5.38.2)(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0))
       '@types/node':
         specifier: ^20
         version: 20.0.0
@@ -46,7 +43,7 @@ importers:
         version: 2.1.1
       framer-motion:
         specifier: latest
-        version: 12.23.12(@emotion/is-prop-valid@1.3.1)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
+        version: 12.23.12(@emotion/is-prop-valid@1.4.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       lucide-react:
         specifier: ^0.454.0
         version: 0.454.0(react@18.0.0)
@@ -71,9 +68,6 @@ importers:
       recharts:
         specifier: ^2.8.0
         version: 2.8.0(prop-types@15.8.1)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
-      svelte:
-        specifier: latest
-        version: 5.38.2
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.5.5
@@ -85,13 +79,10 @@ importers:
         version: 1.0.7(tailwindcss@3.4.17)
       three:
         specifier: latest
-        version: 0.179.1
+        version: 0.180.0
       typescript:
         specifier: ^5
         version: 5.0.2
-      vue:
-        specifier: latest
-        version: 3.5.19(typescript@5.0.2)
       vue-router:
         specifier: latest
         version: 4.5.1(vue@3.5.19(typescript@5.0.2))
@@ -139,8 +130,8 @@ packages:
   '@emnapi/wasi-threads@1.0.4':
     resolution: {integrity: sha512-PJR+bOmMOPH8AtcTGAyYNiuJ3/Fcoj2XN/gBEWzDIKh254XO+mM9XoXHk5GNEhodxeMznbg7BlRojVbKN+gC6g==}
 
-  '@emotion/is-prop-valid@1.3.1':
-    resolution: {integrity: sha512-/ACwoqx7XQi9knQs/G0qKvv5teDMhD7bXYns9N/wM8ah8iNb8jZ2uNO0YOgiq2o2poIvVtJS2YALasQuMSQ7Kw==}
+  '@emotion/is-prop-valid@1.4.0':
+    resolution: {integrity: sha512-QgD4fyscGcbbKwJmqNvUMSE02OsHUa+lAWKdEUIJKgqe5IwRSKd7+KhibEWdaKwgjLj0DRSHA9biAIqGBk05lw==}
 
   '@emotion/memoize@0.9.0':
     resolution: {integrity: sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==}
@@ -2739,8 +2730,8 @@ packages:
   thenify@3.3.1:
     resolution: {integrity: sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==}
 
-  three@0.179.1:
-    resolution: {integrity: sha512-5y/elSIQbrvKOISxpwXCR4sQqHtGiOI+MKLc3SsBdDXA2hz3Mdp3X59aUp8DyybMa34aeBwbFTpdoLJaUDEWSw==}
+  three@0.180.0:
+    resolution: {integrity: sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==}
 
   tinyglobby@0.2.14:
     resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
@@ -2983,7 +2974,7 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@emotion/is-prop-valid@1.3.1':
+  '@emotion/is-prop-valid@1.4.0':
     dependencies:
       '@emotion/memoize': 0.9.0
 
@@ -3127,6 +3118,7 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
+    optional: true
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -3196,7 +3188,8 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@polka/url@1.0.0-next.29': {}
+  '@polka/url@1.0.0-next.29':
+    optional: true
 
   '@radix-ui/primitive@1.0.1':
     dependencies:
@@ -3596,11 +3589,13 @@ snapshots:
 
   '@rushstack/eslint-patch@1.12.0': {}
 
-  '@standard-schema/spec@1.0.0': {}
+  '@standard-schema/spec@1.0.0':
+    optional: true
 
   '@sveltejs/acorn-typescript@1.0.5(acorn@8.15.0)':
     dependencies:
       acorn: 8.15.0
+    optional: true
 
   '@sveltejs/kit@2.36.1(@sveltejs/vite-plugin-svelte@6.1.1(svelte@5.38.2)(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0)))(svelte@5.38.2)(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0))':
     dependencies:
@@ -3620,6 +3615,7 @@ snapshots:
       sirv: 3.0.1
       svelte: 5.38.2
       vite: 7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0)
+    optional: true
 
   '@sveltejs/vite-plugin-svelte-inspector@5.0.0(@sveltejs/vite-plugin-svelte@6.1.1(svelte@5.38.2)(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0)))(svelte@5.38.2)(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0))':
     dependencies:
@@ -3629,6 +3625,7 @@ snapshots:
       vite: 7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0)
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@sveltejs/vite-plugin-svelte@6.1.1(svelte@5.38.2)(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0))':
     dependencies:
@@ -3642,6 +3639,7 @@ snapshots:
       vitefu: 1.1.1(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0))
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@swc/counter@0.1.3': {}
 
@@ -3655,7 +3653,8 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@types/cookie@0.6.0': {}
+  '@types/cookie@0.6.0':
+    optional: true
 
   '@types/d3-array@3.2.1': {}
 
@@ -3681,7 +3680,8 @@ snapshots:
 
   '@types/d3-timer@3.0.2': {}
 
-  '@types/estree@1.0.8': {}
+  '@types/estree@1.0.8':
+    optional: true
 
   '@types/json5@0.0.29': {}
 
@@ -4086,7 +4086,8 @@ snapshots:
 
   concat-map@0.0.1: {}
 
-  cookie@0.6.0: {}
+  cookie@0.6.0:
+    optional: true
 
   cross-spawn@7.0.6:
     dependencies:
@@ -4170,7 +4171,8 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  deepmerge@4.3.1: {}
+  deepmerge@4.3.1:
+    optional: true
 
   define-data-property@1.1.4:
     dependencies:
@@ -4186,7 +4188,8 @@ snapshots:
 
   detect-node-es@1.1.0: {}
 
-  devalue@5.1.1: {}
+  devalue@5.1.1:
+    optional: true
 
   didyoumean@1.2.2: {}
 
@@ -4358,6 +4361,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.25.9
       '@esbuild/win32-ia32': 0.25.9
       '@esbuild/win32-x64': 0.25.9
+    optional: true
 
   escalade@3.2.0: {}
 
@@ -4547,7 +4551,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  esm-env@1.2.2: {}
+  esm-env@1.2.2:
+    optional: true
 
   espree@9.6.1:
     dependencies:
@@ -4562,6 +4567,7 @@ snapshots:
   esrap@2.1.0:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
+    optional: true
 
   esrecurse@4.3.0:
     dependencies:
@@ -4626,13 +4632,13 @@ snapshots:
 
   fraction.js@4.3.7: {}
 
-  framer-motion@12.23.12(@emotion/is-prop-valid@1.3.1)(react-dom@18.0.0(react@18.0.0))(react@18.0.0):
+  framer-motion@12.23.12(@emotion/is-prop-valid@1.4.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0):
     dependencies:
       motion-dom: 12.23.12
       motion-utils: 12.23.6
       tslib: 2.8.1
     optionalDependencies:
-      '@emotion/is-prop-valid': 1.3.1
+      '@emotion/is-prop-valid': 1.4.0
       react: 18.0.0
       react-dom: 18.0.0(react@18.0.0)
 
@@ -4872,6 +4878,7 @@ snapshots:
   is-reference@3.0.3:
     dependencies:
       '@types/estree': 1.0.8
+    optional: true
 
   is-regex@1.2.1:
     dependencies:
@@ -4960,7 +4967,8 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  kleur@4.1.5: {}
+  kleur@4.1.5:
+    optional: true
 
   language-subtag-registry@0.3.23: {}
 
@@ -4977,7 +4985,8 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  locate-character@3.0.0: {}
+  locate-character@3.0.0:
+    optional: true
 
   lodash.merge@4.6.2: {}
 
@@ -5028,9 +5037,11 @@ snapshots:
 
   motion-utils@12.23.6: {}
 
-  mri@1.2.0: {}
+  mri@1.2.0:
+    optional: true
 
-  mrmime@2.0.1: {}
+  mrmime@2.0.1:
+    optional: true
 
   ms@2.1.3: {}
 
@@ -5406,6 +5417,7 @@ snapshots:
       '@rollup/rollup-win32-ia32-msvc': 4.46.2
       '@rollup/rollup-win32-x64-msvc': 4.46.2
       fsevents: 2.3.3
+    optional: true
 
   run-parallel@1.2.0:
     dependencies:
@@ -5414,6 +5426,7 @@ snapshots:
   sade@1.8.1:
     dependencies:
       mri: 1.2.0
+    optional: true
 
   safe-array-concat@1.1.3:
     dependencies:
@@ -5442,7 +5455,8 @@ snapshots:
 
   semver@7.7.2: {}
 
-  set-cookie-parser@2.7.1: {}
+  set-cookie-parser@2.7.1:
+    optional: true
 
   set-function-length@1.2.2:
     dependencies:
@@ -5507,6 +5521,7 @@ snapshots:
       '@polka/url': 1.0.0-next.29
       mrmime: 2.0.1
       totalist: 3.0.1
+    optional: true
 
   slash@3.0.0: {}
 
@@ -5632,6 +5647,7 @@ snapshots:
       locate-character: 3.0.0
       magic-string: 0.30.17
       zimmerframe: 1.1.2
+    optional: true
 
   tailwind-merge@2.5.5: {}
 
@@ -5676,7 +5692,7 @@ snapshots:
     dependencies:
       any-promise: 1.3.0
 
-  three@0.179.1: {}
+  three@0.180.0: {}
 
   tinyglobby@0.2.14:
     dependencies:
@@ -5687,7 +5703,8 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
-  totalist@3.0.1: {}
+  totalist@3.0.1:
+    optional: true
 
   ts-api-utils@1.4.3(typescript@5.0.2):
     dependencies:
@@ -5835,10 +5852,12 @@ snapshots:
       fsevents: 2.3.3
       jiti: 1.21.7
       yaml: 2.8.0
+    optional: true
 
   vitefu@1.1.1(vite@7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0)):
     optionalDependencies:
       vite: 7.1.2(@types/node@20.0.0)(jiti@1.21.7)(yaml@2.8.0)
+    optional: true
 
   vue-router@4.5.1(vue@3.5.19(typescript@5.0.2)):
     dependencies:
@@ -5918,4 +5937,5 @@ snapshots:
 
   yaml@2.8.0: {}
 
-  zimmerframe@1.1.2: {}
+  zimmerframe@1.1.2:
+    optional: true

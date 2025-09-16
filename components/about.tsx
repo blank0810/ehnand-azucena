@@ -46,7 +46,7 @@ export default function About() {
                 <div className="relative z-10 w-full h-full rounded-full overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 group">
                   <OptimizedImage
                     src="/images/profile-new.jpg"
-                    alt="Ehnand Azucena - Professional Profile"
+                    alt="Ehnand Azucena - Professional Full Stack Developer specializing in Laravel, React, and Symfony"
                     width={320}
                     height={320}
                     priority={true}
@@ -68,17 +68,23 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="space-y-6"
           >
-            <h3 className="text-2xl font-bold mb-4">Backend-focused Full Stack Engineer with production experience</h3>
+            <h3 className="text-2xl font-bold mb-4">Professional Full Stack Developer with Production Experience</h3>
             <p className="text-gray-300 leading-relaxed">
-              I specialize in building robust backend systems and scalable web applications using modern technologies
-              like Laravel, Symfony, NestJS, and various database systems. With hands-on experience in multi-tenant SaaS
-              platforms, enterprise-grade internal tools, and mission-critical systems for schools, e-commerce, and
-              associations.
+              I'm a skilled <strong>Full Stack Developer</strong> and <strong>Systems Engineer</strong> specializing in
+              building robust backend systems and scalable web applications. My expertise includes{" "}
+              <strong>Laravel development</strong>, <strong>React applications</strong>,{" "}
+              <strong>Symfony frameworks</strong>, and comprehensive database management systems.
             </p>
             <p className="text-gray-300 leading-relaxed">
-              My expertise spans across delivering robust APIs, scalable backend systems, and optimized databases, with
-              growing experience in Docker-based DevOps and CI/CD pipelines. I'm passionate about creating efficient
-              solutions that solve real-world problems.
+              With hands-on experience in multi-tenant <strong>SaaS platform development</strong>, enterprise-grade
+              internal tools, and mission-critical systems for schools, e-commerce, and professional associations. I
+              excel at delivering robust APIs, scalable backend architectures, and optimized database solutions with
+              growing expertise in Docker-based DevOps and CI/CD pipelines.
+            </p>
+            <p className="text-gray-300 leading-relaxed">
+              As a <strong>remote developer</strong> available for <strong>freelance projects</strong>, I'm passionate
+              about creating efficient, modern solutions that solve real-world business problems and drive measurable
+              results.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
