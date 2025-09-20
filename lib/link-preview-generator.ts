@@ -1,200 +1,197 @@
-export interface PreviewData {
+interface LinkPreviewData {
   title: string
   description: string
   image: string
   url: string
   siteName: string
   type: string
+  locale: string
 }
 
-export interface StructuredData {
-  "@context": string
-  "@type": string
-  name: string
-  description: string
-  url: string
-  image: string
-  author: {
-    "@type": string
-    name: string
-    jobTitle: string
-    url: string
-  }
-  sameAs: string[]
-}
-
-export interface MetaTags {
+interface PlatformPreview {
   title: string
   description: string
-  keywords: string
-  "og:title": string
-  "og:description": string
-  "og:image": string
-  "og:url": string
-  "og:type": string
-  "og:site_name": string
-  "twitter:card": string
-  "twitter:title": string
-  "twitter:description": string
-  "twitter:image": string
-  "twitter:creator": string
-  "linkedin:owner": string
+  image: string
+  url: string
+  platform: string
+  characterLimits: {
+    title: number
+    description: number
+  }
+}
+
+interface CompletePreviewResult {
+  preview: PlatformPreview
+  metaTags: Record<string, string>
+  structuredData: object
 }
 
 export class LinkPreviewGenerator {
-  private baseUrl: string
-  private defaultImage: string
+  private previewData: LinkPreviewData
 
-  constructor(baseUrl = "https://your-portfolio-domain.com") {
-    this.baseUrl = baseUrl
-    this.defaultImage = `${baseUrl}/images/og-image.jpg`
-  }
+  constructor(baseUrl?: string) {
+    const url =
+      baseUrl || (typeof window !== "undefined" ? window.location.origin : "https://your-portfolio-domain.com")
 
-  generatePreviewData(platform?: string): PreviewData {
-    const baseData = {
+    this.previewData = {
       title: "Ehnand Azucena - Full Stack Developer | Laravel, React, Symfony Expert",
       description:
         "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in SaaS platforms, database optimization, and scalable web applications.",
-      image: this.defaultImage,
-      url: this.baseUrl,
+      image: `${url}/images/profile-new.jpg`,
+      url: url,
       siteName: "Ehnand Azucena Portfolio",
       type: "website",
-    }
-
-    // Platform-specific optimizations
-    switch (platform) {
-      case "twitter":
-        return {
-          ...baseData,
-          title: "Ehnand Azucena - Full Stack Developer 🚀",
-          description:
-            "Laravel • React • Symfony • SaaS Expert\n\n✨ Building scalable web applications\n🔧 Database optimization specialist\n💼 Professional portfolio & projects",
-        }
-
-      case "linkedin":
-        return {
-          ...baseData,
-          title: "Ehnand Azucena | Full Stack Developer | Laravel & React Specialist",
-          description:
-            "Experienced Full Stack Developer with expertise in Laravel, React, and Symfony. Specialized in building enterprise-level SaaS platforms, optimizing database performance, and creating scalable web applications. Open to new opportunities and collaborations.",
-        }
-
-      case "facebook":
-        return {
-          ...baseData,
-          description:
-            "Check out my professional portfolio showcasing expertise in Laravel, React, Symfony, and modern web development. Featuring real-world projects, certifications, and technical skills in full-stack development.",
-        }
-
-      case "whatsapp":
-        return {
-          ...baseData,
-          title: "Ehnand Azucena - Portfolio",
-          description: "Full Stack Developer | Laravel, React, Symfony Expert. View my projects and get in touch!",
-        }
-
-      default:
-        return baseData
+      locale: "en_US",
     }
   }
 
-  generateStructuredData(): StructuredData {
+  // Generate meta tags object (not HTML strings)
+  generateMetaTags(): Record<string, string> {
+    return {
+      // Open Graph
+      "og:type": this.previewData.type,
+      "og:title": this.previewData.title,
+      "og:description": this.previewData.description,
+      "og:image": this.previewData.image,
+      "og:image:width": "800",
+      "og:image:height": "800",
+      "og:image:alt": "Ehnand Azucena - Professional Full Stack Developer",
+      "og:url": this.previewData.url,
+      "og:site_name": this.previewData.siteName,
+      "og:locale": this.previewData.locale,
+      "og:image:type": "image/jpeg",
+      "og:image:secure_url": this.previewData.image,
+
+      // Twitter Card
+      "twitter:card": "summary_large_image",
+      "twitter:site": "@ehnandazucena",
+      "twitter:creator": "@ehnandazucena",
+      "twitter:title": this.previewData.title,
+      "twitter:description": this.previewData.description,
+      "twitter:image": this.previewData.image,
+      "twitter:image:alt": "Ehnand Azucena - Professional Full Stack Developer",
+
+      // General
+      title: this.previewData.title,
+      description: this.previewData.description,
+      author: "Ehnand Azucena",
+    }
+  }
+
+  // Generate JSON-LD structured data
+  generateStructuredData(): object {
     return {
       "@context": "https://schema.org",
       "@type": "Person",
       name: "Ehnand Azucena",
-      description: "Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies",
-      url: this.baseUrl,
-      image: this.defaultImage,
-      author: {
-        "@type": "Person",
-        name: "Ehnand Azucena",
-        jobTitle: "Full Stack Developer",
-        url: this.baseUrl,
+      jobTitle: "Full Stack Developer",
+      description: this.previewData.description,
+      url: this.previewData.url,
+      image: this.previewData.image,
+      email: "ehnand.azucena00@gmail.com",
+      telephone: "+639534678287",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Initao",
+        addressRegion: "Northern Mindanao",
+        postalCode: "9022",
+        addressCountry: "Philippines",
       },
       sameAs: [
-        "https://github.com/ehnandazucena",
-        "https://linkedin.com/in/ehnandazucena",
+        "https://www.linkedin.com/in/ehnand-azucena-3028a7194",
+        "https://github.com/blank0810",
         "https://twitter.com/ehnandazucena",
+      ],
+      knowsAbout: [
+        "Full Stack Development",
+        "Laravel",
+        "React",
+        "Symfony",
+        "PHP",
+        "JavaScript",
+        "TypeScript",
+        "Database Design",
+        "SaaS Development",
       ],
     }
   }
 
-  generateMetaTags(platform?: string): MetaTags {
-    const previewData = this.generatePreviewData(platform)
+  // Generate platform-specific preview
+  generatePlatformPreview(platform?: string): PlatformPreview {
+    const platformLimits = {
+      facebook: { title: 100, description: 300 },
+      twitter: { title: 70, description: 200 },
+      linkedin: { title: 120, description: 300 },
+      whatsapp: { title: 65, description: 160 },
+      default: { title: 60, description: 160 },
+    }
+
+    const limits = platformLimits[platform as keyof typeof platformLimits] || platformLimits.default
 
     return {
-      title: previewData.title,
-      description: previewData.description,
-      keywords:
-        "Full Stack Developer, Laravel, React, Symfony, Web Development, SaaS, Database Optimization, PHP, JavaScript, TypeScript",
-      "og:title": previewData.title,
-      "og:description": previewData.description,
-      "og:image": previewData.image,
-      "og:url": previewData.url,
-      "og:type": previewData.type,
-      "og:site_name": previewData.siteName,
-      "twitter:card": "summary_large_image",
-      "twitter:title": previewData.title,
-      "twitter:description": previewData.description,
-      "twitter:image": previewData.image,
-      "twitter:creator": "@ehnandazucena",
-      "linkedin:owner": "ehnandazucena",
+      title: this.truncateText(this.previewData.title, limits.title),
+      description: this.truncateText(this.previewData.description, limits.description),
+      image: this.previewData.image,
+      url: this.previewData.url,
+      platform: platform || "default",
+      characterLimits: limits,
     }
   }
 
-  validateImageDimensions(imageUrl: string): Promise<{ width: number; height: number; isValid: boolean }> {
+  // Generate complete preview data
+  async generateCompletePreview(platform?: string): Promise<CompletePreviewResult> {
+    const preview = this.generatePlatformPreview(platform)
+    const metaTags = this.generateMetaTags()
+    const structuredData = this.generateStructuredData()
+
+    return {
+      preview,
+      metaTags,
+      structuredData,
+    }
+  }
+
+  // Update preview data dynamically
+  updatePreviewData(data: Partial<LinkPreviewData>): void {
+    this.previewData = { ...this.previewData, ...data }
+  }
+
+  // Get current preview data
+  getPreviewData(): LinkPreviewData {
+    return { ...this.previewData }
+  }
+
+  // Validate image for social media requirements
+  validateImage(imageUrl: string): Promise<boolean> {
+    if (typeof window === "undefined") {
+      // Server-side: assume valid
+      return Promise.resolve(true)
+    }
+
     return new Promise((resolve) => {
-      if (typeof window === "undefined") {
-        // Server-side: assume valid
-        resolve({ width: 1200, height: 630, isValid: true })
-        return
-      }
-
       const img = new Image()
-      img.crossOrigin = "anonymous"
-
       img.onload = () => {
-        const isValid = img.width >= 1200 && img.height >= 630
-        resolve({
-          width: img.width,
-          height: img.height,
-          isValid,
-        })
+        // Check if image meets social media requirements
+        const isValidSize = img.width >= 400 && img.height >= 400
+        resolve(isValidSize)
       }
-
-      img.onerror = () => {
-        resolve({ width: 0, height: 0, isValid: false })
-      }
-
+      img.onerror = () => resolve(false)
+      img.crossOrigin = "anonymous"
       img.src = imageUrl
     })
   }
 
-  async generateCompletePreview(platform?: string) {
-    const preview = this.generatePreviewData(platform)
-    const structuredData = this.generateStructuredData()
-    const metaTags = this.generateMetaTags(platform)
-
-    // Validate image if in browser environment
-    let imageValidation = { width: 1200, height: 630, isValid: true }
-    if (typeof window !== "undefined") {
-      imageValidation = await this.validateImageDimensions(preview.image)
-    }
-
-    return {
-      preview,
-      structuredData,
-      metaTags,
-      imageValidation,
-      meta: {
-        generated_at: new Date().toISOString(),
-        platform: platform || "default",
-        format: "json",
-      },
-    }
+  // Helper method to truncate text
+  private truncateText(text: string, maxLength: number): string {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength - 3) + "..."
   }
 }
 
-// Export a default instance
+// Factory function to create instances
+export function createLinkPreviewGenerator(baseUrl?: string): LinkPreviewGenerator {
+  return new LinkPreviewGenerator(baseUrl)
+}
+
+// Default instance
 export const linkPreviewGenerator = new LinkPreviewGenerator()

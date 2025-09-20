@@ -58,17 +58,17 @@ export const metadata: Metadata = {
     siteName: "Ehnand Azucena Portfolio",
     images: [
       {
-        url: "/images/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Ehnand Azucena - Full Stack Developer specializing in Laravel, React, and Symfony",
-        type: "image/jpeg",
-      },
-      {
         url: "/images/profile-new.jpg",
         width: 800,
         height: 800,
-        alt: "Ehnand Azucena - Professional Full Stack Developer",
+        alt: "Ehnand Azucena - Professional Full Stack Developer specializing in Laravel, React, and Symfony",
+        type: "image/jpeg",
+      },
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Ehnand Azucena - Full Stack Developer Portfolio",
         type: "image/jpeg",
       },
     ],
@@ -82,10 +82,10 @@ export const metadata: Metadata = {
       "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in SaaS platforms, database optimization, and scalable web applications.",
     images: [
       {
-        url: "/images/og-image.jpg",
-        alt: "Ehnand Azucena - Full Stack Developer Portfolio",
-        width: 1200,
-        height: 630,
+        url: "/images/profile-new.jpg",
+        alt: "Ehnand Azucena - Professional Full Stack Developer",
+        width: 800,
+        height: 800,
       },
     ],
   },
@@ -127,8 +127,8 @@ export default function RootLayout({
                 "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade solutions.",
               url: "https://your-portfolio-domain.com",
               image: [
-                "https://your-portfolio-domain.com/images/og-image.jpg",
                 "https://your-portfolio-domain.com/images/profile-new.jpg",
+                "https://your-portfolio-domain.com/images/og-image.jpg",
               ],
               email: "ehnand.azucena00@gmail.com",
               telephone: "+639534678287",

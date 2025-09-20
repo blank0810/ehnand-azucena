@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { LinkPreviewGenerator } from "@/lib/link-preview-generator"
+import { createLinkPreviewGenerator } from "@/lib/link-preview-generator"
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,40 +7,43 @@ export async function GET(request: NextRequest) {
     const platform = searchParams.get("platform") || undefined
     const format = searchParams.get("format") || "json"
 
-    // Initialize the generator with the actual domain
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NODE_ENV === "production"
-        ? "https://your-portfolio-domain.com"
-        : "http://localhost:3000"
+    // Get the actual domain from the request
+    const protocol = request.headers.get("x-forwarded-proto") || "https"
+    const host = request.headers.get("host") || "your-portfolio-domain.com"
+    const baseUrl = `${protocol}://${host}`
 
-    const generator = new LinkPreviewGenerator(baseUrl)
+    const generator = createLinkPreviewGenerator(baseUrl)
     const result = await generator.generateCompletePreview(platform)
 
     // Return different formats based on request
     switch (format) {
       case "html":
+        const metaTags = Object.entries(result.metaTags)
+          .map(([key, value]) => {
+            if (key.startsWith("og:") || key.startsWith("twitter:")) {
+              const property = key.startsWith("og:") ? "property" : "name"
+              return `<meta ${property}="${key}" content="${value}" />`
+            }
+            return `<meta name="${key}" content="${value}" />`
+          })
+          .join("\n    ")
+
         return new NextResponse(
           `<!DOCTYPE html>
-          <html>
-          <head>
-            <title>${result.metaTags.title}</title>
-            <meta name="description" content="${result.metaTags.description}" />
-            <meta property="og:title" content="${result.metaTags["og:title"]}" />
-            <meta property="og:description" content="${result.metaTags["og:description"]}" />
-            <meta property="og:image" content="${result.metaTags["og:image"]}" />
-            <meta property="og:url" content="${result.metaTags["og:url"]}" />
-            <meta property="og:type" content="${result.metaTags["og:type"]}" />
-            <meta name="twitter:card" content="${result.metaTags["twitter:card"]}" />
-            <meta name="twitter:title" content="${result.metaTags["twitter:title"]}" />
-            <meta name="twitter:description" content="${result.metaTags["twitter:description"]}" />
-            <meta name="twitter:image" content="${result.metaTags["twitter:image"]}" />
-          </head>
-          <body>
-            <h1>${result.preview.title}</h1>
-            <p>${result.preview.description}</p>
-          </body>
-          </html>`,
+<html>
+<head>
+    <title>${result.metaTags.title}</title>
+    ${metaTags}
+    <script type="application/ld+json">
+    ${JSON.stringify(result.structuredData, null, 2)}
+    </script>
+</head>
+<body>
+    <h1>${result.preview.title}</h1>
+    <p>${result.preview.description}</p>
+    <img src="${result.preview.image}" alt="Profile" style="max-width: 300px;" />
+</body>
+</html>`,
           {
             headers: {
               "Content-Type": "text/html",
@@ -87,36 +90,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const baseUrl =
-      url || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://your-portfolio-domain.com"
+    // Get the actual domain from the request
+    const protocol = request.headers.get("x-forwarded-proto") || "https"
+    const host = request.headers.get("host") || "your-portfolio-domain.com"
+    const baseUrl = url || `${protocol}://${host}`
 
-    const generator = new LinkPreviewGenerator(baseUrl)
+    const generator = createLinkPreviewGenerator(baseUrl)
 
-    // Override default data with provided data
-    const customPreview = {
+    // Update with custom data
+    generator.updatePreviewData({
       title,
       description,
-      image: image || generator.generatePreviewData().image,
+      image: image || `${baseUrl}/images/profile-new.jpg`,
       url: baseUrl,
       siteName: "Ehnand Azucena Portfolio",
       type: "website",
-    }
+      locale: "en_US",
+    })
 
-    const structuredData = generator.generateStructuredData()
-    const metaTags = generator.generateMetaTags(platform)
+    const result = await generator.generateCompletePreview(platform)
 
     return NextResponse.json({
       success: true,
-      data: {
-        preview: customPreview,
-        structuredData,
-        metaTags,
-        meta: {
-          generated_at: new Date().toISOString(),
-          platform: platform || "custom",
-          format: "json",
-        },
-      },
+      data: result,
     })
   } catch (error) {
     console.error("Preview API POST Error:", error)
