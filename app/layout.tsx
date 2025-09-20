@@ -54,24 +54,40 @@ export const metadata: Metadata = {
     url: "https://your-portfolio-domain.com",
     title: "Ehnand Azucena - Full Stack Developer | Laravel, React, Symfony Expert",
     description:
-      "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in SaaS platforms, database optimization, and scalable web applications.",
+      "Professional Full Stack Developer with expertise in Laravel, React, Symfony, and modern web technologies. Specialized in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade solutions. Currently working with ClouDesk Pty. Ltd on multi-tenant platforms and high-value e-commerce systems.",
     siteName: "Ehnand Azucena Portfolio",
     images: [
       {
-        url: "/images/profile-new.jpg",
+        url: "/images/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Ehnand Azucena - Full Stack Developer",
+        alt: "Ehnand Azucena - Full Stack Developer specializing in Laravel, React, and Symfony",
+        type: "image/jpeg",
+      },
+      {
+        url: "/images/profile-new.jpg",
+        width: 800,
+        height: 800,
+        alt: "Ehnand Azucena - Professional Full Stack Developer",
+        type: "image/jpeg",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
+    site: "@ehnandazucena",
+    creator: "@ehnandazucena",
     title: "Ehnand Azucena - Full Stack Developer | Laravel, React, Symfony Expert",
     description:
-      "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in SaaS platforms and scalable web applications.",
-    images: ["/images/profile-new.jpg"],
-    creator: "@ehnandazucena",
+      "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in SaaS platforms, database optimization, and scalable web applications.",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        alt: "Ehnand Azucena - Full Stack Developer Portfolio",
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   alternates: {
     canonical: "https://your-portfolio-domain.com",
@@ -108,9 +124,12 @@ export default function RootLayout({
               name: "Ehnand Azucena",
               jobTitle: "Full Stack Developer",
               description:
-                "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies",
+                "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade solutions.",
               url: "https://your-portfolio-domain.com",
-              image: "https://your-portfolio-domain.com/images/profile-new.jpg",
+              image: [
+                "https://your-portfolio-domain.com/images/og-image.jpg",
+                "https://your-portfolio-domain.com/images/profile-new.jpg",
+              ],
               email: "ehnand.azucena00@gmail.com",
               telephone: "+639534678287",
               address: {
@@ -120,7 +139,11 @@ export default function RootLayout({
                 postalCode: "9022",
                 addressCountry: "Philippines",
               },
-              sameAs: ["https://www.linkedin.com/in/ehnand-azucena-3028a7194", "https://github.com/blank0810"],
+              sameAs: [
+                "https://www.linkedin.com/in/ehnand-azucena-3028a7194",
+                "https://github.com/blank0810",
+                "https://twitter.com/ehnandazucena",
+              ],
               knowsAbout: [
                 "Full Stack Development",
                 "Laravel",
@@ -132,6 +155,10 @@ export default function RootLayout({
                 "Database Design",
                 "SaaS Development",
                 "Web Development",
+                "PostgreSQL",
+                "MySQL",
+                "Cloud Infrastructure",
+                "API Development",
               ],
               hasOccupation: {
                 "@type": "Occupation",
@@ -148,7 +175,23 @@ export default function RootLayout({
                   "SaaS Platform Development",
                   "API Development",
                   "Cloud Infrastructure",
+                  "Multi-tenant Architecture",
                 ],
+              },
+              worksFor: {
+                "@type": "Organization",
+                name: "ClouDesk Pty. Ltd",
+                url: "https://cloudesk.co/",
+              },
+              alumniOf: {
+                "@type": "EducationalOrganization",
+                name: "Mindanao State University - Naawan",
+                address: {
+                  "@type": "PostalAddress",
+                  addressLocality: "Naawan",
+                  addressRegion: "Misamis Oriental",
+                  addressCountry: "Philippines",
+                },
               },
             }),
           }}

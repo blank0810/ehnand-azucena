@@ -18,6 +18,7 @@ import ThemeSwitcher from "@/components/theme-switcher"
 import ScrollProgress from "@/components/scroll-progress"
 import Navigation from "@/components/navigation"
 import SectionIndicator from "@/components/section-indicator"
+import LinkPreviewTester from "@/components/link-preview-tester"
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
@@ -77,6 +78,9 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Link Preview Tester */}
+      <LinkPreviewTester />
     </main>
   )
 }

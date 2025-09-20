@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://your-portfolio-domain.com</loc>
     <lastmod>2025-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://your-portfolio-domain.com/images/og-image.jpg</image:loc>
+      <image:title>Ehnand Azucena - Full Stack Developer Portfolio</image:title>
+      <image:caption>Professional Full Stack Developer specializing in Laravel, React, and Symfony</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://your-portfolio-domain.com/#about</loc>
