@@ -12,6 +12,7 @@
     "@emotion/is-prop-valid": "latest",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-progress": "^1.0.3",
+    "@radix-ui/react-tabs": "latest",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
