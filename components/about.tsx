@@ -69,8 +69,12 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="space-y-6 order-1 md:order-2"
           >
+            <h3 className="text-2xl font-bold mb-4">Professional Full Stack Developer and Systems Engineer</h3>
             <p className="text-gray-300 leading-relaxed">
-              Professional Full Stack Developer and Systems Engineer with production experience across Laravel, Symfony, NestJS, and React, specializing in backend architecture and scalable SaaS solutions. I build enterprise systems that connect data, automation, and operations into unified frameworks—delivering optimized APIs, secure infrastructure, and clean DevOps pipelines. Open to structured collaborations, technical partnerships, and long-term engineering opportunities that align with Umbra Systems' vision.
+              With production experience across <strong>Laravel</strong>, <strong>Symfony</strong>, <strong>NestJS</strong>, and <strong>React</strong>, I specialize in <strong>backend architecture</strong> and <strong>scalable SaaS solutions</strong>. I build enterprise systems that connect data, automation, and operations into unified frameworks—delivering optimized APIs, secure infrastructure, and clean DevOps pipelines.
+            </p>
+            <p className="text-gray-300 leading-relaxed">
+              Open to <strong>structured collaborations</strong>, <strong>technical partnerships</strong>, and long-term engineering opportunities that align with <strong>Umbra Systems' vision</strong>.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
