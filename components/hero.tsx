@@ -42,9 +42,7 @@ export default function Hero() {
               <TypingAnimation texts={roles} typingSpeed={100} deletingSpeed={50} delayBetweenTexts={2000} />
             </h2>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mb-8">
-              Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies.
-              Expert in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade
-              solutions.
+              Full Stack Systems Engineer focused on building scalable SaaS platforms, backend architectures, and AI-driven business systems. I design and deliver production-grade APIs, optimized databases, and Docker-enabled CI/CD that perform and scale.
             </p>
             <div className="flex flex-wrap gap-4 mb-12">
               <Link

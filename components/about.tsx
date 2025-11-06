@@ -69,23 +69,8 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="space-y-6 order-1 md:order-2"
           >
-            <h3 className="text-2xl font-bold mb-4">Professional Full Stack Developer with Production Experience</h3>
             <p className="text-gray-300 leading-relaxed">
-              I'm a skilled <strong>Full Stack Developer</strong> and <strong>Systems Engineer</strong> specializing in
-              building robust backend systems and scalable web applications. My expertise includes{" "}
-              <strong>Laravel development</strong>, <strong>React applications</strong>,{" "}
-              <strong>Symfony frameworks</strong>, and comprehensive database management systems.
-            </p>
-            <p className="text-gray-300 leading-relaxed">
-              With hands-on experience in multi-tenant <strong>SaaS platform development</strong>, enterprise-grade
-              internal tools, and mission-critical systems for schools, e-commerce, and professional associations. I
-              excel at delivering robust APIs, scalable backend architectures, and optimized database solutions with
-              growing expertise in Docker-based DevOps and CI/CD pipelines.
-            </p>
-            <p className="text-gray-300 leading-relaxed">
-              As a <strong>remote developer</strong> available for <strong>freelance projects</strong>, I'm passionate
-              about creating efficient, modern solutions that solve real-world business problems and drive measurable
-              results.
+              Professional Full Stack Developer with production experience across Laravel, Symfony, NestJS, and React, specializing in robust backend systems and scalable web applications. I build multi-tenant SaaS platforms, enterprise internal tools, and mission-critical systems for education, e-commerce, and associations—delivering reliable APIs, database optimization, and pragmatic DevOps automation. Available for remote engagements and freelance projects.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
