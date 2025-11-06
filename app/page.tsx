@@ -18,6 +18,17 @@ import LoadingScreen from "@/components/loading-screen"
 export default function Page() {
   const [isLoading, setIsLoading] = useState(true)
 
+  const sections = [
+    { id: "home", label: "Home" },
+    { id: "about", label: "About" },
+    { id: "experience", label: "Experience" },
+    { id: "projects", label: "Projects" },
+    { id: "skills", label: "Skills" },
+    { id: "education", label: "Education" },
+    { id: "certificates", label: "Certificates" },
+    { id: "contact", label: "Contact" },
+  ]
+
   useEffect(() => {
     // Simulate initial loading
     const timer = setTimeout(() => {
@@ -35,7 +46,7 @@ export default function Page() {
     <>
       <ScrollProgress />
       <Navigation />
-      <SectionIndicator />
+      <SectionIndicator sections={sections} />
       <main className="min-h-screen">
         <Hero />
         <About />
