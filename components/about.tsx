@@ -71,10 +71,13 @@ export default function About() {
           >
             <h3 className="text-2xl font-bold mb-4">Professional Full Stack Developer and Systems Engineer</h3>
             <p className="text-gray-300 leading-relaxed">
-              With production experience across <strong>Laravel</strong>, <strong>Symfony</strong>, <strong>NestJS</strong>, and <strong>React</strong>, I specialize in <strong>backend architecture</strong> and <strong>scalable SaaS solutions</strong>. I build enterprise systems that connect data, automation, and operations into unified frameworks—delivering optimized APIs, secure infrastructure, and clean DevOps pipelines.
+              As a <strong>Full Stack Developer</strong> and <strong>Systems Engineer</strong> based in the Philippines, I bring production-level expertise across <strong>Laravel</strong>, <strong>Symfony</strong>, <strong>NestJS</strong>, and <strong>React</strong>. I specialize in <strong>backend architecture</strong>, <strong>scalable SaaS platforms</strong>, and <strong>enterprise web applications</strong> that integrate data, automation, and operations into unified systems.
             </p>
             <p className="text-gray-300 leading-relaxed">
-              Open to <strong>structured collaborations</strong>, <strong>technical partnerships</strong>, and long-term engineering opportunities that align with <strong>Umbra Systems' vision</strong>.
+              My work spans <strong>multi-tenant SaaS development</strong>, <strong>RESTful API design</strong>, <strong>database optimization</strong> (PostgreSQL, MySQL), and <strong>DevOps automation</strong> with Docker and CI/CD pipelines. I've delivered mission-critical systems for education, e-commerce, professional associations, and internal enterprise tools—building secure, maintainable, and high-performance solutions.
+            </p>
+            <p className="text-gray-300 leading-relaxed">
+              Available for <strong>remote work</strong>, <strong>freelance projects</strong>, and <strong>technical partnerships</strong>. Open to structured collaborations and long-term engineering opportunities that align with <strong>Umbra Systems' vision</strong> of building intelligent, scalable business infrastructure.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
