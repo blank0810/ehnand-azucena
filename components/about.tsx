@@ -40,16 +40,16 @@ export default function About() {
             className="order-2 md:order-1"
           >
             <div className="relative">
-              <div className="w-64 h-64 md:w-80 md:h-80 mx-auto relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20"></div>
-                <div className="absolute inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-2xl"></div>
+              <div className="w-64 h-80 md:w-72 md:h-96 mx-auto relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-2xl blur-3xl opacity-20"></div>
+                <div className="absolute inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl blur-2xl"></div>
 
-                <div className="relative z-10 w-full h-full rounded-full overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 group">
+                <div className="relative z-10 w-full h-full rounded-2xl overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 group">
                   <Image
                     src="/images/profile-new.jpg"
                     alt="Ehnand Azucena - Professional Full Stack Developer specializing in Laravel, React, and Symfony"
-                    width={320}
-                    height={320}
+                    width={288}
+                    height={384}
                     priority={true}
                     className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                   />
