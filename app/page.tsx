@@ -1,10 +1,52 @@
-import LinkPreviewTester from "@/components/link-preview-tester"
+"use client"
+
+import { useEffect, useState } from "react"
+import Navigation from "@/components/navigation"
+import Hero from "@/components/hero"
+import About from "@/components/about"
+import Experience from "@/components/experience"
+import Projects from "@/components/projects"
+import Skills from "@/components/skills"
+import Education from "@/components/education"
+import Certificates from "@/components/certificates"
+import Contact from "@/components/contact"
+import Footer from "@/components/footer"
+import ScrollProgress from "@/components/scroll-progress"
+import SectionIndicator from "@/components/section-indicator"
+import LoadingScreen from "@/components/loading-screen"
 
 export default function Page() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate initial loading
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
   return (
-    <div>
-      {/* rest of code here */}
-      <LinkPreviewTester />
-    </div>
+    <>
+      <ScrollProgress />
+      <Navigation />
+      <SectionIndicator />
+      <main className="min-h-screen">
+        <Hero />
+        <About />
+        <Experience />
+        <Projects />
+        <Skills />
+        <Education />
+        <Certificates />
+        <Contact />
+      </main>
+      <Footer />
+    </>
   )
 }

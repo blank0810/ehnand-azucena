@@ -3,8 +3,6 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import PerformanceOptimizedLayout from "@/components/performance-optimized-layout"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -199,8 +197,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <PerformanceOptimizedLayout>{children}</PerformanceOptimizedLayout>
-          <SpeedInsights />
+          {children}
         </ThemeProvider>
       </body>
     </html>

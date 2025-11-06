@@ -2,8 +2,18 @@
 import { motion } from "framer-motion"
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react"
 import Link from "next/link"
-import ThreeDCube from "./3d-cube"
+import dynamic from "next/dynamic"
 import TypingAnimation from "./typing-animation"
+
+// Lazy load the 3D cube to reduce initial bundle size (~600KB)
+const ThreeDCube = dynamic(() => import("./3d-cube"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-[200px] h-[200px] mx-auto flex items-center justify-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+    </div>
+  ),
+})
 
 export default function Hero() {
   const roles = [

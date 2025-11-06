@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 import { Download } from "lucide-react"
-import OptimizedImage from "./optimized-image"
+import Image from "next/image"
 
 export default function About() {
   const [ref, inView] = useInView({
@@ -44,7 +44,7 @@ export default function About() {
                 <div className="absolute inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-2xl"></div>
 
                 <div className="relative z-10 w-full h-full rounded-full overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 group">
-                  <OptimizedImage
+                  <Image
                     src="/images/profile-new.jpg"
                     alt="Ehnand Azucena - Professional Full Stack Developer specializing in Laravel, React, and Symfony"
                     width={320}
