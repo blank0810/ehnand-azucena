@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { Github, Linkedin, Mail, Heart } from "lucide-react"
-import PerformanceWidget from "./performance-widget"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -73,14 +72,17 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Performance & Contact */}
+          {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Site Performance</h4>
-            <div className="mb-4">
-              <PerformanceWidget />
-            </div>
+            <h4 className="text-lg font-semibold text-white mb-4">Get In Touch</h4>
+            <p className="text-gray-400 text-sm mb-2">
+              📧 ehnand.azucena00@gmail.com
+            </p>
+            <p className="text-gray-400 text-sm mb-2">
+              📱 +639534678287
+            </p>
             <p className="text-gray-400 text-sm">
-              This site is monitored for performance and optimized for the best user experience.
+              📍 Initao, Northern Mindanao, Philippines
             </p>
           </div>
         </div>

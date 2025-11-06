@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 import { Download } from "lucide-react"
-import OptimizedImage from "./optimized-image"
+import Image from "next/image"
 
 export default function About() {
   const [ref, inView] = useInView({
@@ -22,33 +22,34 @@ export default function About() {
 
   return (
     <section id="about" className="py-20 bg-gray-900 relative">
-      <div className="section-container">
+      <div className="section-container" ref={ref}>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="section-title gradient-text"
+          className="section-title gradient-text text-center mb-12"
         >
           About Me
         </motion.h2>
 
-        <div ref={ref} className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
+            className="order-2 md:order-1"
           >
             <div className="relative">
-              <div className="w-80 h-80 mx-auto relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20"></div>
-                <div className="absolute inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-2xl"></div>
+              <div className="w-64 h-80 md:w-72 md:h-96 mx-auto relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-2xl blur-3xl opacity-20"></div>
+                <div className="absolute inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl blur-2xl"></div>
 
-                <div className="relative z-10 w-full h-full rounded-full overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 group">
-                  <OptimizedImage
+                <div className="relative z-10 w-full h-full rounded-2xl overflow-hidden border-4 border-primary/30 shadow-2xl shadow-primary/20 group">
+                  <Image
                     src="/images/profile-new.jpg"
                     alt="Ehnand Azucena - Professional Full Stack Developer specializing in Laravel, React, and Symfony"
-                    width={320}
-                    height={320}
+                    width={288}
+                    height={384}
                     priority={true}
                     className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                   />
@@ -66,25 +67,17 @@ export default function About() {
             initial={{ opacity: 0, x: 50 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="space-y-6"
+            className="space-y-6 order-1 md:order-2"
           >
-            <h3 className="text-2xl font-bold mb-4">Professional Full Stack Developer with Production Experience</h3>
+            <h3 className="text-2xl font-bold mb-4">Professional Full Stack Developer and Systems Engineer</h3>
             <p className="text-gray-300 leading-relaxed">
-              I'm a skilled <strong>Full Stack Developer</strong> and <strong>Systems Engineer</strong> specializing in
-              building robust backend systems and scalable web applications. My expertise includes{" "}
-              <strong>Laravel development</strong>, <strong>React applications</strong>,{" "}
-              <strong>Symfony frameworks</strong>, and comprehensive database management systems.
+              As a <strong>Full Stack Developer</strong> and <strong>Systems Engineer</strong> based in the Philippines, I bring production-level expertise across <strong>Laravel</strong>, <strong>Symfony</strong>, <strong>NestJS</strong>, and <strong>React</strong>. I specialize in <strong>backend architecture</strong>, <strong>scalable SaaS platforms</strong>, and <strong>enterprise web applications</strong> that integrate data, automation, and operations into unified systems.
             </p>
             <p className="text-gray-300 leading-relaxed">
-              With hands-on experience in multi-tenant <strong>SaaS platform development</strong>, enterprise-grade
-              internal tools, and mission-critical systems for schools, e-commerce, and professional associations. I
-              excel at delivering robust APIs, scalable backend architectures, and optimized database solutions with
-              growing expertise in Docker-based DevOps and CI/CD pipelines.
+              My work spans <strong>multi-tenant SaaS development</strong>, <strong>RESTful API design</strong>, <strong>database optimization</strong> (PostgreSQL, MySQL), and <strong>DevOps automation</strong> with Docker and CI/CD pipelines. I've delivered mission-critical systems for education, e-commerce, professional associations, and internal enterprise tools—building secure, maintainable, and high-performance solutions.
             </p>
             <p className="text-gray-300 leading-relaxed">
-              As a <strong>remote developer</strong> available for <strong>freelance projects</strong>, I'm passionate
-              about creating efficient, modern solutions that solve real-world business problems and drive measurable
-              results.
+              Available for <strong>remote work</strong>, <strong>freelance projects</strong>, and <strong>technical partnerships</strong>. Open to structured collaborations and long-term engineering opportunities that align with <strong>Umbra Systems' vision</strong> of building intelligent, scalable business infrastructure.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
