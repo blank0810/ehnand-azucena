@@ -70,7 +70,7 @@ export default function About() {
             className="space-y-6 order-1 md:order-2"
           >
             <p className="text-gray-300 leading-relaxed">
-              Professional Full Stack Developer with production experience across Laravel, Symfony, NestJS, and React, specializing in robust backend systems and scalable web applications. I build multi-tenant SaaS platforms, enterprise internal tools, and mission-critical systems for education, e-commerce, and associations—delivering reliable APIs, database optimization, and pragmatic DevOps automation. Available for remote engagements and freelance projects.
+              Professional Full Stack Developer and Systems Engineer with production experience across Laravel, Symfony, NestJS, and React, specializing in backend architecture and scalable SaaS solutions. I build enterprise systems that connect data, automation, and operations into unified frameworks—delivering optimized APIs, secure infrastructure, and clean DevOps pipelines. Open to structured collaborations, technical partnerships, and long-term engineering opportunities that align with Umbra Systems' vision.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
