@@ -22,24 +22,25 @@ export default function About() {
 
   return (
     <section id="about" className="py-20 bg-gray-900 relative">
-      <div className="section-container">
+      <div className="section-container" ref={ref}>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="section-title gradient-text"
+          className="section-title gradient-text mb-12 text-center"
         >
           About Me
         </motion.h2>
 
-        <div ref={ref} className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
+            className="order-2 md:order-1"
           >
             <div className="relative">
-              <div className="w-80 h-80 mx-auto relative">
+              <div className="w-64 h-64 md:w-80 md:h-80 mx-auto relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20"></div>
                 <div className="absolute inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-2xl"></div>
 
@@ -66,7 +67,7 @@ export default function About() {
             initial={{ opacity: 0, x: 50 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="space-y-6"
+            className="space-y-6 order-1 md:order-2"
           >
             <h3 className="text-2xl font-bold mb-4">Professional Full Stack Developer with Production Experience</h3>
             <p className="text-gray-300 leading-relaxed">
