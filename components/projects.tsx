@@ -11,6 +11,18 @@ import AdvancedProjectsFilter from "./advanced-projects-filter"
 
 const projects = [
   {
+    title: "Personal Budget & Finance Manager",
+    description:
+      "A comprehensive double-entry accounting system for personal finance, featuring net worth tracking, P&L statements, and budget analytics.",
+    image: "/images/projects/budget-app.png",
+    technologies: ["Next.js 15", "TypeScript", "PostgreSQL", "Prisma", "Tailwind CSS", "shadcn/ui", "NextAuth.js", "Recharts"],
+    period: "Dec 2025 – Present",
+    role: "Solo Developer",
+    status: "Live Production",
+    category: "Finance",
+    liveUrl: "https://ehnand-budget.vercel.app/",
+  },
+  {
     title: "REPSShield (Real Estate Professional Compliance Platform)",
     description:
       "Advanced SaaS compliance platform helping real estate investors maintain IRS REP status and protect $50,000+ in annual tax deductions. Features AI-powered compliance monitoring, intelligent time tracking, audit-ready reporting, and seamless integrations.",
