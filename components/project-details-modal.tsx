@@ -49,6 +49,58 @@ export default function ProjectDetailsModal({ project, isOpen, onClose }: Projec
 
   const getDetailedDescription = (title: string) => {
     const descriptions: { [key: string]: string } = {
+      "Adam One (Unified Document Matching Platform)": `
+        Adam One is a unified document matching platform built for a Swiss petrol station company. It consolidates 20 independent services into a single mono-repo, automating the reconciliation of pickup slips, invoices, purchases, and delivery notes across 4 companies (CICA, SOCAR, LANDI, MINEROL) and 8 petrol stations.
+
+        **Architecture & Scale:**
+
+        • **20 Services** organized into 5 categories: Document Matching (10), Data Management (2), Reporting (3), Orchestration (2), and Automation (3)
+        • **10 Matching Algorithms** — each tailored per company with varying criteria (group matching, direct matching, two-pass, delta-based, 3-way verification)
+        • **Feature-first mono-repo** — each service is self-contained with its own config, routes, controller, service, and matching logic
+
+        **Key Capabilities:**
+
+        • **Daily Matching Orchestrator** — Runs all 12 operations sequentially: duplicate cleanup, 4 pickup/invoice matchings, 3 pickup/purchase matchings, invoice/purchase reconciliation, 3-way verification, station reports, and inventory summaries
+        • **WhatsApp Image Classification** — Automated pipeline that fetches WhatsApp group images, classifies documents using AI (Llama Extract), and routes them via email with attachments
+        • **Wholesale Invoice Generator** — Generates invoices with PDF creation, QR bills, automatic numbering, and VAT calculation
+        • **Data Validation Pipeline** — 5-type integrity checks across 13 RAW sheets with Gemini-powered extraction verification and row protection
+
+        **Automation Pipeline:**
+
+        WhatsApp Daily (3 PM) → Email Processing → Relay Batch Tracker → Daily Matching (all 12 steps) → Inventory Summary + Station Reports → WhatsApp Summaries with verification status
+
+        **Infrastructure:**
+
+        Self-hosted on Hetzner VPS with PM2 process management, node-cron scheduling, MongoDB for state tracking, and GitHub Actions CI/CD. All document data flows through Google Sheets API with dynamic column lookup for resilience.
+
+        **Impact:**
+
+        Replaced manual document reconciliation across thousands of records, providing automated matching with visual formatting, match status tracking, and daily summary reports — serving as the operational backbone for the company's document processing workflow.
+      `,
+      "EtzlPark Transaction Checker": `
+        EtzlPark Transaction Checker is a financial reconciliation system for Etzelpark fuel stations in Switzerland. It contains 6 independent Node.js matching engines, each reconciling transactions between a specific payment terminal system and its settlement provider.
+
+        **Terminal Systems & Settlement Providers:**
+
+        • **KSW-WorldLine** — Matches KSW terminal transactions against WorldLine card settlements using ID-based matching (BelegNrOnline + TrxRefNo) with ±1.00 CHF tolerance
+        • **KSW-Post** — Matches KSW PostFinance transactions against POST settlements using primary ID match with time ±5min and amount ±0.10 CHF verification fallback
+        • **Hectronic-TWINT** — Two-phase engine: Phase 1 ID-based matching, Phase 2 time ±3min + amount ±2 CHF + location mapping fallback, with TWINT fee normalization at 0.65%
+        • **Hectronic-Post** — Matches Hectronic XML terminal data against POST settlements using Terminal ID + time ±3min + amount ±0.01 CHF tolerance
+        • **Traffitec-Post** — Matches Traffitec terminals against POST settlements using Terminal ID + time ±3min + amount ±0.05 CHF tolerance with dynamic payment type filtering
+        • **Traffitec-Nexi** — Two-tier engine: Tier 1 map-based composite key lookup (TerminalID + Date + AuthCode) covering 99% of matches with PAN last-4 disambiguation, Tier 2 fallback on time window + amount tolerance
+
+        **Key Design Principles:**
+
+        • Each matcher is a standalone Node.js project — independent installation and execution
+        • Full pipeline in a single command (prepare + match), or step-by-step execution
+        • Duplicate prevention — each settlement transaction can only match once across all matchers
+        • Swiss financial format handling — semicolon-delimited CSVs with comma decimal separators
+        • Reports generated in both CSV and JSON formats (matched, missing, discrepancies, unmatched)
+
+        **Impact:**
+
+        Automates the reconciliation of thousands of fuel station payment transactions across 3 terminal systems and 4 settlement providers, identifying matched transactions, missing records, overpaid/underpaid discrepancies, and unmatched settlements — replacing manual spreadsheet comparison.
+      `,
       "REPSShield (Real Estate Professional Compliance Platform)": `
         REPSShield is a purpose-built SaaS solution addressing one of the biggest challenges in the real estate sector: preserving IRS REP status under Section 469(c)(7). Qualifying professionals can save $50,000+ annually in taxes by deducting unlimited rental property losses—but compliance requires 750+ hours of documented real estate activity, material participation, and meticulous recordkeeping.
 

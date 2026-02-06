@@ -23,6 +23,28 @@ const projects = [
     liveUrl: "https://ehnand-budget.vercel.app/",
   },
   {
+    title: "Adam One (Unified Document Matching Platform)",
+    description:
+      "A 20-service mono-repo platform that automates document matching across 4 companies and 4 document types, with WhatsApp image classification, daily orchestration workflows, and wholesale invoice generation.",
+    image: "/images/projects/adam-one.png",
+    technologies: ["Node.js", "Express.js", "Google Sheets API", "MongoDB", "PM2", "Docker", "GitHub Actions", "EJS"],
+    period: "Dec 2025 – Present",
+    role: "Lead Developer",
+    status: "Live Production",
+    category: "Internal Tool",
+  },
+  {
+    title: "EtzlPark Transaction Checker",
+    description:
+      "Financial reconciliation system with 6 independent matching engines that reconcile payment terminal transactions (KSW, Hectronic, Traffitec) against settlement providers (WorldLine, PostFinance, TWINT, Nexi) for Swiss fuel stations.",
+    image: "/placeholder.svg?height=300&width=500",
+    technologies: ["Node.js", "CSV Processing", "XML Parsing", "Financial Reconciliation"],
+    period: "Dec 2025 – Present",
+    role: "Lead Developer",
+    status: "Live Production",
+    category: "Internal Tool",
+  },
+  {
     title: "REPSShield (Real Estate Professional Compliance Platform)",
     description:
       "Advanced SaaS compliance platform helping real estate investors maintain IRS REP status and protect $50,000+ in annual tax deductions. Features AI-powered compliance monitoring, intelligent time tracking, audit-ready reporting, and seamless integrations.",
