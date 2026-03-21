@@ -50,7 +50,7 @@ export default function Education() {
               initial={{ opacity: 0, y: 50 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.2 }}
-              className="card hover:border-l-4 hover:border-primary transition-all duration-300"
+              className="card border-l-4 border-transparent hover:border-primary transition-all duration-300"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <div>

@@ -15,22 +15,22 @@ interface NavItem {
   icon: React.ReactNode
 }
 
+const navItems: NavItem[] = [
+  { id: "home", label: "Home", href: "#home", icon: <Home className="h-4 w-4" /> },
+  { id: "about", label: "About", href: "#about", icon: <User className="h-4 w-4" /> },
+  { id: "experience", label: "Experience", href: "#experience", icon: <Briefcase className="h-4 w-4" /> },
+  { id: "projects", label: "Projects", href: "#projects", icon: <FolderOpen className="h-4 w-4" /> },
+  { id: "skills", label: "Skills", href: "#skills", icon: <Code className="h-4 w-4" /> },
+  { id: "education", label: "Education", href: "#education", icon: <GraduationCap className="h-4 w-4" /> },
+  { id: "certificates", label: "Certificates", href: "#certificates", icon: <Award className="h-4 w-4" /> },
+  { id: "contact", label: "Contact", href: "#contact", icon: <Mail className="h-4 w-4" /> },
+]
+
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeSection, setActiveSection] = useState("home")
   const [isScrolled, setIsScrolled] = useState(false)
   const [showBackToTop, setShowBackToTop] = useState(false)
-
-  const navItems: NavItem[] = [
-    { id: "home", label: "Home", href: "#home", icon: <Home className="h-4 w-4" /> },
-    { id: "about", label: "About", href: "#about", icon: <User className="h-4 w-4" /> },
-    { id: "skills", label: "Skills", href: "#skills", icon: <Code className="h-4 w-4" /> },
-    { id: "experience", label: "Experience", href: "#experience", icon: <Briefcase className="h-4 w-4" /> },
-    { id: "projects", label: "Projects", href: "#projects", icon: <FolderOpen className="h-4 w-4" /> },
-    { id: "certificates", label: "Certificates", href: "#certificates", icon: <Award className="h-4 w-4" /> },
-    { id: "education", label: "Education", href: "#education", icon: <GraduationCap className="h-4 w-4" /> },
-    { id: "contact", label: "Contact", href: "#contact", icon: <Mail className="h-4 w-4" /> },
-  ]
 
   // Handle scroll events for active section detection and navigation styling
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function Navigation() {
     handleScroll() // Initial call
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [navItems])
+  }, [])
 
   // Smooth scroll to section
   const scrollToSection = (href: string) => {
@@ -294,7 +294,7 @@ export default function Navigation() {
                 {/* Mobile Menu Footer */}
                 <div className="p-6 border-t border-gray-800">
                   <div className="text-center text-gray-400 text-sm">
-                    <p>© 2025 Ehnand Azucena</p>
+                    <p>© {new Date().getFullYear()} Ehnand Azucena</p>
                     <p>Full Stack Developer</p>
                   </div>
                 </div>
@@ -325,23 +325,6 @@ export default function Navigation() {
         )}
       </AnimatePresence>
 
-      {/* Navigation Progress Indicator */}
-      <motion.div
-        className="fixed top-16 left-0 right-0 z-30 h-1 bg-gray-800/50"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: isScrolled ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <motion.div
-          className="h-full bg-gradient-to-r from-primary to-secondary origin-left"
-          style={{
-            scaleX:
-              typeof window !== "undefined"
-                ? window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)
-                : 0,
-          }}
-        />
-      </motion.div>
     </>
   )
 }

@@ -120,24 +120,24 @@ export default function AdvancedProjectsFilter({
     {
       id: "recent-work",
       name: "Recent Work",
-      description: "Projects from 2024-2025",
+      description: "Projects from 2025-2026",
       icon: <Clock className="h-4 w-4" />,
       color: "text-purple-400",
       gradient: "from-purple-500/20 to-pink-500/20",
       criteria: [
         {
-          id: "recent-2025",
-          name: "2025",
+          id: "recent-2026",
+          name: "2026",
           type: "year",
-          value: "2025",
+          value: "2026",
           icon: <Calendar className="h-3 w-3" />,
           color: "bg-purple-500/20 text-purple-400",
         },
         {
-          id: "recent-2024",
-          name: "2024",
+          id: "recent-2025",
+          name: "2025",
           type: "year",
-          value: "2024",
+          value: "2025",
           icon: <Calendar className="h-3 w-3" />,
           color: "bg-purple-500/20 text-purple-400",
         },
@@ -230,7 +230,7 @@ export default function AdvancedProjectsFilter({
         return typeFilters.some((filter) => {
           switch (filter.type) {
             case "technology":
-              return project.technologies.includes(filter.value)
+              return project.technologies.some((tech) => tech.toLowerCase().includes(filter.value.toLowerCase()))
             case "category":
               return project.category === filter.value
             case "status":

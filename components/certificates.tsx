@@ -2,28 +2,10 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { ExternalLink, Award, Calendar, Globe, Database, Code, Shield, Wrench, Layers } from "lucide-react"
+import { ExternalLink, Award, Calendar, Globe, Code, Shield, Layers } from "lucide-react"
 import Image from "next/image"
 
 const certificates = [
-  {
-    title: "Cosmic Coding with Symfony 7",
-    issuer: "SymfonyCasts",
-    date: "March 2025",
-    image: "/images/certificates/cosmic-coding-symfony7.png",
-    verificationUrl: "https://symfonycasts.com/certificates/1437702CC155",
-    category: "Web Development",
-    icon: Globe,
-  },
-  {
-    title: "Doctrine & the Database",
-    issuer: "SymfonyCasts",
-    date: "March 2025",
-    image: "/images/certificates/doctrine-symfony7.png",
-    verificationUrl: "https://symfonycasts.com/certificates/1437702CC155",
-    category: "Database",
-    icon: Database,
-  },
   {
     title: "Symfony 7 Fundamentals",
     issuer: "SymfonyCasts",
@@ -32,15 +14,6 @@ const certificates = [
     verificationUrl: "https://symfonycasts.com/certificates/1437702CC155",
     category: "Web Development",
     icon: Globe,
-  },
-  {
-    title: "React Basics",
-    issuer: "Meta",
-    date: "January 2025",
-    image: "/images/certificates/react-basics.png",
-    verificationUrl: "https://coursera.org/verify/SUL3C9D7GZK3",
-    category: "Frontend",
-    icon: Layers,
   },
   {
     title: "Advanced React",
@@ -52,13 +25,13 @@ const certificates = [
     icon: Layers,
   },
   {
-    title: "Responsive Web Design",
-    issuer: "freeCodeCamp",
-    date: "December 2024",
-    image: "/images/certificates/responsive-web-design.png",
-    verificationUrl: "https://www.freecodecamp.org/certification/Ehnand/responsive-web-design",
-    category: "Web Development",
-    icon: Globe,
+    title: "React Basics",
+    issuer: "Meta",
+    date: "January 2025",
+    image: "/images/certificates/react-basics.png",
+    verificationUrl: "https://coursera.org/verify/SUL3C9D7GZK3",
+    category: "Frontend",
+    icon: Layers,
   },
   {
     title: "JavaScript Algorithms and Data Structures",
@@ -70,6 +43,15 @@ const certificates = [
     icon: Code,
   },
   {
+    title: "Responsive Web Design",
+    issuer: "freeCodeCamp",
+    date: "December 2024",
+    image: "/images/certificates/responsive-web-design.png",
+    verificationUrl: "https://www.freecodecamp.org/certification/Ehnand/responsive-web-design",
+    category: "Web Development",
+    icon: Globe,
+  },
+  {
     title: "CSX Cybersecurity Fundamentals Certificate (CSXF)",
     issuer: "Cybrary",
     date: "August 2023",
@@ -78,33 +60,6 @@ const certificates = [
       "https://app.cybrary.it/profile/SimpleCanidae0202?tab=cert-completion&cert=CC-900adb08-fcfc-4837-b719-e9dcbf3129e4",
     category: "Cybersecurity",
     icon: Shield,
-  },
-  {
-    title: "Intrusion Detection Setup",
-    issuer: "Virtual Cyber Labs",
-    date: "January 2023",
-    image: "/images/certificates/intrusion-detection-setup.png",
-    verificationUrl: "https://verification.givemycertificate.com/v/944bf71e-ac18-468c-ad61-637f7cd7d10a",
-    category: "Cybersecurity",
-    icon: Shield,
-  },
-  {
-    title: "Blue Teaming Internship",
-    issuer: "Virtual Cyber Labs",
-    date: "January 2023",
-    image: "/images/certificates/blue-teaming-internship.png",
-    verificationUrl: "https://academy.virtualcyberlabs.com/verify-certificate?serialno=BKS2KRNH",
-    category: "Cybersecurity",
-    icon: Shield,
-  },
-  {
-    title: "Technical Support Fundamentals",
-    issuer: "Google",
-    date: "November 2022",
-    image: "/images/certificates/technical-support-google.png",
-    verificationUrl: "https://www.coursera.org/account/accomplishments/verify/SWNULUC8VLYL",
-    category: "IT Support",
-    icon: Wrench,
   },
 ]
 

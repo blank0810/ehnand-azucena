@@ -59,7 +59,7 @@ export default function Skills() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="text-4xl md:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
+          className="text-4xl md:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
         >
           Technical Skills
         </motion.h2>
@@ -74,11 +74,11 @@ export default function Skills() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-slate-800/90 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-lg hover:shadow-cyan-500/10"
+                className="bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 hover:border-blue-500/50 transition-all duration-300 group hover:shadow-lg hover:shadow-blue-500/10"
               >
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-cyan-500/20 rounded-lg group-hover:bg-cyan-500/30 transition-colors duration-300">
-                    <Icon className="h-6 w-6 text-cyan-400" />
+                  <div className="p-3 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors duration-300">
+                    <Icon className="h-6 w-6 text-blue-400" />
                   </div>
                   <h3 className="text-xl font-bold text-white">{category.title}</h3>
                 </div>
@@ -90,7 +90,7 @@ export default function Skills() {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={inView ? { opacity: 1, scale: 1 } : {}}
                       transition={{ duration: 0.3, delay: index * 0.1 + skillIndex * 0.05 }}
-                      className="px-3 py-1.5 bg-slate-700/80 text-slate-300 text-sm rounded-full border border-slate-600/50 hover:border-cyan-400/50 hover:text-cyan-300 hover:bg-slate-600/80 transition-all duration-300 cursor-default"
+                      className="px-3 py-1.5 bg-gray-700/80 text-gray-300 text-sm rounded-full border border-gray-600/50 hover:border-blue-400/50 hover:text-blue-300 hover:bg-gray-600/80 transition-all duration-300 cursor-default"
                     >
                       {skill}
                     </motion.span>
@@ -120,10 +120,10 @@ export default function Skills() {
                 className="space-y-3"
               >
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-300 font-medium text-lg">{skill.name}</span>
+                  <span className="text-gray-300 font-medium text-lg">{skill.name}</span>
                   <span className="text-white font-bold text-lg">{skill.percentage}%</span>
                 </div>
-                <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden border border-slate-600/30">
+                <div className="w-full bg-gray-700/50 rounded-full h-3 overflow-hidden border border-gray-600/30">
                   <motion.div
                     className={`h-full rounded-full ${skill.color} shadow-lg`}
                     initial={{ width: 0 }}

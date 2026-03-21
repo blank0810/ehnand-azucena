@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Github, Linkedin, Mail, Heart } from "lucide-react"
+import { Github, Linkedin, Mail } from "lucide-react"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -28,7 +28,7 @@ export default function Footer() {
                 <Github className="h-5 w-5" />
               </motion.a>
               <motion.a
-                href="https://linkedin.com/in/ehnand-azucena"
+                href="https://www.linkedin.com/in/ehnand-azucena-3028a7194"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition-colors duration-200"
@@ -38,7 +38,7 @@ export default function Footer() {
                 <Linkedin className="h-5 w-5" />
               </motion.a>
               <motion.a
-                href="mailto:ehnand.azucena@gmail.com"
+                href="mailto:ehnand.azucena00@gmail.com"
                 className="text-gray-400 hover:text-primary transition-colors duration-200"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -90,11 +90,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm mb-4 md:mb-0">© {currentYear} Ehnand Azucena. All rights reserved.</p>
-          <div className="flex items-center gap-2 text-gray-400 text-sm">
-            <span>Made with</span>
-            <Heart className="h-4 w-4 text-red-500" />
-            <span>using Next.js & Tailwind CSS</span>
-          </div>
+          <p className="text-gray-400 text-sm">Built with Next.js</p>
         </div>
       </div>
     </footer>

@@ -49,85 +49,111 @@ export default function ProjectDetailsModal({ project, isOpen, onClose }: Projec
 
   const getDetailedDescription = (title: string) => {
     const descriptions: { [key: string]: string } = {
-      "Adam One (Unified Document Matching Platform)": `
-        Adam One is a unified document matching platform built for a Swiss petrol station company. It consolidates 20 independent services into a single mono-repo, automating the reconciliation of pickup slips, invoices, purchases, and delivery notes across 4 companies (CICA, SOCAR, LANDI, MINEROL) and 8 petrol stations.
+      "Adam AI (Multi-Tenant Document Intelligence SaaS)": `
+        Adam AI is a multi-tenant B2B document intelligence SaaS platform that enables tenants to subscribe to document-processing modules, commission custom pipelines, and publish to a Module Store. Built for the first tenant -- a Swiss energy client operating a petrol station group.
 
         **Architecture & Scale:**
 
+        • **Module Marketplace** — tenants subscribe to capabilities, commission custom modules, and publish to the Module Store for cross-tenant distribution
+        • **Agentic AI Pipelines** — 8 comparison algorithms power document matching with configurable tolerance, multi-pass strategies, and 3-way verification
+        • **AI-Powered Configuration** — schema auto-detection, live extraction preview, and Gemini-driven matching rules eliminate manual setup
+
+        **Key Capabilities:**
+
+        • **Document Processing Pipelines** — Automated ingestion, classification, and extraction across invoices, pickup slips, delivery notes, and purchase orders
+        • **Smart Matching Engine** — Reconciles documents across multiple companies and stations with per-tenant algorithm configuration
+        • **Live Extraction Preview** — Real-time feedback loop where users see extraction results before committing pipeline configurations
+        • **Multi-Tenant Isolation** — Each tenant operates in a fully isolated environment with independent module subscriptions and data boundaries
+
+        **Technical Stack:**
+
+        TanStack Start with React 19, TypeScript, PostgreSQL 16 with Drizzle ORM, Trigger.dev v4 for background jobs, LlamaCloud for document AI, Google Gemini for intelligent matching, Cloudflare R2 for storage and Email Workers for notifications, Better Auth for authentication, and Bun as the runtime.
+
+        **Impact:**
+
+        Transforms manual document reconciliation into an automated, tenant-configurable intelligence platform -- enabling non-technical users to build and deploy document processing workflows through AI-assisted configuration rather than custom development.
+      `,
+      "Swiss Energy Platform Suite": `
+        The Swiss Energy Platform Suite consolidates 20 services and 6 financial matching engines serving a Swiss petrol station group. It automates the reconciliation of pickup slips, invoices, purchases, and delivery notes across 4 companies (CICA, SOCAR, LANDI, MINEROL) and 8 petrol stations.
+
+        **Services Architecture:**
+
         • **20 Services** organized into 5 categories: Document Matching (10), Data Management (2), Reporting (3), Orchestration (2), and Automation (3)
-        • **10 Matching Algorithms** — each tailored per company with varying criteria (group matching, direct matching, two-pass, delta-based, 3-way verification)
-        • **Feature-first mono-repo** — each service is self-contained with its own config, routes, controller, service, and matching logic
+        • **6 Financial Matching Engines** — Each reconciles transactions between a specific payment terminal system and its settlement provider (KSW-WorldLine, KSW-Post, Hectronic-TWINT, Hectronic-Post, Traffitec-Post, Traffitec-Nexi)
+        • **10 Matching Algorithms** — tailored per company with varying criteria (group matching, direct matching, two-pass, delta-based, 3-way verification)
 
         **Key Capabilities:**
 
         • **Daily Matching Orchestrator** — Runs all 12 operations sequentially: duplicate cleanup, 4 pickup/invoice matchings, 3 pickup/purchase matchings, invoice/purchase reconciliation, 3-way verification, station reports, and inventory summaries
-        • **WhatsApp Image Classification** — Automated pipeline that fetches WhatsApp group images, classifies documents using AI (Llama Extract), and routes them via email with attachments
+        • **WhatsApp AI Pipeline** — Automated document classification that fetches WhatsApp group images, classifies documents using AI, and routes them via email with attachments
         • **Wholesale Invoice Generator** — Generates invoices with PDF creation, QR bills, automatic numbering, and VAT calculation
-        • **Data Validation Pipeline** — 5-type integrity checks across 13 RAW sheets with Gemini-powered extraction verification and row protection
-
-        **Automation Pipeline:**
-
-        WhatsApp Daily (3 PM) → Email Processing → Relay Batch Tracker → Daily Matching (all 12 steps) → Inventory Summary + Station Reports → WhatsApp Summaries with verification status
+        • **Transaction Reconciliation** — Multi-tier matching with Swiss financial format handling, duplicate prevention, and tolerance-based matching across 3 terminal systems and 4 settlement providers
 
         **Infrastructure:**
 
-        Self-hosted on Hetzner VPS with PM2 process management, node-cron scheduling, MongoDB for state tracking, and GitHub Actions CI/CD. All document data flows through Google Sheets API with dynamic column lookup for resilience.
+        Self-hosted on Hetzner VPS with PM2 process management, node-cron scheduling, MongoDB for state tracking, and GitHub Actions CI/CD. All document data flows through Google Sheets API with dynamic column lookup.
 
         **Impact:**
 
-        Replaced manual document reconciliation across thousands of records, providing automated matching with visual formatting, match status tracking, and daily summary reports — serving as the operational backbone for the company's document processing workflow.
+        Replaced manual document reconciliation and financial transaction matching across thousands of records, serving as the operational backbone for the company's entire document processing and payment verification workflow.
       `,
-      "EtzlPark Transaction Checker": `
-        EtzlPark Transaction Checker is a financial reconciliation system for Etzelpark fuel stations in Switzerland. It contains 6 independent Node.js matching engines, each reconciling transactions between a specific payment terminal system and its settlement provider.
+      "Initao Water Billing System": `
+        The Initao Water Billing System is a government enterprise platform won via competitive bidding for the Municipality of Initao. It manages the full water billing lifecycle from meter reading to payment collection.
 
-        **Terminal Systems & Settlement Providers:**
+        **Key Capabilities:**
 
-        • **KSW-WorldLine** — Matches KSW terminal transactions against WorldLine card settlements using ID-based matching (BelegNrOnline + TrxRefNo) with ±1.00 CHF tolerance
-        • **KSW-Post** — Matches KSW PostFinance transactions against POST settlements using primary ID match with time ±5min and amount ±0.10 CHF verification fallback
-        • **Hectronic-TWINT** — Two-phase engine: Phase 1 ID-based matching, Phase 2 time ±3min + amount ±2 CHF + location mapping fallback, with TWINT fee normalization at 0.65%
-        • **Hectronic-Post** — Matches Hectronic XML terminal data against POST settlements using Terminal ID + time ±3min + amount ±0.01 CHF tolerance
-        • **Traffitec-Post** — Matches Traffitec terminals against POST settlements using Terminal ID + time ±3min + amount ±0.05 CHF tolerance with dynamic payment type filtering
-        • **Traffitec-Nexi** — Two-tier engine: Tier 1 map-based composite key lookup (TerminalID + Date + AuthCode) covering 99% of matches with PAN last-4 disambiguation, Tier 2 fallback on time window + amount tolerance
+        • **Full Billing Lifecycle** — Meter reading capture, consumption calculation, bill generation, payment collection, and receipt issuance in a single integrated workflow
+        • **Offline-First Mobile API** — Field workers can record meter readings without connectivity, with automatic synchronization when back online via Laravel Sanctum-secured endpoints
+        • **WebSocket Notifications** — Real-time updates via Laravel Reverb for payment confirmations, overdue alerts, and system events
+        • **Double-Entry Ledger** — Audit-grade financial integrity with proper accounting entries for every transaction, ensuring full traceability for government audits
 
-        **Key Design Principles:**
+        **Technical Stack:**
 
-        • Each matcher is a standalone Node.js project — independent installation and execution
-        • Full pipeline in a single command (prepare + match), or step-by-step execution
-        • Duplicate prevention — each settlement transaction can only match once across all matchers
-        • Swiss financial format handling — semicolon-delimited CSVs with comma decimal separators
-        • Reports generated in both CSV and JSON formats (matched, missing, discrepancies, unmatched)
+        Laravel 12 with PHP 8.2+, MySQL 8 for relational data, Alpine.js 3 and Tailwind CSS 3 for the frontend, Laravel Reverb for WebSocket support, Pest PHP for testing, Docker for containerized deployment, and Laravel Sanctum for API authentication.
+
+        **Architecture Highlights:**
+
+        • **Multi-zone billing** — Supports different rate structures across municipal water zones
+        • **Penalty and discount engine** — Configurable late payment penalties and early payment discounts
+        • **Audit trail** — Every modification to billing records is logged with user attribution and timestamps
+        • **Report generation** — Monthly collection reports, outstanding balance summaries, and consumption analytics for municipal officials
 
         **Impact:**
 
-        Automates the reconciliation of thousands of fuel station payment transactions across 3 terminal systems and 4 settlement providers, identifying matched transactions, missing records, overpaid/underpaid discrepancies, and unmatched settlements — replacing manual spreadsheet comparison.
+        Digitized water billing operations for the municipality, replacing manual ledger-based processes with a system that ensures accurate billing, real-time payment tracking, and audit-ready financial records.
       `,
-      "REPSShield (Real Estate Professional Compliance Platform)": `
-        REPSShield is a purpose-built SaaS solution addressing one of the biggest challenges in the real estate sector: preserving IRS REP status under Section 469(c)(7). Qualifying professionals can save $50,000+ annually in taxes by deducting unlimited rental property losses—but compliance requires 750+ hours of documented real estate activity, material participation, and meticulous recordkeeping.
+      "REPSShield (AI-Powered Real Estate Tax Compliance)": `
+        REPSShield is a purpose-built SaaS platform protecting real estate investors' IRS Real Estate Professional (REP) status under Section 469(c)(7). Qualifying professionals can save $50,000+ annually in taxes by deducting unlimited rental property losses -- but compliance requires 750+ hours of documented real estate activity, material participation, and meticulous recordkeeping.
+
+        **Three AI Modes:**
+
+        • **Agentic Time-Tracking** — AI auto-classifies real estate activities, validates entries against IRS requirements, and provides real-time logging with voice-to-text support
+        • **RAG Advisory** — Retrieval-augmented generation over 282 IRS documents, enabling natural-language queries about tax compliance with source citations
+        • **14-Check IRS Examiner Simulation** — Runs a comprehensive audit simulation mirroring actual IRS examination procedures to identify compliance gaps before they become problems
 
         **Key Features & Capabilities:**
-        
-        • **Intelligent Time Tracking & Validation** - Real-time logging, activity classification, and voice-to-text entries that meet IRS requirements
-        • **AI Compliance Engine** - Predicts qualification status, detects risks, and auto-classifies activities from emails, invoices, and receipts
-        • **Property & Portfolio Management** - Multi-property activity logs, material participation analysis, and ROI insights
-        • **Audit-Ready Reporting** - Professional, IRS-formatted reports with real-time dashboards and goal tracking
-        • **Seamless Integrations** - Google Calendar, Gmail, property management systems, and export formats for CPAs
-        • **Collaboration Tools** - Secure CPA sharing, role-based team management, and white-label options for firms
 
-        **Target Market & Impact:**
-        The platform serves high-income real estate investors, professionals (agents, managers, attorneys), property management companies, and accounting firms. It not only safeguards tax savings but also boosts operational efficiency, enabling firms to scale client management while delivering premium services.
+        • **Multi-Provider Circuit-Breaker Failover** — Automatic failover across AI providers ensures zero downtime for compliance-critical operations
+        • **Calendar Sync** — Google Calendar integration for automatic activity capture and hour tracking
+        • **Stripe Billing** — Subscription management with usage-based pricing tiers
+        • **Mobile Apps** — Native iOS and Android apps via Capacitor.js for on-the-go time tracking
+        • **Audit-Ready Reporting** — Professional, IRS-formatted reports with real-time dashboards and goal tracking
+        • **CPA Collaboration** — Secure sharing, role-based team management, and export formats for accounting firms
 
-        **Technical Excellence:**
-        Backed by scalable cloud architecture, bank-level security, and a forward-looking roadmap including international tax support, syndication management, and predictive compliance insights. REPSShield positions itself as the definitive compliance solution in a $500M+ market.
+        **Technical Stack:**
 
-        **ROI & Value Proposition:**
-        At its core, REPSShield provides peace of mind: reducing audit anxiety, saving time, and protecting millions in tax benefits—delivering up to 130x ROI for individual users and major efficiency gains for firms.
+        React 18 frontend, Node.js/Express backend, TypeScript throughout, PostgreSQL 16 (Neon) with Drizzle ORM, Vercel AI SDK v4 for multi-provider AI integration, Stripe for payments, Capacitor.js for mobile, Astro 5 for the marketing site, Cloudflare Workers for edge functions, and Trigger.dev for background jobs.
+
+        **Impact:**
+
+        Protects millions in tax benefits for real estate professionals -- reducing audit anxiety, saving time, and delivering up to 130x ROI for individual users and major efficiency gains for accounting firms.
 
         Visit the platform at: https://repsshield.com
       `,
       "MemberPulse (SaaS CPD Platform)": `
-        MemberPulse is a comprehensive multi-tenant SaaS platform designed for professional associations and organizations. 
+        MemberPulse is a comprehensive multi-tenant SaaS platform designed for professional associations and organizations.
         The platform features a complete ecosystem including:
-        
+
         • **Course Management System** - Create, manage, and deliver professional development courses
         • **Event Management** - Full-featured event planning, registration, and management
         • **Subscription System** - Flexible membership tiers and billing management
@@ -135,36 +161,23 @@ export default function ProjectDetailsModal({ project, isOpen, onClose }: Projec
         • **Business Directory** - Member and organization listings
         • **Sponsorship Management** - Corporate partnership and sponsorship tracking
         • **CPD Points Tracking** - Continuing Professional Development credit system
-        
+
         Built with enterprise-grade security, scalability, and multi-tenancy in mind, supporting both individual professionals and large organizations.
-        
+
         Visit the platform at: https://memberpulse.com.au
       `,
       PlayNow: `
-        PlayNow is an innovative SaaS marketplace platform that connects merchants with customers through a unique coupon-based system. 
+        PlayNow is an innovative SaaS marketplace platform that connects merchants with customers through a unique coupon-based system.
         The platform enables:
-        
+
         • **Merchant Dashboard** - Comprehensive tools for businesses to create and manage deals
         • **Coupon Management** - Dynamic pricing and promotional campaign tools
         • **Multi-Category Support** - Sports venues, activities, goods, and services
         • **User Experience** - Intuitive interface for discovering and purchasing deals
         • **Payment Integration** - Secure transaction processing and merchant payouts
         • **Analytics & Reporting** - Performance tracking for merchants and platform metrics
-        
+
         The beta version successfully demonstrated the core marketplace functionality before project handoff, showcasing the potential for scalable deal distribution.
-      `,
-      "Weather Forecasting Application": `
-        A modern, responsive weather application built with React and integrated with the OpenWeather API. 
-        Key features include:
-        
-        • **Real-time Weather Data** - Current conditions, forecasts, and weather alerts
-        • **Geolocation Support** - Automatic location detection and manual city search
-        • **Interactive UI** - Clean, intuitive interface with weather visualizations
-        • **Performance Optimized** - Achieving 95% uptime with efficient API usage
-        • **Responsive Design** - Seamless experience across desktop and mobile devices
-        • **Error Handling** - Robust error management and user feedback systems
-        
-        Deployed on Vercel with continuous integration and monitoring for optimal performance.
       `,
     }
 

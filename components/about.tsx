@@ -77,7 +77,7 @@ export default function About() {
               My work spans <strong>multi-tenant SaaS development</strong>, <strong>RESTful API design</strong>, <strong>database optimization</strong> (PostgreSQL, MySQL), and <strong>DevOps automation</strong> with Docker and CI/CD pipelines. I've delivered mission-critical systems for education, e-commerce, professional associations, and internal enterprise tools—building secure, maintainable, and high-performance solutions.
             </p>
             <p className="text-gray-300 leading-relaxed">
-              Available for <strong>remote work</strong>, <strong>freelance projects</strong>, and <strong>technical partnerships</strong>. Open to structured collaborations and long-term engineering opportunities that align with <strong>Umbra Systems' vision</strong> of building intelligent, scalable business infrastructure.
+              Available for <strong>remote work</strong>, <strong>freelance projects</strong>, and <strong>technical partnerships</strong>. Open to structured collaborations and long-term engineering opportunities focused on building intelligent, scalable business infrastructure.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">

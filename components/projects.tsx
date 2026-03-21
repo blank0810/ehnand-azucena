@@ -11,50 +11,15 @@ import AdvancedProjectsFilter from "./advanced-projects-filter"
 
 const projects = [
   {
-    title: "Personal Budget & Finance Manager",
+    title: "Adam AI (Multi-Tenant Document Intelligence SaaS)",
     description:
-      "A comprehensive double-entry accounting system for personal finance, featuring net worth tracking, P&L statements, and budget analytics.",
-    image: "/images/projects/budget-app.png",
-    technologies: ["Next.js 15", "TypeScript", "PostgreSQL", "Prisma", "Tailwind CSS", "shadcn/ui", "NextAuth.js", "Recharts"],
-    period: "Dec 2025 – Present",
-    role: "Solo Developer",
-    status: "Live Production",
-    category: "Finance",
-    liveUrl: "https://ehnand-budget.vercel.app/",
-  },
-  {
-    title: "Adam One (Unified Document Matching Platform)",
-    description:
-      "A 20-service mono-repo platform that automates document matching across 4 companies and 4 document types, with WhatsApp image classification, daily orchestration workflows, and wholesale invoice generation.",
+      "B2B platform enabling tenants to subscribe to document-processing modules, commission custom pipelines, and publish to a Module Store. Agentic AI pipelines with 8 comparison algorithms power schema auto-detection, live extraction preview, and Gemini-driven matching rules for the first tenant -- a Swiss energy client operating a petrol station group.",
     image: "/images/projects/adam-one.png",
-    technologies: ["Node.js", "Express.js", "Google Sheets API", "MongoDB", "PM2", "Docker", "GitHub Actions", "EJS"],
-    period: "Dec 2025 – Present",
+    technologies: ["TanStack Start", "React 19", "TypeScript", "PostgreSQL 16", "Drizzle ORM", "Trigger.dev v4", "LlamaCloud", "Google Gemini", "Cloudflare R2", "Better Auth", "Bun"],
+    period: "Jan 2026 – Present",
     role: "Lead Developer",
-    status: "Live Production",
-    category: "Internal Tool",
-  },
-  {
-    title: "EtzlPark Transaction Checker",
-    description:
-      "Financial reconciliation system with 6 independent matching engines that reconcile payment terminal transactions (KSW, Hectronic, Traffitec) against settlement providers (WorldLine, PostFinance, TWINT, Nexi) for Swiss fuel stations.",
-    image: "/placeholder.svg?height=300&width=500",
-    technologies: ["Node.js", "CSV Processing", "XML Parsing", "Financial Reconciliation"],
-    period: "Dec 2025 – Present",
-    role: "Lead Developer",
-    status: "Live Production",
-    category: "Internal Tool",
-  },
-  {
-    title: "REPSShield (Real Estate Professional Compliance Platform)",
-    description:
-      "Advanced SaaS compliance platform helping real estate investors maintain IRS REP status and protect $50,000+ in annual tax deductions. Features AI-powered compliance monitoring, intelligent time tracking, audit-ready reporting, and seamless integrations.",
-    image: "/images/projects/repsshield.png",
-    technologies: ["React", "TypeScript", "Vite", "Tailwind CSS", "AI Integration", "IRS Compliance"],
-    period: "Aug 2025 – Present",
-    role: "Backend Developer",
     status: "Live Production",
     category: "SaaS Platform",
-    liveUrl: "https://repsshield.com",
   },
   {
     title: "MemberPulse (SaaS CPD Platform)",
@@ -69,6 +34,41 @@ const projects = [
     liveUrl: "https://memberpulse.com.au",
   },
   {
+    title: "REPSShield (AI-Powered Real Estate Tax Compliance)",
+    description:
+      "Three AI modes protect real estate investors' IRS REP status: agentic time-tracking that auto-classifies activities, RAG advisory over 282 IRS documents, and a 14-check IRS examiner simulation. Multi-provider circuit-breaker failover, calendar sync, Stripe billing, and mobile apps via Capacitor.js round out the platform.",
+    image: "/images/projects/repsshield.png",
+    technologies: ["React 18", "Node.js", "Express", "TypeScript", "PostgreSQL 16", "Drizzle ORM", "Vercel AI SDK v4", "Stripe", "Capacitor.js", "Astro 5", "Cloudflare Workers", "Trigger.dev"],
+    period: "Aug 2025 – Present",
+    role: "Backend Developer",
+    status: "Live Production",
+    category: "SaaS Platform",
+    liveUrl: "https://repsshield.com",
+  },
+  {
+    title: "Initao Water Billing System",
+    description:
+      "Won via competitive government bidding for the Municipality of Initao. Full billing lifecycle from meter reading to payment collection, offline-first mobile API for field workers, WebSocket real-time notifications, and a double-entry ledger ensuring audit-grade financial integrity.",
+    image: "/images/projects/water-billing-placeholder.svg",
+    technologies: ["Laravel 12", "PHP 8.2+", "MySQL 8", "Alpine.js 3", "Tailwind CSS 3", "Laravel Reverb", "Pest PHP", "Docker", "Laravel Sanctum"],
+    period: "Feb 2026 – Present",
+    role: "Lead Developer",
+    status: "Deployed",
+    category: "Government / Enterprise",
+    githubUrl: "https://github.com/blank0810/initao-water-billing",
+  },
+  {
+    title: "Swiss Energy Platform Suite",
+    description:
+      "Consolidated 20 services and 6 financial matching engines serving a Swiss petrol station group. Daily orchestration reconciles pickup slips, invoices, purchases, and delivery notes across 4 companies and 8 stations. Includes WhatsApp AI document classification pipeline and wholesale invoice generation.",
+    image: "/images/projects/swiss-energy-placeholder.svg",
+    technologies: ["Node.js", "MongoDB", "Google Sheets API", "CSV/XML Processing", "PM2", "GitHub Actions", "Hetzner"],
+    period: "Dec 2025 – Present",
+    role: "Lead Developer",
+    status: "Live Production",
+    category: "Internal Tool",
+  },
+  {
     title: "PlayNow",
     description:
       "Beta version of a SaaS marketplace for merchants to sell coupons for goods/venues/activities (Project Handed Off).",
@@ -79,90 +79,6 @@ const projects = [
     status: "Beta",
     category: "Marketplace",
     liveUrl: "https://dev.playnow.ae",
-  },
-  {
-    title: "Weather Forecasting Application",
-    description:
-      "React-based app with OpenWeather API, hitting 95% uptime and geolocation support, deployed on Vercel.",
-    image: "/images/weather_app.png",
-    technologies: ["React", "OpenWeather API", "Vercel", "Geolocation"],
-    period: "Jan 2025 – Feb 2025",
-    role: "Solo Developer",
-    status: "Live",
-    category: "Web App",
-    liveUrl: "https://ehnand-weather-app.vercel.app/",
-    githubUrl: "https://github.com/blank0810/weather-app",
-  },
-  {
-    title: "EduTracker System",
-    description: "Laravel/MySQL tool with Google Sheets/Gmail APIs, slashing reporting time by 40%.",
-    image: "/images/edutracker.jpg",
-    technologies: ["Laravel", "MySQL", "Google APIs", "Reporting"],
-    period: "Jul 2024",
-    role: "Solo Developer",
-    status: "Deployed",
-    category: "Education",
-  },
-  {
-    title: "Email Automation Script",
-    description:
-      "Python script leveraging MXroute API to automate creation of 500+ email accounts, cutting manual setup time by 70% and ensuring config consistency.",
-    image: "/images/email_auto.jpg",
-    technologies: ["Python", "MXroute API", "Automation"],
-    period: "Jul 2024",
-    role: "Solo Developer",
-    status: "Completed",
-    category: "Automation",
-  },
-  {
-    title: "M1 – WEB HRIS",
-    description: "Cloud HR system, enhancing data integrity and security compliance.",
-    image: "/images/lgu_hris.jpg",
-    technologies: ["Laravel", "SQL Server", "Cloud", "HR System", "Security", "Data Integrity"],
-    period: "Jan 2024 - Jun 2024",
-    role: "Team Developer",
-    status: "Deployed",
-    category: "Enterprise",
-  },
-  {
-    title: "M1-Helpdesk System",
-    description: "Centralized IT platform with VMware, halving response times.",
-    image: "/placeholder.svg?height=300&width=500",
-    technologies: ["Laravel", "SQL Server", "IT Helpdesk", "VMware", "Response Time"],
-    period: "Jan 2024 - Jun 2024",
-    role: "Lead Developer",
-    status: "Deployed",
-    category: "Internal Tool",
-  },
-  {
-    title: "Desktop Human Resources Information System",
-    description: "C#.NET-based desktop app, securing payroll and employee records while speeding processing by 30%.",
-    image: "/images/lgu_hris.jpg",
-    technologies: ["C#.NET", "SQL Server", "Desktop", "HR", "Payroll"],
-    period: "Aug 2023 - Jan 2024",
-    role: "Lead Developer",
-    status: "Deployed",
-    category: "Desktop App",
-  },
-  {
-    title: "File Repository System",
-    description: "Secure document management system with role-based access control and version tracking.",
-    image: "/images/file_repo.jpg",
-    technologies: ["PHP", "MySQL", "Document Management", "Security", "Version Control"],
-    period: "Jun 2023 - Aug 2023",
-    role: "Solo Developer",
-    status: "Completed",
-    category: "Document Management",
-  },
-  {
-    title: "Medical Diagnostic Expert System",
-    description: "AI-powered diagnostic tool using rule-based inference to assist medical professionals.",
-    image: "/images/expert_sys.jpg",
-    technologies: ["AI", "Expert Systems", "Healthcare", "Diagnostics", "PHP"],
-    period: "Mar 2023 - May 2023",
-    role: "Solo Developer",
-    status: "Completed",
-    category: "AI/Healthcare",
   },
 ]
 
@@ -209,9 +125,8 @@ export default function Projects() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-center text-gray-400 mb-8 max-w-3xl mx-auto"
         >
-          Explore my portfolio of innovative solutions, from enterprise SaaS platforms to cutting-edge web applications.
-          Use the advanced filtering system below to discover projects by technology, category, timeline, or create your
-          own custom filters.
+          A selection of production systems, SaaS platforms, and enterprise tools built for clients across four
+          countries.
         </motion.p>
 
         {/* Advanced Filter System */}

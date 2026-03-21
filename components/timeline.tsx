@@ -18,9 +18,6 @@ interface TimelineProps {
 }
 
 export default function Timeline({ items }: TimelineProps) {
-  // Debug logging for production
-  console.log("Timeline component rendering with items:", items?.length || 0)
-
   if (!items || items.length === 0) {
     return (
       <div className="text-center text-gray-400 py-12">
@@ -51,13 +48,6 @@ function TimelineItemComponent({ item, index }: TimelineItemComponentProps) {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
-  })
-
-  // Debug logging for each timeline item
-  console.log(`Timeline item ${index} rendering:`, {
-    title: item.title,
-    company: item.company,
-    inView,
   })
 
   // Determine if this card should be on the left (even index) or right (odd index)
