@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SITE_URL } from "@/lib/site"
+import { FAQ_ITEMS } from "@/lib/faq"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,6 +20,7 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Ehnand Azucena - Full Stack Developer | Laravel, React, Symfony Expert",
   description:
     "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in SaaS platforms, database optimization, and scalable web applications. Available for hire.",
@@ -37,6 +40,12 @@ export const metadata: Metadata = {
     "TypeScript Developer",
     "Remote Developer",
     "Freelance Developer",
+    "Full Stack Developer Philippines",
+    "Freelance Full Stack Developer Philippines",
+    "Contract Developer Philippines",
+    "Project-based Developer",
+    "Laravel Developer Philippines",
+    "Hire Full Stack Developer",
     "Ehnand Azucena",
   ],
   authors: [{ name: "Ehnand Azucena" }],
@@ -56,7 +65,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://your-portfolio-domain.com",
+    url: SITE_URL,
     title: "Ehnand Azucena - Full Stack Developer | Laravel, React, Symfony Expert",
     description:
       "Professional Full Stack Developer with expertise in Laravel, React, Symfony, and modern web technologies. Specialized in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade solutions. Currently working with ClouDesk Pty. Ltd on multi-tenant platforms and high-value e-commerce systems.",
@@ -80,8 +89,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@ehnandazucena",
-    creator: "@ehnandazucena",
     title: "Ehnand Azucena - Full Stack Developer | Laravel, React, Symfony Expert",
     description:
       "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in SaaS platforms, database optimization, and scalable web applications.",
@@ -95,14 +102,11 @@ export const metadata: Metadata = {
     ],
   },
   alternates: {
-    canonical: "https://your-portfolio-domain.com",
+    canonical: "/",
   },
   category: "Technology",
   classification: "Portfolio Website",
-  other: {
-    "google-site-verification": "your-google-verification-code",
-  },
-    generator: 'v0.app'
+  generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -116,8 +120,6 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//vercel.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preload" href="/images/profile-new.jpg" as="image" type="image/jpeg" />
-        <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
 
         {/* Structured Data */}
         <script
@@ -130,10 +132,10 @@ export default function RootLayout({
               jobTitle: "Full Stack Developer",
               description:
                 "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade solutions.",
-              url: "https://your-portfolio-domain.com",
+              url: SITE_URL,
               image: [
-                "https://your-portfolio-domain.com/images/profile-new.jpg",
-                "https://your-portfolio-domain.com/images/og-image.jpg",
+                `${SITE_URL}/images/profile-new.jpg`,
+                `${SITE_URL}/images/og-image.jpg`,
               ],
               email: "ehnand.azucena00@gmail.com",
               telephone: "+639534678287",
@@ -147,7 +149,6 @@ export default function RootLayout({
               sameAs: [
                 "https://www.linkedin.com/in/ehnand-azucena-3028a7194",
                 "https://github.com/blank0810",
-                "https://twitter.com/ehnandazucena",
               ],
               knowsAbout: [
                 "Full Stack Development",
@@ -198,6 +199,25 @@ export default function RootLayout({
                   addressCountry: "Philippines",
                 },
               },
+            }),
+          }}
+        />
+
+        {/* FAQ structured data — mirrors the visible FAQ section (lib/faq.ts) */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: FAQ_ITEMS.map((item) => ({
+                "@type": "Question",
+                name: item.question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: item.answer,
+                },
+              })),
             }),
           }}
         />

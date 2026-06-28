@@ -5,19 +5,32 @@ import { useInView } from "react-intersection-observer"
 import { Download } from "lucide-react"
 import Image from "next/image"
 
+// CV hosted on Vercel Blob (public store) — keeps the binary out of the repo
+const CV_URL = "https://7zznrjaei5nypecj.public.blob.vercel-storage.com/CV/Ehnand%20CV.pdf"
+
 export default function About() {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
   })
 
-  const handleDownload = () => {
-    const link = document.createElement("a")
-    link.href = "/Ehnand CV.pdf"
-    link.download = "Ehnand CV.pdf"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const handleDownload = async () => {
+    try {
+      const res = await fetch(CV_URL)
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+      const blob = await res.blob()
+      const objectUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = objectUrl
+      link.download = "Ehnand CV.pdf"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(objectUrl)
+    } catch {
+      // Fallback: let the browser download directly via the blob's attachment URL
+      window.open(`${CV_URL}?download=1`, "_blank")
+    }
   }
 
   return (
