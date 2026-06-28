@@ -1,6 +1,3 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import Navigation from "@/components/navigation"
 import Hero from "@/components/hero"
 import About from "@/components/about"
@@ -9,39 +6,25 @@ import Projects from "@/components/projects"
 import Skills from "@/components/skills"
 import Education from "@/components/education"
 import Certificates from "@/components/certificates"
+import Faq from "@/components/faq"
 import Contact from "@/components/contact"
 import Footer from "@/components/footer"
 import ScrollProgress from "@/components/scroll-progress"
 import SectionIndicator from "@/components/section-indicator"
-import LoadingScreen from "@/components/loading-screen"
+
+const sections = [
+  { id: "home", label: "Home" },
+  { id: "about", label: "About" },
+  { id: "experience", label: "Experience" },
+  { id: "projects", label: "Projects" },
+  { id: "skills", label: "Skills" },
+  { id: "education", label: "Education" },
+  { id: "certificates", label: "Certificates" },
+  { id: "faq", label: "FAQ" },
+  { id: "contact", label: "Contact" },
+]
 
 export default function Page() {
-  const [isLoading, setIsLoading] = useState(true)
-
-  const sections = [
-    { id: "home", label: "Home" },
-    { id: "about", label: "About" },
-    { id: "experience", label: "Experience" },
-    { id: "projects", label: "Projects" },
-    { id: "skills", label: "Skills" },
-    { id: "education", label: "Education" },
-    { id: "certificates", label: "Certificates" },
-    { id: "contact", label: "Contact" },
-  ]
-
-  useEffect(() => {
-    // Simulate initial loading
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (isLoading) {
-    return <LoadingScreen />
-  }
-
   return (
     <>
       <ScrollProgress />
@@ -55,6 +38,7 @@ export default function Page() {
         <Skills />
         <Education />
         <Certificates />
+        <Faq />
         <Contact />
       </main>
       <Footer />

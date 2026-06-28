@@ -30,8 +30,8 @@ export default function Hero() {
       <div className="section-container z-10">
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ x: -50 }}
+            animate={{ x: 0 }}
             transition={{ duration: 0.8 }}
             className="text-left"
           >

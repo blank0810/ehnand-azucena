@@ -174,7 +174,7 @@ export default function Contact() {
         >
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-green-900/30 border border-green-700 rounded-full backdrop-blur-sm">
             <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-green-400 font-semibold text-lg">Available for new opportunities</span>
+            <span className="text-green-400 font-semibold text-lg">Available for contract &amp; project-based work</span>
           </div>
         </motion.div>
       </div>
