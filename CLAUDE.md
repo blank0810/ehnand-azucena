@@ -15,6 +15,8 @@ npm run start    # Run production build locally
 npm run lint     # ESLint checks
 ```
 
+Both `package-lock.json` and `pnpm-lock.yaml` are committed. The Dockerfile and tooling use **npm** — prefer `npm` to keep the npm lockfile authoritative. There is no test runner configured.
+
 ### Docker Development
 
 ```bash
@@ -51,7 +53,7 @@ RootLayout (app/layout.tsx - server component)
 - **Section components** (`components/hero.tsx`, `about.tsx`, `experience.tsx`, etc.) - Portfolio content sections
 - **UI primitives** (`components/ui/`) - shadcn/ui components (button, card, badge, toast, tabs)
 - **Supporting components** - `theme-provider.tsx`, `scroll-progress.tsx`, `section-indicator.tsx`, `loading-screen.tsx`, `typing-animation.tsx`
-- **Unused components still in repo** - `blog-section.tsx`, `testimonials.tsx`, `parallax-background.tsx`, `animated-background.tsx` and others not imported in `page.tsx`
+- **Unused components still in repo** (not imported anywhere) - `blog-section.tsx`, `testimonials.tsx`, `parallax-background.tsx`, `animated-background.tsx`, `ProjectCard.tsx`, `projects-filter-dropdown.tsx`, `skill-progress.tsx`, `theme-switcher.tsx`. Verify usage with grep before editing — most rendering goes through `projects.tsx`, `about.tsx`, and `skills.tsx`
 
 ### Adding shadcn/ui Components
 
@@ -66,9 +68,10 @@ Configured in `components.json` with aliases: `@/components`, `@/lib/utils`, `@/
 - Tailwind CSS with `tailwindcss-animate` plugin
 - Dark mode via `next-themes` with class-based switching (default: dark)
 - CSS custom properties in `app/globals.css` define base utility classes: `.section-container`, `.section-title`, `.gradient-text`, `.btn-primary`, `.btn-outline`, `.card`, `.skill-tag`
+- The only active stylesheet is `app/globals.css` (imported in `layout.tsx`). A second `styles/globals.css` exists but is **not** imported — edit `app/globals.css`
 - Color palette: primary `#3b82f6` (blue), secondary `#10b981` (green), accent `#f59e0b` (amber)
 - Custom CSS animations defined in both `globals.css` and `tailwind.config.ts`: `float`, `pulse-slow`, `fadeIn`, `typing`, `progress`
-- Font: Inter (Google Fonts, loaded via `next/font`)
+- Fonts (Google Fonts via `next/font`): Inter for body (`--font-inter`), Poppins for headings (`--font-poppins`, weights 600/700, applied with the `font-poppins` class, e.g. `hero.tsx`)
 
 ## Build Configuration
 
