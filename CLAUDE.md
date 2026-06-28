@@ -9,13 +9,13 @@ Personal portfolio website for Ehnand Azucena (Full Stack Developer). Built with
 ## Development Commands
 
 ```bash
-npm run dev      # Start development server at localhost:3000
-npm run build    # Production build
-npm run start    # Run production build locally
-npm run lint     # ESLint checks
+pnpm dev      # Start development server at localhost:3000
+pnpm build    # Production build
+pnpm start    # Run production build locally
+pnpm lint     # ESLint checks
 ```
 
-Both `package-lock.json` and `pnpm-lock.yaml` are committed. The Dockerfile and tooling use **npm** — prefer `npm` to keep the npm lockfile authoritative. There is no test runner configured.
+This project standardizes on **pnpm** (`pnpm-lock.yaml`); Vercel and the Docker dev image both build with pnpm. Do **not** run `npm install` — npm's flat `node_modules` pulls in a duplicate React that breaks `next build` with a `useContext` null error during prerender. There is no test runner configured.
 
 ### Docker Development
 
@@ -28,22 +28,23 @@ Uses `Dockerfile.dev` with Node 20 Alpine, bind-mounts source code, and isolates
 
 ## Architecture
 
-Single-page portfolio app. `app/page.tsx` is a client component that renders all sections sequentially with a 2-second loading screen:
+Portfolio app: a single-page home plus statically-generated per-project detail routes. `app/page.tsx` is a **server component** (the old 2-second client loading screen was removed so all section content is server-rendered for SEO):
 
 ```
-RootLayout (app/layout.tsx - server component)
+RootLayout (app/layout.tsx - server component; metadata + Person & FAQPage JSON-LD)
   └─ ThemeProvider (next-themes, class-based dark mode, defaults to dark)
-       └─ Page (app/page.tsx - "use client")
-            ├─ LoadingScreen (shown for 2s)
-            ├─ ScrollProgress
-            ├─ Navigation
-            ├─ SectionIndicator (tracks 8 sections by ID)
-            └─ Hero → About → Experience → Projects → Skills → Education → Certificates → Contact → Footer
+       ├─ Page (app/page.tsx - server component)
+       │    ├─ ScrollProgress
+       │    ├─ Navigation
+       │    ├─ SectionIndicator (tracks 9 sections by ID)
+       │    └─ Hero → About → Experience → Projects → Skills → Education → Certificates → FAQ → Contact → Footer
+       └─ /projects/[slug] (app/projects/[slug]/page.tsx - server component; SSG per project, own metadata + JSON-LD)
 ```
 
 ### Key Patterns
 
-- **Nearly everything is a client component** (`"use client"`) for Framer Motion animations and interactivity. No API routes remain.
+- **Section components are client components** (`"use client"`) for Framer Motion animations; `app/page.tsx` and the `/projects/[slug]` pages are **server components** so content is server-rendered. No API routes.
+- **Content data lives in `lib/`** as the single source of truth: `lib/projects.ts` (projects + `featured` flag, feeds the cards, detail pages, and sitemap), `lib/faq.ts` (feeds the FAQ section and FAQPage JSON-LD), `lib/site.ts` (`SITE_URL` from `NEXT_APP_URL`, fallback `https://ehnand.com`). Edit data here, not in the components.
 - **3D Cube** (`components/3d-cube.tsx`): Three.js-based, dynamically imported in `hero.tsx` with `ssr: false` to avoid server-side rendering. Adds ~600KB to bundle but is lazy-loaded.
 - **Section navigation**: Each section component has a matching `id` attribute (e.g., `id="home"`, `id="about"`) that maps to the `sections` array in `page.tsx` for `SectionIndicator` dot navigation.
 - **Animations**: Framer Motion (`motion` components) used heavily across all sections. `react-intersection-observer` triggers animations on scroll.
@@ -52,8 +53,8 @@ RootLayout (app/layout.tsx - server component)
 
 - **Section components** (`components/hero.tsx`, `about.tsx`, `experience.tsx`, etc.) - Portfolio content sections
 - **UI primitives** (`components/ui/`) - shadcn/ui components (button, card, badge, toast, tabs)
-- **Supporting components** - `theme-provider.tsx`, `scroll-progress.tsx`, `section-indicator.tsx`, `loading-screen.tsx`, `typing-animation.tsx`
-- **Unused components still in repo** (not imported anywhere) - `blog-section.tsx`, `testimonials.tsx`, `parallax-background.tsx`, `animated-background.tsx`, `ProjectCard.tsx`, `projects-filter-dropdown.tsx`, `skill-progress.tsx`, `theme-switcher.tsx`. Verify usage with grep before editing — most rendering goes through `projects.tsx`, `about.tsx`, and `skills.tsx`
+- **Supporting components** - `theme-provider.tsx`, `scroll-progress.tsx`, `section-indicator.tsx`, `typing-animation.tsx`, `enhanced-status-badge.tsx`
+- **Unused components still in repo** (not imported anywhere) - `blog-section.tsx`, `testimonials.tsx`, `parallax-background.tsx`, `animated-background.tsx`, `skill-progress.tsx`, `theme-switcher.tsx`. Verify usage with grep before editing — most rendering goes through `projects.tsx`, `about.tsx`, and `skills.tsx`
 
 ### Adding shadcn/ui Components
 
