@@ -5,4 +5,4 @@
 // does NOT need the NEXT_PUBLIC_ prefix and stays out of the client bundle.
 // Falls back to the production domain so local dev and env-less builds still
 // produce valid absolute URLs. Trailing slashes are stripped for safe concatenation.
-export const SITE_URL = (process.env.NEXT_APP_URL ?? "https://www.ehnand.com").replace(/\/+$/, "")
+export const SITE_URL = (process.env.NEXT_APP_URL ?? "https://ehnand.com").replace(/\/+$/, "")
