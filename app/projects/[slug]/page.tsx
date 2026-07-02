@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, ExternalLink, Github, Calendar, User, Award, Layers } from "lucide-react"
-import { PROJECTS, getProjectBySlug } from "@/lib/projects"
+import { PROJECTS, getProjectBySlug, getProjectStartDate } from "@/lib/projects"
 import { SITE_URL } from "@/lib/site"
 import Footer from "@/components/footer"
 
@@ -59,6 +59,7 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
         applicationCategory: project.category,
         url: `${SITE_URL}${path}`,
         image: imageUrl,
+        ...(getProjectStartDate(project) ? { dateCreated: getProjectStartDate(project) } : {}),
         author: {
           "@type": "Person",
           name: "Ehnand Azucena",

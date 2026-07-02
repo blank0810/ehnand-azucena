@@ -378,3 +378,19 @@ export const ARCHIVE_PROJECTS = PROJECTS.filter((p) => !p.featured)
 export function getProjectBySlug(slug: string): Project | undefined {
   return PROJECTS.find((p) => p.slug === slug)
 }
+
+const MONTH_ABBR: Record<string, string> = {
+  jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
+  jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
+}
+
+// Parses the leading "MMM YYYY" of a project's `period` (e.g. "Jan 2026 – Present")
+// into an ISO 8601 year-month for JSON-LD `dateCreated`. Returns undefined if the
+// format ever drifts from the "MMM YYYY" convention used across lib/projects.ts.
+export function getProjectStartDate(project: Project): string | undefined {
+  const match = project.period.match(/^([A-Za-z]{3})\s+(\d{4})/)
+  if (!match) return undefined
+  const month = MONTH_ABBR[match[1].toLowerCase()]
+  if (!month) return undefined
+  return `${match[2]}-${month}`
+}
