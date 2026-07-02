@@ -106,7 +106,13 @@ export const metadata: Metadata = {
   },
   category: "Technology",
   classification: "Portfolio Website",
-  generator: 'v0.app'
+  generator: 'v0.app',
+  // No fallback value on purpose: Search Console verification tokens are
+  // per-property secrets. Set GOOGLE_SITE_VERIFICATION once the property is
+  // added at https://search.google.com/search-console — see .env.example.
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
 }
 
 export default function RootLayout({
