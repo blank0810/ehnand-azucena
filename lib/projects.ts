@@ -5,8 +5,7 @@
 // titles, descriptions, and the long-form copy live in ONE place — no drift between
 // the cards, the detail routes, and the structured data.
 //
-// `featured: true`  -> shown in the main grid (production / client work).
-// `featured: false` -> "Earlier & Academic Work" archive (still server-rendered + indexable).
+// All projects render identically here; curation/highlighting is the CV's job, not the portfolio's.
 export interface Project {
   slug: string
   title: string
@@ -20,13 +19,12 @@ export interface Project {
   role: string
   status: string
   category: string
-  featured: boolean
   liveUrl?: string
   githubUrl?: string
 }
 
 export const PROJECTS: Project[] = [
-  // ---------------------------------------------------------------- Featured
+  // --------------------------------------------------- Production / Client Work
   {
     slug: "adam-ai",
     title: "Adam AI (Multi-Tenant Document Intelligence SaaS)",
@@ -62,7 +60,6 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Live Production",
     category: "SaaS Platform",
-    featured: true,
   },
   {
     slug: "repsshield",
@@ -101,7 +98,6 @@ export const PROJECTS: Project[] = [
     role: "Backend Developer",
     status: "Live Production",
     category: "SaaS Platform",
-    featured: true,
     liveUrl: "https://repsshield.com",
   },
   {
@@ -128,7 +124,6 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Live Production",
     category: "SaaS Platform",
-    featured: true,
     liveUrl: "https://memberpulse.com.au",
   },
   {
@@ -167,7 +162,6 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Deployed",
     category: "Government / Enterprise",
-    featured: true,
     githubUrl: "https://github.com/blank0810/initao-water-billing",
   },
   {
@@ -205,7 +199,6 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Live Production",
     category: "Internal Tool",
-    featured: true,
   },
   {
     slug: "personal-budget-finance-manager",
@@ -233,7 +226,6 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Live Production",
     category: "Finance",
-    featured: true,
     liveUrl: "https://ehnand-budget.vercel.app/",
   },
   {
@@ -259,11 +251,10 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Beta",
     category: "Marketplace",
-    featured: true,
     liveUrl: "https://dev.playnow.ae",
   },
 
-  // ------------------------------------------------ Earlier & Academic Work
+  // ------------------------------------------------- Earlier & Academic Work
   {
     slug: "weather-forecasting-application",
     title: "Weather Forecasting Application",
@@ -275,7 +266,6 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Live",
     category: "Web App",
-    featured: false,
     liveUrl: "https://ehnand-weather-app.vercel.app/",
     githubUrl: "https://github.com/blank0810/weather-app",
   },
@@ -290,7 +280,6 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Deployed",
     category: "Education",
-    featured: false,
   },
   {
     slug: "email-automation-script",
@@ -303,7 +292,6 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Completed",
     category: "Automation",
-    featured: false,
   },
   {
     slug: "m1-web-hris",
@@ -316,7 +304,6 @@ export const PROJECTS: Project[] = [
     role: "Team Developer",
     status: "Deployed",
     category: "Enterprise",
-    featured: false,
   },
   {
     slug: "m1-helpdesk-system",
@@ -329,7 +316,6 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Deployed",
     category: "Internal Tool",
-    featured: false,
   },
   {
     slug: "desktop-hris",
@@ -342,7 +328,6 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Deployed",
     category: "Desktop App",
-    featured: false,
   },
   {
     slug: "file-repository-system",
@@ -355,7 +340,6 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Completed",
     category: "Document Management",
-    featured: false,
   },
   {
     slug: "medical-diagnostic-expert-system",
@@ -368,12 +352,8 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Completed",
     category: "AI / Healthcare",
-    featured: false,
   },
 ]
-
-export const FEATURED_PROJECTS = PROJECTS.filter((p) => p.featured)
-export const ARCHIVE_PROJECTS = PROJECTS.filter((p) => !p.featured)
 
 export function getProjectBySlug(slug: string): Project | undefined {
   return PROJECTS.find((p) => p.slug === slug)
