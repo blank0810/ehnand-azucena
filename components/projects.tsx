@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
-import { ExternalLink, Github, Calendar, ArrowRight, ChevronDown, Search, X } from "lucide-react"
+import { ExternalLink, Github, Calendar, ArrowRight, Search, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { FEATURED_PROJECTS, ARCHIVE_PROJECTS, PROJECTS, type Project } from "@/lib/projects"
+import { PROJECTS, type Project } from "@/lib/projects"
 import EnhancedStatusBadge from "./enhanced-status-badge"
 
 const CATEGORIES = ["All", ...Array.from(new Set(PROJECTS.map((p) => p.category)))]
@@ -188,74 +188,32 @@ export default function Projects() {
           </div>
         </div>
 
-        {isFiltering ? (
-          /* Flat filtered results across all projects */
-          <>
-            <div className="flex items-center justify-center gap-3 mb-8 text-sm text-gray-400">
-              <span>
-                {filtered.length} {filtered.length === 1 ? "project" : "projects"} found
-              </span>
-              <button onClick={clearFilters} className="text-primary hover:underline">
-                Clear filters
-              </button>
-            </div>
+        {/* All projects, rendered identically — the CV is where curation/highlighting happens */}
+        <div className="flex items-center justify-center gap-3 mb-8 text-sm text-gray-400">
+          <span>
+            {filtered.length} {filtered.length === 1 ? "project" : "projects"}
+            {isFiltering ? " found" : ""}
+          </span>
+          {isFiltering && (
+            <button onClick={clearFilters} className="text-primary hover:underline">
+              Clear filters
+            </button>
+          )}
+        </div>
 
-            {filtered.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filtered.map((project) => (
-                  <ProjectCard key={project.slug} project={project} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16 text-gray-400">
-                <p className="mb-4">No projects match your search.</p>
-                <button onClick={clearFilters} className="btn-primary">
-                  View all projects
-                </button>
-              </div>
-            )}
-          </>
+        {filtered.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filtered.map((project) => (
+              <ProjectCard key={project.slug} project={project} />
+            ))}
+          </div>
         ) : (
-          /* Default view: Featured grid + collapsible (but crawlable) archive */
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {FEATURED_PROJECTS.map((project) => (
-                <ProjectCard key={project.slug} project={project} />
-              ))}
-            </div>
-
-            {ARCHIVE_PROJECTS.length > 0 && (
-              <details className="mt-16 group max-w-5xl mx-auto">
-                <summary className="flex items-center justify-center gap-2 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-gray-300 hover:text-primary transition-colors">
-                  <span className="font-semibold">
-                    Earlier &amp; Academic Work (2023–2024) — {ARCHIVE_PROJECTS.length} projects
-                  </span>
-                  <ChevronDown className="h-5 w-5 transition-transform duration-300 group-open:rotate-180" />
-                </summary>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                  {ARCHIVE_PROJECTS.map((project) => (
-                    <Link
-                      key={project.slug}
-                      href={`/projects/${project.slug}`}
-                      className="card flex items-start justify-between gap-4 group/row hover:border-primary/50 transition-all duration-300"
-                    >
-                      <div>
-                        <h4 className="font-semibold text-white group-hover/row:text-primary transition-colors duration-300">
-                          {project.title}
-                        </h4>
-                        <p className="text-sm text-gray-400 mt-1">
-                          {project.period} · {project.category}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">{project.technologies.slice(0, 3).join(" · ")}</p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 flex-shrink-0 text-gray-500 group-hover/row:text-primary transition-colors duration-300 mt-1" />
-                    </Link>
-                  ))}
-                </div>
-              </details>
-            )}
-          </>
+          <div className="text-center py-16 text-gray-400">
+            <p className="mb-4">No projects match your search.</p>
+            <button onClick={clearFilters} className="btn-primary">
+              View all projects
+            </button>
+          </div>
         )}
       </div>
     </section>
