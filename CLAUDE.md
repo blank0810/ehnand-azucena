@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal portfolio website for Ehnand Azucena (Full Stack Developer). Built with Next.js 14 App Router, React 18, TypeScript, and Tailwind CSS. Originally generated via v0.dev and deployed on Vercel.
 
+## Git Workflow (CRITICAL)
+
+**Commit and push directly on `main`. Do NOT create feature branches or PRs.** This is a solo repo — the owner is the only contributor — so branch/PR ceremony adds no value here. This project rule intentionally overrides the global "branch first / feature branches → PRs → main" default. Still honor the non-negotiable safety rules: never force-push, never commit secrets/`.env`, and only commit/push when asked.
+
 ## Development Commands
 
 ```bash
