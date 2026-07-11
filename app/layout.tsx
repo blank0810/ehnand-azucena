@@ -143,7 +143,7 @@ export default function RootLayout({
                 `${SITE_URL}/images/profile-new.jpg`,
                 `${SITE_URL}/images/og-image.jpg`,
               ],
-              email: "ehnand.azucena00@gmail.com",
+              email: "contact@ehnand.com",
               telephone: "+639534678287",
               address: {
                 "@type": "PostalAddress",

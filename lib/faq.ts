@@ -31,6 +31,6 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "How can I hire Ehnand or request a quote?",
     answer:
-      "Reach out by email at ehnand.azucena00@gmail.com, on WhatsApp at +63 953 467 8287, or via LinkedIn. He responds to contract, project-based, and full-time inquiries.",
+      "Reach out by email at contact@ehnand.com, on WhatsApp at +63 953 467 8287, or via LinkedIn. He responds to contract, project-based, and full-time inquiries.",
   },
 ]

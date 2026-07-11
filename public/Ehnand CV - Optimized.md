@@ -3,7 +3,7 @@
 **Full Stack Developer | Backend-Focused**
 
 Philippines (UTC+8) | Open to Remote
-+63 953 467 8287 | ehnand.azucena00@gmail.com
++63 953 467 8287 | contact@ehnand.com
 ehnand-azucena.vercel.app | linkedin.com/in/ehnand-azucena-3028a7194 | github.com/blank0810
 
 ---

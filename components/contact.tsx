@@ -21,8 +21,8 @@ export default function Contact() {
     {
       icon: Mail,
       label: "Email",
-      value: "ehnand.azucena00@gmail.com",
-      href: "mailto:ehnand.azucena00@gmail.com",
+      value: "contact@ehnand.com",
+      href: "mailto:contact@ehnand.com",
       copyable: true,
       id: "email",
       description: "Send me a direct email",
