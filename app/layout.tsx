@@ -78,13 +78,6 @@ export const metadata: Metadata = {
         alt: "Ehnand Azucena - Professional Full Stack Developer specializing in Laravel, React, and Symfony",
         type: "image/jpeg",
       },
-      {
-        url: "/images/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Ehnand Azucena - Full Stack Developer Portfolio",
-        type: "image/jpeg",
-      },
     ],
   },
   twitter: {
@@ -139,10 +132,7 @@ export default function RootLayout({
               description:
                 "Professional Full Stack Developer specializing in Laravel, React, Symfony, and modern web technologies. Expert in building scalable SaaS platforms, optimizing databases, and delivering enterprise-grade solutions.",
               url: SITE_URL,
-              image: [
-                `${SITE_URL}/images/profile-new.jpg`,
-                `${SITE_URL}/images/og-image.jpg`,
-              ],
+              image: `${SITE_URL}/images/profile-new.jpg`,
               email: "contact@ehnand.com",
               telephone: "+639534678287",
               address: {
