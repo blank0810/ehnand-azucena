@@ -13,22 +13,25 @@ Personal portfolio website for Ehnand Azucena (Full Stack Developer). Built with
 ## Development Commands
 
 ```bash
-pnpm dev      # Start development server at localhost:3000
-pnpm build    # Production build
-pnpm start    # Run production build locally
-pnpm lint     # ESLint checks
-```
-
-This project standardizes on **pnpm** (`pnpm-lock.yaml`); Vercel and the Docker dev image both build with pnpm. Do **not** run `npm install` — npm's flat `node_modules` pulls in a duplicate React that breaks `next build` with a `useContext` null error during prerender. There is no test runner configured.
-
-### Docker Development
-
-```bash
-docker compose up        # Start dev server at localhost:3001 (maps to container port 3000)
+docker compose up          # Start dev server at localhost:3001 (maps to container port 3000)
 docker compose up --build  # Rebuild after dependency changes
+
+# Production build — note the NODE_ENV override, it is required (see below)
+docker compose run --rm --no-deps -e NODE_ENV=production app pnpm build
+
+docker compose run --rm --no-deps app pnpm lint   # ESLint checks
 ```
 
-Uses `Dockerfile.dev` with Node 20 Alpine, bind-mounts source code, and isolates `node_modules` and `.next` in the container.
+**This project is containerized. Run everything through `docker compose`, not on the host.**
+
+`docker-compose.yml` mounts *anonymous volumes* over `/app/node_modules` and `/app/.next` to isolate them from the host. Docker creates the host-side stubs of those directories as **root-owned**, so running `pnpm dev` or `pnpm build` directly on the host fails with `EACCES: permission denied, open '.next/trace'` — and running `pnpm install` on the host just populates a `node_modules` the container ignores. Neither is worth doing; use the container.
+
+**Two gotchas that will waste your time if you don't know them:**
+
+1. **`next build` needs `NODE_ENV=production` explicitly.** `docker-compose.yml` sets `NODE_ENV=development` for the dev server, and that value leaks into `docker compose run`. Building under it makes Next load the *dev* React runtime and every route fails prerender ("Export encountered errors on following paths: /, /projects/..."). The errors are misleading — they look like app bugs, but the app is fine. Always pass `-e NODE_ENV=production` when building.
+2. **pnpm only, never `npm install`.** The project standardizes on pnpm (`pnpm-lock.yaml`); Vercel and `Dockerfile.dev` (Node 20 Alpine, pnpm via corepack) both build with it. npm's flat `node_modules` pulls in a duplicate React that breaks `next build` with a `useContext` null error during prerender.
+
+There is no test runner configured. Vercel builds from source on push and is unaffected by any of the above.
 
 ## Architecture
 
