@@ -126,6 +126,11 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Person",
+              // Stable @id so every article, project, and page can REFERENCE this one
+              // Person instead of inlining its own copy. Duplicate Person objects make
+              // a crawler see several entities where there is only one — which is the
+              // thing that stops a search engine (or an LLM) resolving who wrote what.
+              "@id": `${SITE_URL}/#person`,
               name: "Ehnand Azucena",
               jobTitle: "Full Stack Developer",
               description:

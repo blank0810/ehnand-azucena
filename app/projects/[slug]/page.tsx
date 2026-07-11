@@ -4,7 +4,9 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, ExternalLink, Github, Calendar, User, Award, Layers } from "lucide-react"
 import { PROJECTS, getProjectBySlug, getProjectStartDate } from "@/lib/projects"
+import { getCaseStudy } from "@/lib/content"
 import { SITE_URL } from "@/lib/site"
+import MdxContent from "@/components/mdx-content"
 import Footer from "@/components/footer"
 
 export function generateStaticParams() {
@@ -49,6 +51,11 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
   const path = `/projects/${project.slug}`
   const imageUrl = project.image.startsWith("http") ? project.image : `${SITE_URL}${project.image}`
 
+  // Body fallback chain: a written case study wins; otherwise fall back to the
+  // existing longDescription, then the short description. Projects convert to MDX
+  // one at a time — an unconverted project renders exactly as it did before.
+  const caseStudy = getCaseStudy(project.slug)
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -60,11 +67,9 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
         url: `${SITE_URL}${path}`,
         image: imageUrl,
         ...(getProjectStartDate(project) ? { dateCreated: getProjectStartDate(project) } : {}),
-        author: {
-          "@type": "Person",
-          name: "Ehnand Azucena",
-          url: SITE_URL,
-        },
+        // Reference the single Person entity from the root layout instead of inlining
+        // a duplicate — a second Person object makes crawlers see two entities.
+        author: { "@id": `${SITE_URL}/#person` },
       },
       {
         "@type": "BreadcrumbList",
@@ -128,10 +133,16 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
 
           <div className="mb-10">
             <h2 className="text-2xl font-bold text-white mb-4">Project Overview</h2>
-            <div
-              className="text-gray-300 leading-relaxed whitespace-pre-line"
-              dangerouslySetInnerHTML={{ __html: renderRichText(project.longDescription ?? project.description) }}
-            />
+            {caseStudy ? (
+              <div className="max-w-3xl">
+                <MdxContent source={caseStudy} />
+              </div>
+            ) : (
+              <div
+                className="text-gray-300 leading-relaxed whitespace-pre-line"
+                dangerouslySetInnerHTML={{ __html: renderRichText(project.longDescription ?? project.description) }}
+              />
+            )}
           </div>
 
           <div className="mb-10">

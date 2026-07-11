@@ -1,0 +1,105 @@
+---
+title: "Offline-First Field Data Collection in Laravel: Meter Readers with No Signal"
+date: 2026-07-14
+draft: true
+tags: [laravel, offline-first, sanctum, mobile-api, sync]
+summary: "How I built an offline-first mobile API for municipal water meter readers who work in areas with no connectivity — the sync model, the conflict rules, and what a queued write actually has to carry."
+---
+
+Field data collection breaks the assumption every web app is built on: that the network is there when the user presses Save.
+
+For the Municipality of Initao's water billing system, the users are meter readers walking routes through barangays where connectivity is unreliable or simply absent. They capture a reading, a photo of the meter as evidence, and a QR scan identifying the connection. Then they walk to the next house. The reading has to be committed to the device *immediately* and reconciled with the server whenever a signal returns — which might be four hours and two hundred readings later.
+
+This post covers how that sync model works in Laravel, and the design decisions that matter more than the framework you pick.
+
+## Why not just retry the request?
+
+The naive approach is to treat this as a networking problem: catch the failed request, retry with backoff, show a spinner. This fails immediately in the field, for a reason that has nothing to do with code.
+
+The reader is not waiting. They have already walked to the next meter. Any design where the user must stay on a screen until a write succeeds is a design that loses data the moment someone pockets their phone. **The write has to be durable on the device before the reader moves, and the sync has to happen without their attention.**
+
+That reframes the problem. It is not a retry problem, it is a *queue and reconcile* problem — which means the client owns a local write-ahead log, and the server has to accept a batch of writes that may arrive hours late, out of order, and more than once.
+
+## What a queued reading has to carry
+
+The single most important decision is what goes into the queued record. A reading is not just a number.
+
+| Field | Why it must be captured on the device |
+|---|---|
+| `client_uuid` | Generated offline. This is the idempotency key — without it, a retried batch creates duplicate readings. |
+| `connection_id` | From the QR scan, not typed. Typed identifiers in the field are a data-quality disaster. |
+| `reading_value` | The meter number itself. |
+| `read_at` | The device timestamp of capture — **not** the time the server received it. These can differ by hours. |
+| `photo` | Evidence, captured at read time. Queued as a separate binary upload keyed to the same `client_uuid`. |
+| `reader_id` | Who took it, for the audit trail. |
+
+The two that people forget are `client_uuid` and `read_at`, and both are load-bearing.
+
+`read_at` matters because billing is time-sensitive. A reading captured on the 28th and synced on the 1st belongs to the *previous* billing period. If you stamp records with server-received time, you will silently misfile readings across period boundaries, and the error surfaces as a customer complaint about their bill, weeks later, with no obvious cause.
+
+## Idempotency: the part that actually bites
+
+The client will send the same batch twice. Not might — will. A sync fires, the server commits, the response is lost to a dropped connection, and the client — having never seen a 200 — retries the identical payload.
+
+If your endpoint is a plain `POST /readings` that inserts what it receives, you now have duplicate meter readings, and in a billing system a duplicate reading is not a cosmetic bug: it corrupts consumption calculations, which corrupt bills.
+
+The fix is that the `client_uuid` generated on the device becomes a unique constraint in the database, and the sync endpoint upserts against it:
+
+```php
+public function sync(SyncReadingsRequest $request)
+{
+    $accepted = [];
+
+    foreach ($request->validated()['readings'] as $reading) {
+        $record = MeterReading::updateOrCreate(
+            ['client_uuid' => $reading['client_uuid']],
+            [
+                'connection_id' => $reading['connection_id'],
+                'reading_value' => $reading['reading_value'],
+                'read_at'       => $reading['read_at'],
+                'reader_id'     => $request->user()->id,
+            ],
+        );
+
+        $accepted[] = $record->client_uuid;
+    }
+
+    return response()->json(['accepted' => $accepted]);
+}
+```
+
+The endpoint is now safe to call repeatedly with the same payload. That single property — idempotency keyed on a client-generated UUID — is what makes the whole offline model tractable. Everything else is bookkeeping.
+
+Note what the response returns: the list of `client_uuid`s the server has durably accepted. The device clears exactly those from its local queue and no others. It does not clear on a 200 alone, because a partially-processed batch would then lose the unprocessed remainder.
+
+## Why Sanctum, and the token lifetime problem
+
+Authentication for the mobile API runs on **Laravel Sanctum**, issuing a personal access token per device.
+
+The subtlety with offline-first is token expiry. A reader may be offline for most of a shift. If the token expires mid-route, every queued write is now unauthenticated, and the naive failure mode is that the app drops the queue and asks the reader to log in again — destroying a shift's worth of data.
+
+So the rule is: **authentication failures on sync must never discard the queue.** A 401 means "hold the queue, re-authenticate, retry" — never "clear and start over." The queue is the source of truth until the server confirms otherwise.
+
+## Conflict resolution
+
+With one reader per connection per period, true write-write conflicts are rare — but "rare" is not "never," and the resolution rule has to be decided before it happens rather than after.
+
+{/* TODO — Ehnand: this section needs your actual rule. What happened when
+     two readings arrived for the same connection in the same period?
+     Last-write-wins on read_at? Flag for supervisor review? Reject the
+     second? I don't want to invent this. */}
+
+## What I would do differently
+
+{/* TODO — Ehnand: the most citable part of this article is the thing that
+     broke. Did a sync bug ship? Did you get duplicate bills? Did the photo
+     upload queue blow up device storage? One concrete failure with the
+     before/after is worth more than everything above it. */}
+
+## The takeaway
+
+Offline-first is not a networking feature you bolt on. It changes your data model: every record needs a client-generated identity and a client-side timestamp, and every write endpoint has to be idempotent. Get those two things right and the sync layer is almost boring. Get them wrong and you will be debugging duplicate bills in production, months later, with no way to reconstruct what the reader actually saw.
+
+---
+
+*I'm Ehnand Azucena — full stack and lead developer. I led delivery of the [Initao Water Billing System](https://ehnand.com/projects/initao-water-billing-system), a full water utility platform for a Philippine municipality won through competitive government bidding: Laravel 12, MySQL 8, Sanctum, Laravel Reverb. I take remote contract and lead engagements — [get in touch](https://ehnand.com/#contact).*

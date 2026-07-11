@@ -1,0 +1,87 @@
+---
+title: "Document Reconciliation: The Matching Strategies That Actually Work"
+date: 2026-08-25
+draft: true
+tags: [reconciliation, algorithms, fuzzy-matching, data-engineering, node]
+summary: "Exact match fails on real documents. Here are the eight comparison algorithms and three matching strategies I use to reconcile invoices, delivery notes, and payment terminal settlements across four companies and eight stations."
+---
+
+Reconciliation looks trivial until you see real data. Match the invoice to the delivery note — how hard can it be?
+
+Then you discover the invoice says `INV-2024-0891`, the delivery note says `2024/891`, the amounts differ by €0.02 because of VAT rounding, and the dates are two days apart because the delivery happened Friday and the invoice was cut Monday. Exact match finds nothing. A human finds it in four seconds.
+
+I build reconciliation systems for a Swiss energy client — a petrol station group running four companies and eight stations, reconciling documents and payment-terminal settlements across three terminal systems (KSW, Hectronic, Traffitec) and four settlement providers. This post is about the comparison layer that makes that work.
+
+## Exact match is a special case, not the default
+
+The mistake is building around equality and bolting fuzziness on later. It should be the reverse: **matching is a scoring problem, and exact equality is just the highest-confidence score.**
+
+Every field comparison returns a confidence, not a boolean. A match is then a set of field comparisons combined into an overall score, and a decision threshold on that score. This is the only model that survives real documents.
+
+## The comparison algorithms
+
+Different fields fail in different ways, so each field needs the comparator that matches *its* failure mode:
+
+| Algorithm | Use it for | The failure it absorbs |
+|---|---|---|
+| **Exact** | IDs you control | None — the baseline. |
+| **Case-insensitive** | Names, references | `ACME Ltd` vs `Acme ltd` |
+| **Fuzzy (Levenshtein)** | Free-text names, addresses | Typos, transliteration, OCR errors |
+| **Numeric tolerance** | Amounts, quantities | Rounding, VAT, currency conversion |
+| **Date equality / window** | Dates | Delivery Friday, invoiced Monday |
+| **Contains** | References embedded in longer strings | `Ref: INV-2024-0891 (partial)` |
+| **Common substring** | Mangled identifiers | `INV-2024-0891` vs `2024/891` |
+| **Last-N-characters** | Terminal and card references | Systems that truncate or prefix differently |
+
+The last two are the ones people never think of and end up needing most. Identifiers get reformatted as they pass between systems — a terminal writes the last six digits, an ERP prefixes a company code — and neither exact nor Levenshtein handles that well. Levenshtein in particular scores `INV-2024-0891` against `2024/891` as very *distant*, because it counts every deleted prefix character. Common-substring gets it right immediately.
+
+**The lesson: choose the comparator by asking how this specific field gets mangled, not by picking one clever algorithm and applying it everywhere.**
+
+## The three matching strategies
+
+Comparators score a pair. Strategies decide *which pairs to consider* — and that is where the real design lives.
+
+**ID-based.** Where a shared identifier exists, use it. Fast, unambiguous, and it should always run first to take the easy matches off the table before anything expensive runs.
+
+**Time-window.** Restrict candidates to documents within N days of each other. This is not primarily an accuracy device — it is what keeps the problem tractable. Without it you are comparing every document against every other document, and the cost is quadratic. A window turns an O(n²) sweep into something bounded.
+
+**Amount-tolerance.** Match on value within a configured epsilon. Essential for anything that has passed through VAT, rounding, or a currency conversion — where "the same amount" is almost never the same number.
+
+These compose. A typical pass is: window the candidates by date, filter by amount tolerance, then score the survivors field-by-field with the comparators above.
+
+## Multi-pass beats one clever pass
+
+The single most useful structural decision: **run reconciliation as a sequence of passes, from strictest to loosest, and remove matched records after each pass.**
+
+1. Exact ID match. High confidence, removes most of the volume.
+2. Strict field match within a tight date window.
+3. Fuzzy scoring with amount tolerance across a wider window.
+4. Whatever remains goes to a human.
+
+Each pass runs against a shrinking pool. This matters for both cost and correctness: by the time the expensive fuzzy pass runs, it is operating on the small residue that the cheap passes could not resolve — and there is far less opportunity for a loose rule to steal a record that a strict rule would have matched correctly.
+
+The inverse — running the fuzzy matcher first — produces confident-looking wrong answers, because a loose comparator will happily claim a record that a stricter pass would have matched properly.
+
+## Three-way verification
+
+Two-way matching (invoice ↔ delivery note) tells you the documents agree. It does not tell you the *money* is right.
+
+Three-way verification adds the settlement or payment record: the document says what was ordered, the delivery note says what arrived, and the settlement says what was actually paid. Reconciling all three is what catches the discrepancies that matter financially — the short delivery that was invoiced in full, the terminal settlement that does not tie to the day's transactions.
+
+{/* TODO — Ehnand: what did 3-way verification actually catch in production?
+     A real discovered discrepancy — even anonymized — would be the single
+     most compelling paragraph in this article. */}
+
+## What I would do differently
+
+{/* TODO — Ehnand: you consolidated 20 independent services into one mono-repo.
+     Why were there 20? What broke because they were separate? That
+     consolidation story is genuinely interesting and it's yours alone. */}
+
+## The takeaway
+
+Reconciliation is not an equality check, it is a scoring pipeline. Pick comparators by how each field gets mangled in transit. Use windows to keep the candidate set bounded. Run passes strictest-first and shrink the pool as you go. And accept that the last few percent will always go to a human — the goal is not to eliminate that queue, it is to make it small enough to be someone's morning task rather than their whole job.
+
+---
+
+*I'm Ehnand Azucena — full stack and lead developer. I lead the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite): reconciliation across 4 companies and 8 stations, with 10 company-specific matching algorithms and 6 financial matching engines. Node.js, MongoDB, PM2, Hetzner. I take remote contract and lead engagements — [get in touch](https://ehnand.com/#contact).*

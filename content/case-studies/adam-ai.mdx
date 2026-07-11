@@ -1,0 +1,26 @@
+---
+updated: 2026-07-11
+---
+
+Adam AI is a multi-tenant B2B document intelligence SaaS platform that enables tenants to subscribe to document-processing modules, commission custom pipelines, and publish to a Module Store. Built for the first tenant — a Swiss energy client operating a petrol station group.
+
+## Architecture & Scale
+
+- **Module Marketplace** — tenants subscribe to capabilities, commission custom modules, and publish to the Module Store for cross-tenant distribution
+- **Agentic AI Pipelines** — 8 comparison algorithms power document matching with configurable tolerance, multi-pass strategies, and 3-way verification
+- **AI-Powered Configuration** — schema auto-detection, live extraction preview, and Gemini-driven matching rules eliminate manual setup
+
+## Key Capabilities
+
+- **Document Processing Pipelines** — automated ingestion, classification, and extraction across invoices, pickup slips, delivery notes, and purchase orders
+- **Smart Matching Engine** — reconciles documents across multiple companies and stations with per-tenant algorithm configuration
+- **Live Extraction Preview** — a real-time feedback loop where users see extraction results before committing pipeline configurations
+- **Multi-Tenant Isolation** — each tenant operates in a fully isolated environment with independent module subscriptions and data boundaries
+
+## Technical Stack
+
+TanStack Start with React 19, TypeScript, PostgreSQL 16 with Drizzle ORM, Trigger.dev v4 for background jobs, LlamaCloud for document AI, Google Gemini for intelligent matching, Cloudflare R2 for storage and Email Workers for notifications, Better Auth for authentication, and Bun as the runtime.
+
+## Impact
+
+Transforms manual document reconciliation into an automated, tenant-configurable intelligence platform — enabling non-technical users to build and deploy document processing workflows through AI-assisted configuration rather than custom development.

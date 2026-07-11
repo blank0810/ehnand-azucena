@@ -5,8 +5,22 @@ import { useEffect } from "react"
 import { useState } from "react"
 
 import type React from "react"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Home, User, Code, Briefcase, FolderOpen, Award, GraduationCap, Mail, ChevronUp } from "lucide-react"
+import {
+  Menu,
+  X,
+  Home,
+  User,
+  Code,
+  Briefcase,
+  FolderOpen,
+  Award,
+  GraduationCap,
+  Mail,
+  ChevronUp,
+  PenLine,
+} from "lucide-react"
 
 interface NavItem {
   id: string
@@ -177,6 +191,15 @@ export default function Navigation() {
                   <span>{item.label}</span>
                 </motion.button>
               ))}
+
+              {/* A real route, not a scroll anchor — the others jump to sections on this page. */}
+              <Link
+                href="/blog"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800/50 transition-all duration-300"
+              >
+                <PenLine className="h-4 w-4" />
+                <span>Blog</span>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -288,6 +311,17 @@ export default function Navigation() {
                         </div>
                       </motion.button>
                     ))}
+
+                    <Link
+                      href="/blog"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:text-white hover:bg-gray-800/50 transition-all duration-300"
+                    >
+                      <div className="p-2 rounded-lg bg-gray-800/50">
+                        <PenLine className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">Blog</span>
+                    </Link>
                   </div>
                 </div>
 

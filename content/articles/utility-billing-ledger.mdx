@@ -1,0 +1,99 @@
+---
+title: "Designing a Double-Entry Ledger for Utility Billing: Arrears, Partial Payments, and Rate Schedules"
+date: 2026-07-28
+draft: true
+tags: [database-design, laravel, accounting, billing, mysql]
+summary: "Most billing systems store a balance column and slowly corrupt it. Here is the double-entry model I used for a municipal water utility, and why arrears and partial payments force your hand."
+---
+
+Most billing systems start with a `balance` column on the customer table. It is the obvious design, and it is wrong in a way that takes about eight months to become visible.
+
+I built the billing engine for the Municipality of Initao's water utility — full lifecycle, from meter reading through bill generation to payment. This post is about the data model underneath it, and specifically why a mutable balance column cannot survive contact with real customers.
+
+## Why a balance column fails
+
+A `balance` column is a *derived* value stored as a *source* value. Every payment, adjustment, penalty, and correction mutates it in place. Which means:
+
+- **You cannot answer "why is this balance ₱1,240?"** There is no history. The number is the result of every operation that ever touched it, and none of them were recorded.
+- **Every bug is permanent.** A double-applied payment does not just produce a wrong balance today — it silently rebases every future balance, forever. There is nothing to recompute from.
+- **Corrections are destructive.** A staff member fixing a mistake overwrites the evidence of the mistake.
+
+In a municipal utility this is not an abstract concern. Bills are disputed. Payments are made in cash at a counter. Adjustments happen. Someone will eventually ask a question that a balance column physically cannot answer, and the honest response will be "we don't know."
+
+## The double-entry model
+
+The fix is the one accountants worked out several centuries ago: **never mutate a balance — append immutable entries, and derive the balance.**
+
+The core table is a ledger of entries against a customer account. Each entry is a debit or a credit, and it carries the reason it exists:
+
+| Column | Purpose |
+|---|---|
+| `account_id` | The customer's billing account. |
+| `entry_type` | `bill`, `payment`, `penalty`, `adjustment`, `reversal`. |
+| `amount` | Always positive. Direction comes from `entry_type`, never from a sign. |
+| `direction` | `debit` (increases what is owed) or `credit` (reduces it). |
+| `source_type` / `source_id` | Polymorphic link to what caused it — the bill, the receipt, the adjustment record. |
+| `posted_at` | When it takes effect. Distinct from `created_at`. |
+
+The balance is then never stored. It is a sum:
+
+```php
+public function balance(): int
+{
+    return LedgerEntry::where('account_id', $this->id)
+        ->selectRaw("
+            SUM(CASE WHEN direction = 'debit' THEN amount ELSE -amount END) AS balance
+        ")
+        ->value('balance') ?? 0;
+}
+```
+
+Three properties fall out of this for free:
+
+1. **Every balance is explainable.** You can render the exact entries that produced it.
+2. **Nothing is destructive.** A mistake is corrected by posting a `reversal` entry, not by editing history. The error and its correction both remain visible — which is exactly what an audit needs.
+3. **The balance is always recomputable.** If a bug corrupts a cached value, you drop the cache and re-derive. There is no lost state.
+
+Store money as integers in the smallest unit (centavos), never floats. This is old advice and it remains correct.
+
+## Partial payments force the issue
+
+Here is the case that kills the naive model. A customer owes ₱1,240 across two unpaid bills and hands over ₱500 in cash.
+
+With a balance column, you subtract 500 and move on. But now: *which bill did they pay?* The system does not know, because it never modelled the question. And it matters — arrears aging, disconnection thresholds, and penalty accrual are all per-bill, not per-customer.
+
+With a ledger, a payment is an entry, and **allocation is a separate concern**: the ₱500 credit is applied against outstanding bills according to an explicit policy. Oldest-first is the usual rule for utilities, since it minimizes the arrears that trigger disconnection.
+
+The allocation itself is recorded — which bill absorbed how much of which payment — so a partially-paid bill knows exactly what it is still owed and why.
+
+{/* TODO — Ehnand: what allocation policy did Initao actually use? Oldest-first?
+     Did the municipality have a rule about penalties being paid before principal?
+     This is a real business rule and I don't want to guess at it. */}
+
+## Rate schedules must be versioned, not edited
+
+The last piece. Water tariffs are usually **stepped** — the first 10 cubic meters at one rate, the next 20 at another, and so on — and they change when the municipality passes a new ordinance.
+
+The trap is editing the rate table in place. Do that and you have just retroactively changed every historical bill, because your bills were computed by *looking up* the rate rather than *recording* it.
+
+Two rules avoid this:
+
+- **Rate schedules are versioned and effective-dated.** A new tariff is a new row with an `effective_from`, not an edit.
+- **Bills record what they charged, not just what they owe.** Each bill line stores the tier boundaries and rate actually applied. Reprinting a bill from 2024 must produce the 2024 bill, even after three tariff changes.
+
+This is the same principle as the ledger: the historical record is immutable, and the current state is derived.
+
+## What I would do differently
+
+{/* TODO — Ehnand: this is the section that makes the article citable.
+     What actually went wrong? Did you start with a balance column and migrate?
+     Was there a reconciliation bug at the counter? A tariff change that
+     retroactively broke old bills? The concrete failure is the whole point. */}
+
+## The takeaway
+
+If money moves through your system, do not store a balance. Store the events that change it, and derive the number. The performance objection — that summing a ledger is slower than reading a column — is real but solvable with a cached projection you can always rebuild. The correctness objection to a mutable balance is not solvable at all.
+
+---
+
+*I'm Ehnand Azucena — full stack and lead developer. I led delivery of the [Initao Water Billing System](https://ehnand.com/projects/initao-water-billing-system): Laravel 12, PHP 8.2, MySQL 8, with a double-entry accounting ledger, offline-first meter reading, and configurable rate schedules. I take remote contract and lead engagements — [get in touch](https://ehnand.com/#contact).*
