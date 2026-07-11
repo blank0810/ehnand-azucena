@@ -54,7 +54,7 @@ export const PROJECTS: Project[] = [
 
       Transforms manual document reconciliation into an automated, tenant-configurable intelligence platform -- enabling non-technical users to build and deploy document processing workflows through AI-assisted configuration rather than custom development.
     `,
-    image: "/images/projects/adam-one.png",
+    image: "/images/projects/adam-ai.webp",
     technologies: ["TanStack Start", "React 19", "TypeScript", "PostgreSQL 16", "Drizzle ORM", "Trigger.dev v4", "LlamaCloud", "Google Gemini", "Cloudflare R2", "Better Auth", "Bun"],
     period: "Jan 2026 – Present",
     role: "Lead Developer",
@@ -118,7 +118,7 @@ export const PROJECTS: Project[] = [
 
       Integrated Stripe, Xero, HubSpot, and PayPal for cross-tenant payment processing, CRM synchronization, and automated invoicing. Built with enterprise-grade security, scalability, and multi-tenancy in mind, supporting both individual professionals and large organizations.
     `,
-    image: "/images/projects/memberpulse.png",
+    image: "/images/projects/memberpulse.webp",
     technologies: ["Symfony", "Bootstrap", "Vultr", "PostgreSQL", "OAuth2"],
     period: "Feb 2025 – Aug 2025",
     role: "Lead Developer",
@@ -156,7 +156,7 @@ export const PROJECTS: Project[] = [
 
       Digitized water billing operations for the municipality, replacing manual ledger-based processes with a system that ensures accurate billing, real-time payment tracking, and audit-ready financial records.
     `,
-    image: "/images/projects/water-billing-placeholder.svg",
+    image: "/images/projects/initao-water-bill.webp",
     technologies: ["Laravel 12", "PHP 8.2+", "MySQL 8", "Alpine.js 3", "Tailwind CSS 3", "Laravel Reverb", "Pest PHP", "Docker", "Laravel Sanctum"],
     period: "Feb 2026 – Present",
     role: "Lead Developer",
@@ -245,7 +245,7 @@ export const PROJECTS: Project[] = [
 
       Built end-to-end from a NestJS API to a Next.js frontend on Vercel. The beta successfully demonstrated the core marketplace functionality before project handoff.
     `,
-    image: "/images/projects/playnow.png",
+    image: "/images/projects/playnow.webp",
     technologies: ["Next.js", "NestJS", "Vercel", "Stripe"],
     period: "Mar 2025 – Apr 2025",
     role: "Solo Developer",

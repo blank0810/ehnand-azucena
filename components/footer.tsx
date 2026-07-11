@@ -38,7 +38,7 @@ export default function Footer() {
                 <Linkedin className="h-5 w-5" />
               </motion.a>
               <motion.a
-                href="mailto:ehnand.azucena00@gmail.com"
+                href="mailto:contact@ehnand.com"
                 className="text-gray-400 hover:text-primary transition-colors duration-200"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -76,7 +76,7 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Get In Touch</h4>
             <p className="text-gray-400 text-sm mb-2">
-              📧 ehnand.azucena00@gmail.com
+              📧 contact@ehnand.com
             </p>
             <p className="text-gray-400 text-sm mb-2">
               📱 +639534678287

@@ -59,7 +59,7 @@ export default function Hero() {
               >
                 <Github size={18} className="group-hover:animate-pulse" /> GitHub
               </Link>
-              <Link href="mailto:ehnand.azucena00@gmail.com" className="btn-outline flex items-center gap-2 group">
+              <Link href="mailto:contact@ehnand.com" className="btn-outline flex items-center gap-2 group">
                 <Mail size={18} className="group-hover:animate-pulse" /> Email
               </Link>
             </div>
