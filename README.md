@@ -1,30 +1,63 @@
-# Portfolio
+# ehnand.com — Portfolio of Ehnand Azucena
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+Personal portfolio site for **Ehnand Azucena**, a Full Stack Developer at [Cloudesk](https://cloudesk.co/) based in Initao, Northern Mindanao, Philippines (UTC+8).
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/blank0810s-projects/v0-portfolio)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/cXcQzYacN8r)
+**Live: [ehnand.com](https://ehnand.com)** · [LinkedIn](https://www.linkedin.com/in/ehnand-azucena-3028a7194) · contact@ehnand.com
 
-## Overview
+Built with Next.js 14 (App Router), React 18, TypeScript, and Tailwind CSS. Deployed on Vercel.
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## Development
 
-## Deployment
+This project is **containerized** — run everything through Docker, not on the host.
 
-Your project is live at:
+```bash
+docker compose up          # Dev server at localhost:3001
+docker compose up --build  # Rebuild after dependency changes
 
-**[https://vercel.com/blank0810s-projects/v0-portfolio](https://vercel.com/blank0810s-projects/v0-portfolio)**
+# Production build — the NODE_ENV override is required, see below
+docker compose run --rm --no-deps -e NODE_ENV=production app pnpm build
 
-## Build your app
+docker compose run --rm --no-deps app pnpm lint
+```
 
-Continue building your app on:
+Two gotchas worth knowing up front:
 
-**[https://v0.dev/chat/projects/cXcQzYacN8r](https://v0.dev/chat/projects/cXcQzYacN8r)**
+1. **Host builds fail.** `docker-compose.yml` mounts anonymous volumes over `/app/node_modules` and `/app/.next`. Docker creates the host-side stubs root-owned, so a host `pnpm build` dies with `EACCES: permission denied, open '.next/trace'`.
+2. **`next build` needs an explicit `NODE_ENV=production`.** Compose sets `NODE_ENV=development` for the dev server and that value leaks into `docker compose run`. Building under it loads the dev React runtime and every route fails prerender — the errors look like app bugs, but the app is fine.
 
-## How It Works
+The project standardizes on **pnpm**. Do not run `npm install`: npm's flat `node_modules` pulls in a duplicate React that breaks `next build` with a `useContext` null error during prerender.
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## Architecture
+
+A server-rendered single-page home plus statically-generated per-project detail routes.
+
+```
+RootLayout (app/layout.tsx — metadata + Person JSON-LD)
+  └─ ThemeProvider (next-themes, class-based dark mode, defaults to dark)
+       ├─ app/page.tsx — server component; FAQPage JSON-LD
+       │    └─ Hero → About → Experience → Projects → Skills
+       │       → Education → Certificates → FAQ → Contact → Footer
+       └─ app/projects/[slug] — SSG per project, own metadata + JSON-LD
+```
+
+Section components are client components (`"use client"`) for Framer Motion animations; the pages that host them are server components, so all content is server-rendered for search engines and AI crawlers.
+
+**Content lives in `lib/`, not in the components** — this is the single source of truth:
+
+| File | Feeds |
+|---|---|
+| `lib/projects.ts` | Project cards, `/projects/[slug]` detail pages, sitemap |
+| `lib/faq.ts` | The FAQ section *and* the FAQPage JSON-LD (they must match) |
+| `lib/site.ts` | `SITE_URL`, from `NEXT_APP_URL` (falls back to `https://ehnand.com`) |
+
+Edit data there, not in the JSX.
+
+## SEO notes
+
+Structured data is split deliberately: `Person` schema is in the root layout (every page), while `FAQPage` schema lives in `app/page.tsx` only — Google discounts FAQPage markup whose answers don't appear on the page, so it must not be emitted on project routes.
+
+`app/sitemap.ts` and `app/robots.ts` generate `/sitemap.xml` and `/robots.txt` from `lib/projects.ts` and `SITE_URL`.
+
+## License
+
+Personal project. Not licensed for reuse.
