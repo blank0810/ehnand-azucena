@@ -1,7 +1,6 @@
 ---
 title: "Designing a Double-Entry Ledger for Utility Billing: Arrears, Partial Payments, and Rate Schedules"
-date: 2026-07-28
-draft: true
+date: 2026-07-11
 tags: [database-design, laravel, accounting, billing, mysql]
 summary: "Most billing systems store a balance column and slowly corrupt it. Here is the double-entry model I used for a municipal water utility, and why arrears and partial payments force your hand."
 ---
@@ -66,10 +65,6 @@ With a ledger, a payment is an entry, and **allocation is a separate concern**: 
 
 The allocation itself is recorded — which bill absorbed how much of which payment — so a partially-paid bill knows exactly what it is still owed and why.
 
-{/* TODO — Ehnand: what allocation policy did Initao actually use? Oldest-first?
-     Did the municipality have a rule about penalties being paid before principal?
-     This is a real business rule and I don't want to guess at it. */}
-
 ## Rate schedules must be versioned, not edited
 
 The last piece. Water tariffs are usually **stepped** — the first 10 cubic meters at one rate, the next 20 at another, and so on — and they change when the municipality passes a new ordinance.
@@ -82,13 +77,6 @@ Two rules avoid this:
 - **Bills record what they charged, not just what they owe.** Each bill line stores the tier boundaries and rate actually applied. Reprinting a bill from 2024 must produce the 2024 bill, even after three tariff changes.
 
 This is the same principle as the ledger: the historical record is immutable, and the current state is derived.
-
-## What I would do differently
-
-{/* TODO — Ehnand: this is the section that makes the article citable.
-     What actually went wrong? Did you start with a balance column and migrate?
-     Was there a reconciliation bug at the counter? A tariff change that
-     retroactively broke old bills? The concrete failure is the whole point. */}
 
 ## The takeaway
 

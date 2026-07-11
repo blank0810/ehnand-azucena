@@ -1,7 +1,6 @@
 ---
 title: "Document Reconciliation: The Matching Strategies That Actually Work"
-date: 2026-08-25
-draft: true
+date: 2026-07-11
 tags: [reconciliation, algorithms, fuzzy-matching, data-engineering, node]
 summary: "Exact match fails on real documents. Here are the eight comparison algorithms and three matching strategies I use to reconcile invoices, delivery notes, and payment terminal settlements across four companies and eight stations."
 ---
@@ -67,16 +66,6 @@ The inverse — running the fuzzy matcher first — produces confident-looking w
 Two-way matching (invoice ↔ delivery note) tells you the documents agree. It does not tell you the *money* is right.
 
 Three-way verification adds the settlement or payment record: the document says what was ordered, the delivery note says what arrived, and the settlement says what was actually paid. Reconciling all three is what catches the discrepancies that matter financially — the short delivery that was invoiced in full, the terminal settlement that does not tie to the day's transactions.
-
-{/* TODO — Ehnand: what did 3-way verification actually catch in production?
-     A real discovered discrepancy — even anonymized — would be the single
-     most compelling paragraph in this article. */}
-
-## What I would do differently
-
-{/* TODO — Ehnand: you consolidated 20 independent services into one mono-repo.
-     Why were there 20? What broke because they were separate? That
-     consolidation story is genuinely interesting and it's yours alone. */}
 
 ## The takeaway
 

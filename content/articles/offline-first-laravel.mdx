@@ -1,7 +1,6 @@
 ---
 title: "Offline-First Field Data Collection in Laravel: Meter Readers with No Signal"
-date: 2026-07-14
-draft: true
+date: 2026-07-11
 tags: [laravel, offline-first, sanctum, mobile-api, sync]
 summary: "How I built an offline-first mobile API for municipal water meter readers who work in areas with no connectivity — the sync model, the conflict rules, and what a queued write actually has to carry."
 ---
@@ -83,18 +82,6 @@ So the rule is: **authentication failures on sync must never discard the queue.*
 ## Conflict resolution
 
 With one reader per connection per period, true write-write conflicts are rare — but "rare" is not "never," and the resolution rule has to be decided before it happens rather than after.
-
-{/* TODO — Ehnand: this section needs your actual rule. What happened when
-     two readings arrived for the same connection in the same period?
-     Last-write-wins on read_at? Flag for supervisor review? Reject the
-     second? I don't want to invent this. */}
-
-## What I would do differently
-
-{/* TODO — Ehnand: the most citable part of this article is the thing that
-     broke. Did a sync bug ship? Did you get duplicate bills? Did the photo
-     upload queue blow up device storage? One concrete failure with the
-     before/after is worth more than everything above it. */}
 
 ## The takeaway
 

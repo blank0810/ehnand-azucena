@@ -1,7 +1,6 @@
 ---
 title: "Multi-Provider LLM Failover: A Circuit Breaker Across Five Inference Providers"
-date: 2026-08-11
-draft: true
+date: 2026-07-11
 tags: [ai, llm, reliability, circuit-breaker, vercel-ai-sdk]
 summary: "Inference providers go down, rate-limit, and degrade. I run a failover chain across SambaNova, Groq, Gemini, OpenAI, and Cerebras — here is why a retry loop is not enough and what a circuit breaker actually buys you."
 ---
@@ -79,11 +78,6 @@ Getting this classification wrong is how a single bad input takes down your enti
 
 The order is a cost/latency/quality decision, not an arbitrary one. Fast, cheap inference providers sit at the front; the expensive, highly-available incumbents act as the backstop at the end.
 
-{/* TODO — Ehnand: why THIS order specifically? SambaNova and Groq first
-     suggests you're optimizing for inference speed, with OpenAI as the
-     reliable fallback. Was that the reasoning? Any cost numbers? What's
-     the actual failure rate of the front of the chain? */}
-
 ## The thing nobody mentions: outputs differ
 
 A failover chain quietly assumes the providers are interchangeable. They are not.
@@ -91,10 +85,6 @@ A failover chain quietly assumes the providers are interchangeable. They are not
 The same prompt against Groq and against Gemini returns differently-shaped output — different formatting habits, different adherence to a JSON schema, different tool-calling reliability. If your application parses the response, a failover can hand you a response your parser has never seen.
 
 This is why structured output and schema validation matter more in a multi-provider setup than a single-provider one: the schema is what makes providers substitutable. Without it, failover does not degrade gracefully — it degrades *silently*, which is worse.
-
-{/* TODO — Ehnand: did you hit this? Any provider that consistently broke
-     tool-calling or JSON mode? This would be the most valuable paragraph
-     in the article — it's the thing people discover in production. */}
 
 ## The takeaway
 
