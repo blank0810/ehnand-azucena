@@ -11,6 +11,7 @@ import Contact from "@/components/contact"
 import Footer from "@/components/footer"
 import ScrollProgress from "@/components/scroll-progress"
 import SectionIndicator from "@/components/section-indicator"
+import { FAQ_ITEMS } from "@/lib/faq"
 
 const sections = [
   { id: "home", label: "Home" },
@@ -27,6 +28,26 @@ const sections = [
 export default function Page() {
   return (
     <>
+      {/* FAQ structured data — lives here, not in the root layout, so it is emitted
+          only on the page that actually renders the FAQ section (components/faq.tsx).
+          Google discounts FAQPage markup whose Q&As are absent from the page. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ_ITEMS.map((item) => ({
+              "@type": "Question",
+              name: item.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: item.answer,
+              },
+            })),
+          }),
+        }}
+      />
       <ScrollProgress />
       <Navigation />
       <SectionIndicator sections={sections} />

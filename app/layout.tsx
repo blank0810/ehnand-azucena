@@ -4,7 +4,6 @@ import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SITE_URL } from "@/lib/site"
-import { FAQ_ITEMS } from "@/lib/faq"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -195,25 +194,6 @@ export default function RootLayout({
                   addressCountry: "Philippines",
                 },
               },
-            }),
-          }}
-        />
-
-        {/* FAQ structured data — mirrors the visible FAQ section (lib/faq.ts) */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: FAQ_ITEMS.map((item) => ({
-                "@type": "Question",
-                name: item.question,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: item.answer,
-                },
-              })),
             }),
           }}
         />
