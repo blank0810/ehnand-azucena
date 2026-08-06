@@ -60,6 +60,7 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Live Production",
     category: "SaaS Platform",
+    liveUrl: "https://adamai.ch",
   },
   {
     slug: "repsshield",
