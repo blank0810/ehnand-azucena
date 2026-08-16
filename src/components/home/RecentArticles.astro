@@ -1,0 +1,45 @@
+---
+import type { ArticleEntry } from "@/lib/content"
+import { entrySlug } from "@/lib/content"
+import { formatIsoDate } from "@/lib/dates"
+
+interface Props {
+  articles: ArticleEntry[]
+}
+
+const { articles } = Astro.props
+---
+
+<section id="articles" class="section recent-articles" aria-labelledby="articles-title">
+  <div class="container">
+    <div class="section-heading">
+      <h2 id="articles-title">Recent field notes</h2>
+      <p>
+        One current article from each publishing category, grounded in delivery work and
+        engineering practice.
+      </p>
+    </div>
+
+    <div class="recent-articles__list">
+      {
+        articles.map((article) => {
+          const slug = entrySlug(article.id)
+          return (
+            <article class="article-record record" data-home-article={slug}>
+              <div class="article-record__meta">
+                <time datetime={article.data.date}>{formatIsoDate(article.data.date)}</time>
+                <span>{article.data.category}</span>
+              </div>
+              <div class="article-record__body">
+                <h3><a href={`/articles/${slug}`}>{article.data.title}</a></h3>
+                <p>{article.data.summary}</p>
+              </div>
+              <a class="text-link" href={`/articles/${slug}`}>Read article</a>
+            </article>
+          )
+        })
+      }
+    </div>
+    <a class="section-link" href="/articles">View all articles</a>
+  </div>
+</section>

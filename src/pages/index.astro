@@ -1,0 +1,79 @@
+---
+import AboutEvidence from "@/components/home/AboutEvidence.astro"
+import AiWorkflow from "@/components/home/AiWorkflow.astro"
+import CommissioningRail from "@/components/home/CommissioningRail.astro"
+import Contact from "@/components/home/Contact.astro"
+import Faq from "@/components/home/Faq.astro"
+import Hero from "@/components/home/Hero.astro"
+import RecentArticles from "@/components/home/RecentArticles.astro"
+import SelectedSystems from "@/components/home/SelectedSystems.astro"
+import Services from "@/components/home/Services.astro"
+import { FAQ_ITEMS } from "@/data/faq"
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import {
+  absoluteUrl,
+  PERSON_ID,
+  SITE_LAST_UPDATED,
+  SITE_NAME,
+} from "@/config/site"
+import { assertContentIntegrity, getHomepageArticles } from "@/lib/content"
+
+const title = "Full Stack Systems Engineer | Ehnand Azucena"
+const description =
+  "Full-stack systems delivery for production SaaS, operational platforms, APIs, and infrastructure."
+
+await assertContentIntegrity()
+const articles = await getHomepageArticles()
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": absoluteUrl("/#website"),
+  url: absoluteUrl("/"),
+  name: SITE_NAME,
+  author: { "@id": PERSON_ID },
+}
+
+const profileSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "@id": absoluteUrl("/#profile"),
+  url: absoluteUrl("/"),
+  name: title,
+  dateModified: SITE_LAST_UPDATED,
+  mainEntity: { "@id": PERSON_ID },
+}
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": absoluteUrl("/#faq-schema"),
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/"
+  schemas={[websiteSchema, profileSchema, faqSchema]}
+>
+  <main id="main-content">
+    <Hero />
+    <CommissioningRail />
+    <SelectedSystems />
+    <Services />
+    <AiWorkflow />
+    <RecentArticles articles={articles} />
+    <AboutEvidence />
+    <Faq />
+    <Contact />
+  </main>
+</BaseLayout>

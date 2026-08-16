@@ -1,0 +1,42 @@
+---
+import { PROFILE } from "@/data/profile"
+---
+
+<section id="contact" class="section contact" aria-labelledby="contact-title">
+  <div class="container contact__layout">
+    <div>
+      <h2 id="contact-title">Discuss a system that needs to ship</h2>
+      <p>
+        Share the operating problem, current constraints, and what production needs to
+        look like.
+      </p>
+      <a class="contact__email" href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
+    </div>
+    <dl class="contact__records">
+      <div>
+        <dt>Availability</dt>
+        <dd>{PROFILE.availability}</dd>
+      </div>
+      <div>
+        <dt>Location</dt>
+        <dd>{PROFILE.location} · {PROFILE.timezone}</dd>
+      </div>
+      <div>
+        <dt>Direct</dt>
+        <dd><a href={PROFILE.whatsappUrl} target="_blank" rel="noopener noreferrer">WhatsApp</a></dd>
+      </div>
+      <div>
+        <dt>Professional</dt>
+        <dd><a href={PROFILE.linkedinUrl} target="_blank" rel="noopener noreferrer">LinkedIn</a></dd>
+      </div>
+      <div>
+        <dt>Code</dt>
+        <dd><a href={PROFILE.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a></dd>
+      </div>
+      <div>
+        <dt>Background</dt>
+        <dd><a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer">Résumé</a></dd>
+      </div>
+    </dl>
+  </div>
+</section>

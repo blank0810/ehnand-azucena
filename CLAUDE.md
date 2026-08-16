@@ -1,97 +1,94 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code and other coding agents working in this repository.
 
 ## Project Overview
 
-Personal portfolio website for Ehnand Azucena (Full Stack Developer). Built with Next.js 14 App Router, React 18, TypeScript, and Tailwind CSS. Originally generated via v0.dev and deployed on Vercel.
+This is Ehnand Azucena's personal professional portfolio at `ehnand.com`. Its purpose is to turn verified production experience, technical writing, work history, and credentials into credible evidence for prospective clients and employers.
 
-## Git Workflow (CRITICAL)
+Optimize changes for credibility, clear proof, accessibility, performance, search/AI discoverability, and direct contact conversion. Public copy is reputation-sensitive: never invent or embellish employers, clients, outcomes, metrics, dates, credentials, testimonials, contact details, or technical experience. If the repository or owner does not support a claim, flag it instead of guessing.
 
-**Commit and push directly on `main`. Do NOT create feature branches or PRs.** This is a solo repo — the owner is the only contributor — so branch/PR ceremony adds no value here. This project rule intentionally overrides the global "branch first / feature branches → PRs → main" default. Still honor the non-negotiable safety rules: never force-push, never commit secrets/`.env`, and only commit/push when asked.
-
-## Development Commands
-
-```bash
-docker compose up          # Start dev server at localhost:3001 (maps to container port 3000)
-docker compose up --build  # Rebuild after dependency changes
-
-# Production build — note the NODE_ENV override, it is required (see below)
-docker compose run --rm --no-deps -e NODE_ENV=production app pnpm build
-
-docker compose run --rm --no-deps app pnpm lint   # ESLint checks
-```
-
-**This project is containerized. Run everything through `docker compose`, not on the host.**
-
-`docker-compose.yml` mounts *anonymous volumes* over `/app/node_modules` and `/app/.next` to isolate them from the host. Docker creates the host-side stubs of those directories as **root-owned**, so running `pnpm dev` or `pnpm build` directly on the host fails with `EACCES: permission denied, open '.next/trace'` — and running `pnpm install` on the host just populates a `node_modules` the container ignores. Neither is worth doing; use the container.
-
-**Two gotchas that will waste your time if you don't know them:**
-
-1. **`next build` needs `NODE_ENV=production` explicitly.** `docker-compose.yml` sets `NODE_ENV=development` for the dev server, and that value leaks into `docker compose run`. Building under it makes Next load the *dev* React runtime and every route fails prerender ("Export encountered errors on following paths: /, /projects/..."). The errors are misleading — they look like app bugs, but the app is fine. Always pass `-e NODE_ENV=production` when building.
-2. **pnpm only, never `npm install`.** The project standardizes on pnpm (`pnpm-lock.yaml`); Vercel and `Dockerfile.dev` (Node 20 Alpine, pnpm via corepack) both build with it. npm's flat `node_modules` pulls in a duplicate React that breaks `next build` with a `useContext` null error during prerender.
-
-There is no test runner configured. Vercel builds from source on push and is unaffected by any of the above.
+The positioning is engineer-directed and AI-augmented. Ehnand owns discovery, architecture, technical decisions, review, and production accountability. Claude Code and Codex assist research, scaffolding, implementation, tests, documentation, CI/CD, and infrastructure as code.
 
 ## Architecture
 
-Portfolio app: a single-page home plus statically-generated per-project detail routes. `app/page.tsx` is a **server component** (the old 2-second client loading screen was removed so all section content is server-rendered for SEO):
+Astro statically generates every public page. There is no React application, framework hydration runtime, server adapter, or Worker runtime entry.
 
+```text
+src/pages/                  Static routes and XML/text endpoints
+src/layouts/                Shared page, article, and project layouts
+src/components/             Focused Astro presentation components
+src/data/                   Verified portfolio, career, FAQ, and taxonomy data
+src/lib/                    Content queries, schemas, dates, filters, and validation
+src/styles/global.css       Active stylesheet
+content/articles/           MDX technical articles
+content/case-studies/       Optional MDX project narratives
+public/                     Evidence images, headers, redirects, verification file
 ```
-RootLayout (app/layout.tsx - server component; metadata + Person & FAQPage JSON-LD)
-  └─ ThemeProvider (next-themes, class-based dark mode, defaults to dark)
-       ├─ Page (app/page.tsx - server component)
-       │    ├─ ScrollProgress
-       │    ├─ Navigation
-       │    ├─ SectionIndicator (tracks 9 sections by ID)
-       │    └─ Hero → About → Experience → Projects → Skills → Education → Certificates → FAQ → Contact → Footer
-       └─ /projects/[slug] (app/projects/[slug]/page.tsx - server component; SSG per project, own metadata + JSON-LD)
-```
 
-### Key Patterns
+Browser-authored interactions are deliberately limited to the progressively enhanced `/articles` search and category filter, system-aware theme selection, the five-project featured rotation, and one-time section reveals. Every article and project record, including all five featured projects, is present in generated HTML; static fallback paths remain available without JavaScript.
 
-- **Section components are client components** (`"use client"`) for Framer Motion animations; `app/page.tsx` and the `/projects/[slug]` pages are **server components** so content is server-rendered. No API routes.
-- **Content data lives in `lib/`** as the single source of truth: `lib/projects.ts` (projects + `featured` flag, feeds the cards, detail pages, and sitemap), `lib/faq.ts` (feeds the FAQ section and FAQPage JSON-LD), `lib/site.ts` (`SITE_URL` from `NEXT_APP_URL`, fallback `https://ehnand.com`). Edit data here, not in the components.
-- **3D Cube** (`components/3d-cube.tsx`): Three.js-based, dynamically imported in `hero.tsx` with `ssr: false` to avoid server-side rendering. Adds ~600KB to bundle but is lazy-loaded.
-- **Section navigation**: Each section component has a matching `id` attribute (e.g., `id="home"`, `id="about"`) that maps to the `sections` array in `page.tsx` for `SectionIndicator` dot navigation.
-- **Animations**: Framer Motion (`motion` components) used heavily across all sections. `react-intersection-observer` triggers animations on scroll.
+## Sources of truth
 
-### Component Categories
+- `src/data/projects.ts` feeds project records, project detail routes, related articles, schemas, and sitemap URLs. Do not duplicate project metadata in components or case-study frontmatter.
+- `content/case-studies/<project-slug>.mdx` must match an existing project slug. Detail pages fall back to verified project descriptions when no case study exists.
+- `content/articles/*.mdx` is validated by `src/content.config.ts`. Drafts remain directly buildable for local review but are excluded from listings, related articles, RSS, and sitemap and use `noindex,nofollow`.
+- `src/data/article-categories.ts` owns the four article categories.
+- `src/data/faq.ts` feeds both visible FAQ content and homepage `FAQPage` JSON-LD.
+- `src/config/site.ts` owns `SITE_URL`, site identity, and the canonical Person id `${SITE_URL}/#person`.
+- `src/data/profile.ts` and `src/data/career.ts` own contact, history, education, skills, and credential evidence.
 
-- **Section components** (`components/hero.tsx`, `about.tsx`, `experience.tsx`, etc.) - Portfolio content sections
-- **UI primitives** (`components/ui/`) - shadcn/ui components (button, card, badge, toast, tabs)
-- **Supporting components** - `theme-provider.tsx`, `scroll-progress.tsx`, `section-indicator.tsx`, `typing-animation.tsx`, `enhanced-status-badge.tsx`
-- **Unused components still in repo** (not imported anywhere) - `blog-section.tsx`, `testimonials.tsx`, `parallax-background.tsx`, `animated-background.tsx`, `skill-progress.tsx`, `theme-switcher.tsx`. Verify usage with grep before editing — most rendering goes through `projects.tsx`, `about.tsx`, and `skills.tsx`
+The FastAPI Python 3.14 ERP article is published, but there is no public ERP project. Do not add `/projects/multi-tenant-erp-backend`, project schema, project sitemap entries, or internal project links until the owner publishes complete resources.
 
-### Adding shadcn/ui Components
+## Routes and discovery
+
+Canonical public routes are `/`, `/projects`, `/projects/[slug]`, `/articles`, `/articles/[slug]`, `/rss.xml`, `/sitemap.xml`, and `/robots.txt`. `public/_redirects` permanently maps `/blog` and `/blog/*` to the corresponding `/articles` paths.
+
+`BaseLayout.astro` emits one canonical Person entity. Page-specific Blog, BlogPosting, SoftwareApplication, BreadcrumbList, WebSite, ProfilePage, and FAQPage schemas reference that Person id rather than duplicating a person object.
+
+Use evidence dates for sitemap `lastmod`: article `updated` then `date`, and explicit project or case-study update dates only. Never stamp routes with the build time or infer modification from a project's start period.
+
+## Visual system
+
+`DESIGN.md` is the durable authority for Production Trace: neutral light/dark technical surfaces, graphite ink, cobalt working marks, amber live status, ruled evidence records, IBM Plex Sans/Mono, restrained entry and state motion, and the commissioning trace. `src/styles/global.css` is the only application stylesheet.
+
+Preserve semantic headings, keyboard navigation, visible focus, meaningful alternative text, WCAG AA contrast, responsive one-column behavior, table overflow access, and reduced motion. Do not introduce gradients, glass panels, generic card grids, a second visual language, or unsupported evidence.
+
+## Docker-only workflow
+
+Run every Node, Astro, pnpm, lint, test, build, preview, and deploy command through Docker Compose. Never install or build on the host. Use pnpm only.
 
 ```bash
-npx shadcn-ui@latest add [component-name]
+docker compose up
+docker compose up --build
+
+docker compose run --rm --no-deps app pnpm check
+docker compose run --rm --no-deps app pnpm lint
+docker compose run --rm --no-deps -e NODE_ENV=production app pnpm build
+docker compose run --rm --no-deps app pnpm validate:html
+docker compose run --rm --no-deps app pnpm test
+docker compose run --rm --no-deps app pnpm test:integration
 ```
 
-Configured in `components.json` with aliases: `@/components`, `@/lib/utils`, `@/components/ui`, `@/lib`, `@/hooks`.
+Development is at `http://localhost:3001`, mapped to Astro port `4321`. Compose named volumes isolate `/app/node_modules`, `/app/.astro`, and `/app/dist`; host installs are ignored by the container.
 
-## Styling
+`Dockerfile.dev` uses Node 22 Bookworm Slim because Wrangler's `workerd` binary requires glibc. Keep the explicit production environment override in the documented build command so local and integration builds use the same mode.
 
-- Tailwind CSS with `tailwindcss-animate` plugin
-- Dark mode via `next-themes` with class-based switching (default: dark)
-- CSS custom properties in `app/globals.css` define base utility classes: `.section-container`, `.section-title`, `.gradient-text`, `.btn-primary`, `.btn-outline`, `.card`, `.skill-tag`
-- The only active stylesheet is `app/globals.css` (imported in `layout.tsx`). A second `styles/globals.css` exists but is **not** imported — edit `app/globals.css`
-- Color palette: primary `#3b82f6` (blue), secondary `#10b981` (green), accent `#f59e0b` (amber)
-- Custom CSS animations defined in both `globals.css` and `tailwind.config.ts`: `float`, `pulse-slow`, `fadeIn`, `typing`, `progress`
-- Fonts (Google Fonts via `next/font`): Inter for body (`--font-inter`), Poppins for headings (`--font-poppins`, weights 600/700, applied with the `font-poppins` class, e.g. `hero.tsx`)
+## Cloudflare
 
-## Build Configuration
+`wrangler.jsonc` configures asset-only Cloudflare Workers Static Assets for `dist/`. It intentionally has no `main`, server adapter, database, storage binding, account id, route, or secret. `public/_headers` supplies conservative response headers; do not add a Content Security Policy without a complete asset and external-origin inventory plus browser verification.
 
-- ESLint and TypeScript errors are **ignored during builds** (`next.config.mjs`: `ignoreDuringBuilds: true`, `ignoreBuildErrors: true`)
-- Remote images allowed from `*.public.blob.vercel-storage.com`
-- Image optimization enabled with AVIF/WebP formats
-- Path alias `@/*` maps to project root
+Deployment, custom domains, DNS changes, old Vercel removal, and Cloudflare credentials are owner-controlled actions. Do not run `wrangler deploy`, modify DNS, or remove the prior deployment unless explicitly asked.
 
-## v0.dev Sync
+## Change discipline
 
-This repo was originally auto-synced from v0.dev. The `generator: 'v0.app'` metadata remains in `layout.tsx`. Manual edits are now the primary workflow.
+- Keep pages and content static by default. Do not add a React island unless separately justified by functionality that cannot be delivered with semantic HTML or a small vanilla script.
+- Keep content-source consumers synchronized across listings, details, metadata, JSON-LD, sitemap, RSS, and internal links.
+- Follow the repository style: `@/...` aliases, double quotes, no semicolons, two-space indentation, and focused components.
+- Add dependencies only when their value justifies bundle size and maintenance cost.
+- Keep secrets and private operational or vault material out of Git and public MDX.
+- Files in `docs/superpowers/` and `docs/plans/` are decision records, not automatic evidence that work remains pending.
 
-## Active Refactoring
+## Git workflow
 
-See `REFACTORING_PLAN.md` for a 10-phase plan to remove unused code and files. Several components in the repo (email templates, performance monitoring, link preview tester) are listed for removal but some files referenced may already be deleted.
+Work directly on `main`; do not create branches or pull requests for this solo repository. Commit or push only when the owner explicitly asks. Never force-push, never commit secrets, and preserve unrelated owner changes in a dirty worktree.

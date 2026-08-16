@@ -1,0 +1,11 @@
+---
+import { serializeJsonLd } from "@/lib/schema"
+
+interface Props {
+  value: unknown
+}
+
+const { value } = Astro.props
+---
+
+<script is:inline type="application/ld+json" set:html={serializeJsonLd(value)} />

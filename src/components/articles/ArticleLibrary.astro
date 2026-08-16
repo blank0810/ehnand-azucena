@@ -1,0 +1,75 @@
+---
+import ArticleRecord from "@/components/articles/ArticleRecord.astro"
+import {
+  ARTICLE_CATEGORIES,
+  type ArticleListItem,
+} from "@/data/article-categories"
+
+interface Props {
+  articles: ArticleListItem[]
+}
+
+const { articles } = Astro.props
+const categories = ["All", ...ARTICLE_CATEGORIES]
+---
+
+<section class="article-library" data-article-library aria-labelledby="article-library-title">
+  <div class="article-library__controls">
+    <div class="article-search">
+      <label for="article-search-input" id="article-library-title">Search the article library</label>
+      <input
+        id="article-search-input"
+        type="search"
+        name="q"
+        autocomplete="off"
+        placeholder="Search titles, subjects, and tags"
+        data-article-search
+      />
+    </div>
+
+    <div class="article-filter" role="group" aria-label="Filter articles by category">
+      <div class="article-filter__rail">
+        {
+          categories.map((category) => (
+            <button
+              type="button"
+              class="article-filter__button"
+              data-category-filter={category}
+              aria-pressed={category === "All" ? "true" : "false"}
+            >
+              {category}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="article-library__status">
+      <p aria-live="polite" aria-atomic="true">
+        <strong data-article-count>{articles.length} articles</strong>
+        <span> in the current view</span>
+      </p>
+      <button class="article-reset" type="button" data-article-reset hidden>
+        Clear filters
+      </button>
+    </div>
+  </div>
+
+  <section
+    class="article-library__results"
+    aria-label="Article results"
+    data-scroll-region="articles"
+    tabindex="0"
+  >
+    {articles.map((article) => <ArticleRecord article={article} />)}
+
+    <div class="article-library__empty" data-article-empty hidden>
+      <p>No articles match this search and category.</p>
+      <button class="button button--secondary" type="button" data-article-reset>
+        Reset the library
+      </button>
+    </div>
+  </section>
+</section>
+
+<script src="../../scripts/article-library.ts"></script>

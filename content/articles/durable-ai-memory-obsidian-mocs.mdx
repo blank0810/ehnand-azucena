@@ -1,0 +1,199 @@
+---
+title: "Building Durable AI Memory with Obsidian, Atomic Notes, and MOCs"
+seoTitle: "Durable AI Memory with Obsidian and MOCs"
+date: 2026-08-16
+category: "AI & Automation"
+tags: [ai-memory, obsidian, knowledge-management, automation, developer-tools]
+summary: "A context window is temporary working state, not durable memory. This is the dual-read, forward-write system I use to preserve project knowledge without loading an entire vault into every session."
+---
+
+An AI coding session can understand a complicated system at 4:00 PM and forget the most important reason behind it by the next morning.
+
+The source code remains. The judgment does not. Why one apparently cleaner architecture was rejected, which production symptom exposed a hidden invariant, whether a deployment warning is still current, and which name is safe to use publicly are all knowledge that may never live in code.
+
+I use an Obsidian vault as durable memory for AI-assisted development, but the vault itself is not the important part. The design problem is **getting the right, current slice of memory into a session without flooding its context or copying secrets into a portable store**.
+
+The model I settled on is **dual-read, forward-write**.
+
+## A context window is working state
+
+A long context window feels like memory because the assistant can refer to earlier messages. It is closer to RAM:
+
+- bounded;
+- expensive to fill;
+- eventually compacted;
+- scoped to one active conversation;
+- weak at distinguishing a settled decision from an idea discussed three hours ago.
+
+Durable project memory needs properties a transcript does not naturally provide:
+
+- stable names;
+- links between decisions and projects;
+- provenance;
+- confidence and freshness;
+- explicit updates when reality changes;
+- removal or correction of stale knowledge.
+
+Saving every transcript does not solve this. It preserves more text while making the next retrieval problem larger.
+
+## The two stores have different jobs
+
+My setup already had tool-managed project memory. It was automatically available at session start and shaped for the coding assistant's native loader. Obsidian offered portability, cross-project links, and notes I could inspect and edit independently of any one tool.
+
+The tempting move was to replace one with the other. That would have thrown away useful behavior on both sides.
+
+Tool-managed memory expects its own flat index and loading conventions. An Obsidian vault is a linked knowledge base organized around notes, project hubs, and maps of content. Repointing one loader at the other store would make a folder path look compatible while the information architecture remained wrong.
+
+So the system keeps both:
+
+| Store | Best use |
+|---|---|
+| Existing tool-managed memory | Previously accumulated project context and sensitive operational references that should not enter a synced vault |
+| Obsidian vault | New durable, non-secret decisions, lessons, dev logs, and cross-project synthesis |
+
+Both are read. New durable knowledge moves forward into the vault. That is dual-read, forward-write.
+
+## Why forward-write instead of dual-write
+
+Writing every fact to both stores sounds safer. It creates two sources that can disagree.
+
+One copy gets corrected and the other does not. One uses a renamed project, while the other keeps the old name. A future session retrieves whichever duplicate appears first and treats stale knowledge as certainty.
+
+Forward-write avoids that drift:
+
+1. Preserve the existing memory rather than migrating it in one risky operation.
+2. Continue loading it for historical context.
+3. Send new non-secret memories to the vault only.
+4. Migrate older material later only when retrieval shows a real need.
+
+The split is deliberately boring. It delivers portability immediately without making a bulk migration a prerequisite.
+
+## Load a catalog, not the vault
+
+At session start, the system does not inject every note. It injects a compact catalog that tells the assistant what projects and maps of content exist.
+
+```text
+session starts
+  -> load existing project memory
+  -> load the vault catalog
+  -> identify the current project
+  -> follow its MOC when deeper context is needed
+  -> retrieve individual notes on demand
+```
+
+This changes the role of startup context. It does not need to contain the answer. It needs to contain a reliable route to the answer.
+
+Loading the entire vault would spend context on unrelated projects and make important constraints compete with thousands of low-relevance lines. Loading nothing would require the assistant to remember that an external store exists. A small catalog is the bridge between those extremes.
+
+## MOCs provide the retrieval spine
+
+A Map of Content, or MOC, is a curated project hub. The global catalog links to project MOCs; each project MOC links to decisions, recent dev logs, unresolved tasks, and atomic lessons.
+
+```text
+global catalog
+  -> project MOC
+      -> current architecture decision
+      -> recent production lesson
+      -> deployment constraint
+      -> open task
+      -> related cross-project synthesis
+```
+
+Folders still help a human browse, but links carry the retrieval semantics. A note can live in a synthesis folder and still belong to three projects. The backlinks make that relationship explicit without copying the note three times.
+
+A useful MOC is not a dump of every note. It is a maintained map of the notes that change how the project should be understood or operated.
+
+## Atomic notes keep retrieval precise
+
+Large running documents are useful for narrative history. They are poor retrieval units when a session needs one invariant.
+
+For facts likely to matter again, I use atomic notes: one idea, one title, one set of sources. A lightweight shape is enough:
+
+```yaml
+type: memory
+date: 2026-08-16
+topic: concise description of the invariant
+tags: [project-slug, subsystem, gotcha]
+related-projects: [Project Name]
+confidence: high
+sources:
+  - source file or verified session artifact
+```
+
+The body starts with a direct instruction for the future reader, explains the mechanism, records why the fact matters, and links back to the project MOC.
+
+Good atomic-note titles are conclusions:
+
+- `Reporting periods, not transaction dates, determine statement boundaries`
+- `An API key is a throttle handle, not user identity`
+- `A recurring no-op job has not exercised its action path`
+
+Titles like `Notes from Tuesday` force the next session to open the file before knowing whether it matters.
+
+## Provenance is part of memory
+
+An assistant-written sentence can sound equally confident whether it came from source code, a design discussion, a stale document, or an assumption. Durable memory has to preserve that distinction.
+
+Each important note records where the claim came from and a confidence level. When source and documentation disagree, the note should say so explicitly. When a later implementation supersedes a design decision, the original note should point forward to the new state instead of silently remaining plausible.
+
+This matters most for facts that change action:
+
+- which runtime is actually active;
+- whether a feature is implemented or only designed;
+- which deployment path is authoritative;
+- whether a security finding remains open;
+- which client or project name is safe to publish.
+
+Memory without provenance is not knowledge. It is cached assertion.
+
+## Secrets need a different boundary
+
+Portable Markdown is an advantage until the note contains a credential, production connection detail, or private customer record.
+
+My rule is simple: **the vault receives durable judgment, not secrets**.
+
+The note can preserve that a database uses a certificate-verified connection, that a rotation is required, or that an operational command exists. It should not preserve the password, private key, live account identifier, or customer data used during the incident.
+
+Sensitive operational references stay in the more restricted project memory or the system designed to hold secrets. A backlink can state that a protected runbook exists without copying its contents into the vault.
+
+## Memory needs garbage collection
+
+A wrong note is worse than no note because it arrives with the authority of prior experience.
+
+The system therefore needs a maintenance loop:
+
+1. Find orphaned notes that are not reachable from a MOC.
+2. Detect duplicated conclusions with conflicting wording.
+3. Mark decisions that were superseded.
+4. Reconcile notes against the current repository.
+5. Remove generated artifacts that no longer identify the run that created them.
+6. Refresh the startup catalog when projects or MOCs change.
+
+This is not housekeeping after the real memory system. It is part of the memory system. Search quality degrades as stale confidence accumulates.
+
+## What I save after a session
+
+Not every solved ticket deserves a permanent note. I save information that changes a future decision:
+
+- a non-obvious invariant;
+- a rejected approach and the property that ruled it out;
+- a production failure mechanism;
+- an operational boundary that the repository does not make obvious;
+- a public-versus-private naming decision;
+- a recurring mistake whose next occurrence can be prevented.
+
+Implementation details that source search can recover cheaply stay in source. Durable judgment that source cannot reconstruct goes into the vault.
+
+That division prevents the knowledge base from becoming a second, worse copy of the codebase.
+
+## The takeaway
+
+AI memory is not mainly a storage problem. It is a retrieval, provenance, scoping, and decay problem.
+
+Keep existing memory readable. Send new non-secret knowledge to one durable home. Inject a small catalog rather than an entire vault. Use MOCs as the retrieval spine and atomic notes as precise units of judgment. Record sources, keep secrets outside the portable store, and prune facts that reality has invalidated.
+
+The result is not an assistant that remembers everything. It is an assistant that can reliably find the few things it must not forget.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I use this memory workflow across production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

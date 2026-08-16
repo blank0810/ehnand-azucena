@@ -1,0 +1,2 @@
+/blog /articles 308
+/blog/* /articles/:splat 308

@@ -1,0 +1,111 @@
+---
+import Breadcrumbs from "@/components/site/Breadcrumbs.astro"
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import {
+  entrySlug,
+  type ArticleEntry,
+} from "@/lib/content"
+import { formatIsoDate } from "@/lib/dates"
+
+interface Props {
+  article: ArticleEntry
+  canonicalPath: string
+  schemas: unknown[]
+  relatedArticles: ArticleEntry[]
+}
+
+const { article, canonicalPath, schemas, relatedArticles } = Astro.props
+const title = `${article.data.seoTitle ?? article.data.title} | Ehnand Azucena`
+const syndicated = article.data.syndicated
+---
+
+<BaseLayout
+  title={title}
+  description={article.data.summary}
+  canonicalPath={canonicalPath}
+  robots={article.data.draft ? "noindex,nofollow" : "index,follow"}
+  ogType="article"
+  publishedTime={article.data.date}
+  modifiedTime={article.data.updated ?? article.data.date}
+  tags={article.data.tags}
+  schemas={schemas}
+>
+  <Breadcrumbs
+    items={[
+      { label: "Home", href: "/" },
+      { label: "Articles", href: "/articles" },
+      { label: article.data.title },
+    ]}
+  />
+
+  <main id="main-content" class="article-detail container">
+    {article.data.draft && (
+      <aside class="article-draft-notice" aria-label="Draft status">
+        <strong>Draft preview</strong>
+        <span>This article is available locally for review and is excluded from discovery feeds.</span>
+      </aside>
+    )}
+
+    <header class="article-detail__header">
+      <p class="mono-label">{article.data.category}</p>
+      <h1>{article.data.title}</h1>
+      <p class="article-detail__summary">{article.data.summary}</p>
+      <div class="article-detail__dates">
+        <span>
+          Published <time datetime={article.data.date}>{formatIsoDate(article.data.date)}</time>
+        </span>
+        {article.data.updated && (
+          <span>
+            Updated <time datetime={article.data.updated}>{formatIsoDate(article.data.updated)}</time>
+          </span>
+        )}
+      </div>
+      <ul class="article-tag-list">
+        {article.data.tags.map((tag) => <li>{tag}</li>)}
+      </ul>
+    </header>
+
+    <article class="article-detail__content prose">
+      <slot name="content" />
+    </article>
+
+    {syndicated && (syndicated.devto || syndicated.hashnode) && (
+      <aside class="article-syndication" aria-labelledby="syndication-title">
+        <h2 id="syndication-title">Also published on</h2>
+        <ul>
+          {syndicated.devto && (
+            <li><a href={syndicated.devto} rel="noopener noreferrer" target="_blank">DEV Community</a></li>
+          )}
+          {syndicated.hashnode && (
+            <li><a href={syndicated.hashnode} rel="noopener noreferrer" target="_blank">Hashnode</a></li>
+          )}
+        </ul>
+      </aside>
+    )}
+
+    {relatedArticles.length > 0 && (
+      <section class="article-related" aria-labelledby="article-related-title">
+        <h2 id="article-related-title">Continue through the field notes</h2>
+        <div>
+          {relatedArticles.map((related) => {
+            const slug = entrySlug(related.id)
+            return (
+              <article class="record">
+                <p class="mono-label">
+                  {related.data.category} · <time datetime={related.data.date}>{formatIsoDate(related.data.date)}</time>
+                </p>
+                <h3><a href={`/articles/${slug}`}>{related.data.title}</a></h3>
+                <p>{related.data.summary}</p>
+              </article>
+            )
+          })}
+        </div>
+      </section>
+    )}
+
+    <nav class="article-detail__actions" aria-label="Article actions">
+      <a class="button button--secondary" href="/articles">Back to all articles</a>
+      <a class="button button--primary" href="/#contact">Discuss a project</a>
+    </nav>
+  </main>
+</BaseLayout>

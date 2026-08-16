@@ -1,0 +1,90 @@
+---
+const services = [
+  {
+    title: "SaaS and operational platform delivery",
+    description:
+      "Architecture and implementation for tenant-aware products, subscription workflows, internal operations, and production handoff.",
+    links: [
+      { label: "Adam AI", href: "/projects/adam-ai" },
+      { label: "MemberPulse", href: "/projects/memberpulse" },
+    ],
+  },
+  {
+    title: "APIs, data models, billing, reconciliation, and business-system integrity",
+    description:
+      "Backend boundaries and financial data flows designed for traceability, field constraints, reporting, and audit-ready records.",
+    links: [
+      {
+        label: "Water Billing System",
+        href: "/projects/initao-water-billing-system",
+      },
+      {
+        label: "Double-entry utility billing",
+        href: "/articles/utility-billing-ledger",
+      },
+    ],
+  },
+  {
+    title: "AI-assisted document and workflow automation",
+    description:
+      "Document ingestion, extraction, matching, classification, and resilient inference integrated into real operating workflows.",
+    links: [
+      {
+        label: "Document matching strategies",
+        href: "/articles/document-matching-strategies",
+      },
+      {
+        label: "Swiss Energy Platform Suite",
+        href: "/projects/swiss-energy-platform-suite",
+      },
+    ],
+  },
+  {
+    title: "Deployment, CI/CD, cloud infrastructure, and infrastructure as code",
+    description:
+      "Containerized delivery, reviewable automation, deployment checks, and infrastructure definitions aligned with application boundaries.",
+    links: [
+      {
+        label: "Automation rare paths",
+        href: "/articles/automation-no-op-rare-paths",
+      },
+      {
+        label: "FastAPI and Terraform deployment article",
+        href: "/articles/fastapi-erp-terraform-aws-lambda",
+      },
+    ],
+  },
+]
+---
+
+<section id="services" class="section services" aria-labelledby="services-title">
+  <div class="container">
+    <div class="section-heading">
+      <h2 id="services-title">Systems I can take ownership of</h2>
+      <p>
+        Delivery is framed around the operating problem and its evidence, not a loose
+        inventory of frameworks.
+      </p>
+    </div>
+    <ol class="services__list">
+      {
+        services.map((service, index) => (
+          <li class="service-record record">
+            <span class="service-record__index mono-label">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div>
+              <h3>{service.title}</h3>
+              <p>{service.description}</p>
+            </div>
+            <ul>
+              {service.links.map((link) => (
+                <li><a href={link.href}>{link.label}</a></li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>

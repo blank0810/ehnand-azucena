@@ -1,0 +1,38 @@
+---
+import ThemeToggle from "@/components/site/ThemeToggle.astro"
+---
+
+<header class="site-header">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="site-header__inner container">
+    <a class="site-brand" href="/" aria-label="Ehnand Azucena, home">
+      <span class="site-brand__mark" aria-hidden="true">EA</span>
+      <span>Ehnand Azucena</span>
+    </a>
+
+    <nav class="site-nav site-nav--desktop" aria-label="Primary navigation">
+      <a href="/projects">Projects</a>
+      <a href="/#services">Services</a>
+      <a href="/articles">Articles</a>
+      <a href="/#about">About</a>
+    </nav>
+
+    <ThemeToggle className="theme-toggle--desktop" />
+
+    <a class="button button--primary site-header__action" href="/#contact">
+      Discuss a project
+    </a>
+
+    <details class="mobile-nav">
+      <summary>Menu</summary>
+      <nav aria-label="Mobile navigation">
+        <a href="/projects">Projects</a>
+        <a href="/#services">Services</a>
+        <a href="/articles">Articles</a>
+        <a href="/#about">About</a>
+        <ThemeToggle className="theme-toggle--mobile" />
+        <a href="/#contact">Discuss a project</a>
+      </nav>
+    </details>
+  </div>
+</header>

@@ -1,0 +1,119 @@
+---
+import { getFeaturedProjects } from "@/data/featured-projects"
+
+const projects = getFeaturedProjects()
+---
+
+<section id="home" class="hero container" aria-labelledby="hero-title">
+  <div class="hero__offer">
+    <p class="hero__mode mono-label">ENGINEER-DIRECTED · AI-AUGMENTED</p>
+    <h1 id="hero-title">Full-stack systems delivery.</h1>
+    <p class="hero__summary">
+      I design and architect production SaaS, operational platforms, APIs, and
+      infrastructure, using Claude Code and Codex to accelerate implementation,
+      testing, CI/CD, and IaC.
+    </p>
+    <div class="hero__actions">
+      <a class="button button--primary" href="#contact">Discuss a project</a>
+      <a class="button button--secondary" href="#projects">
+        Inspect selected projects
+      </a>
+    </div>
+  </div>
+
+  <section
+    class="hero-showcase"
+    aria-label="Featured projects"
+    aria-roledescription="carousel"
+    data-featured-projects
+  >
+    <div class="hero-showcase__track" aria-live="off">
+      {
+        projects.map((project, index) => (
+          <article
+            class="hero-record"
+            data-featured-project={project.slug}
+            data-active={String(index === 0)}
+            aria-hidden={index !== 0}
+            inert={index !== 0}
+            aria-label={`${index + 1} of ${projects.length}: ${project.title}`}
+            aria-roledescription="slide"
+          >
+            <div
+              class:list={[
+                "hero-record__image",
+                { "is-fallback": project.image.fallback },
+              ]}
+            >
+              <img
+                src={project.image.src}
+                width={project.image.width}
+                height={project.image.height}
+                alt={project.image.alt}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchpriority={index === 0 ? "high" : "auto"}
+              />
+            </div>
+            <div class="hero-record__body">
+              <p class="mono-label">Featured production evidence</p>
+              <h2>{project.title}</h2>
+              <dl class="evidence-meta">
+                <div><dt>Category</dt><dd>{project.category}</dd></div>
+                <div><dt>Role</dt><dd>{project.role}</dd></div>
+                <div><dt>Period</dt><dd>{project.period}</dd></div>
+                <div><dt>Status</dt><dd>{project.status}</dd></div>
+              </dl>
+              <a class="text-link" href={`/projects/${project.slug}`}>
+                Inspect project evidence
+              </a>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="hero-showcase__controls" data-featured-controls hidden>
+      <button type="button" data-featured-previous aria-label="Previous project">
+        ←
+      </button>
+      <span class="mono-label" data-featured-position>01 / 05</span>
+      <button type="button" data-featured-next aria-label="Next project">→</button>
+      <button type="button" data-featured-pause aria-pressed="false">
+        Pause rotation
+      </button>
+    </div>
+
+    <div
+      class="hero-showcase__selectors"
+      data-featured-controls
+      hidden
+      role="group"
+      aria-label="Choose featured project"
+    >
+      {
+        projects.map((project, index) => (
+          <button
+            type="button"
+            data-featured-selector={String(index)}
+            aria-label={`Show ${project.title}`}
+            aria-pressed={index === 0}
+          >
+            {String(index + 1).padStart(2, "0")}
+          </button>
+        ))
+      }
+    </div>
+
+    <p class="visually-hidden" data-featured-status aria-live="polite"></p>
+    <ul class="hero-showcase__fallback-links">
+      {
+        projects.map((project) => (
+          <li>
+            <a href={`/projects/${project.slug}`}>{project.title}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</section>

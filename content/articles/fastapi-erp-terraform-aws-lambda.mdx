@@ -1,0 +1,158 @@
+---
+title: "Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform"
+seoTitle: "Python 3.14 FastAPI on AWS Lambda with Terraform"
+date: 2026-08-16
+category: "SaaS, Cloud & Security"
+tags: [python-3.14, fastapi, terraform, aws-lambda, multi-tenancy]
+summary: "How I am packaging a FastAPI and Mangum ERP backend for AWS Lambda with Terraform while keeping the current one-tenant-per-stack boundary explicit."
+---
+
+Infrastructure as code is most useful when it makes the system's current boundary impossible to misunderstand.
+
+I am building a Python 3.14 ERP backend with FastAPI and Mangum for AWS Lambda. It is intended to grow into a multi-tenant SaaS backend, but the honest description today is narrower: **multi-tenancy is partially implemented, and one deployed stack supports one configured tenant**.
+
+Terraform is valuable here for more than repeatable deployment. It puts that boundary beside the Lambda, gateway, identity, permissions, and packaging decisions that enforce it. A reviewer can see what exists now and what still belongs to the future control plane.
+
+## The request path
+
+The application uses a single Lambda rather than one function per endpoint:
+
+```text
+mobile or web client
+  -> API Gateway REST API
+  -> Firebase custom authorizer
+  -> Lambda proxy integration
+  -> Mangum
+  -> FastAPI route
+  -> service and authorization layer
+  -> PostgreSQL or S3
+```
+
+API Gateway receives the HTTP request and invokes a custom authorizer before the application. The authorizer verifies the Firebase identity and passes a small identity context forward. The application still resolves the corresponding user and permissions from its own database before performing protected work.
+
+That separation is deliberate:
+
+- The authorizer answers **who presented this token?**
+- The application answers **is that user provisioned for this tenant, and what may they do?**
+- The API key provides a usage-plan and throttling handle. It is not authentication.
+
+Treating an API key as identity would turn a shared client credential into a master password. Treating a valid Firebase identity as sufficient authorization would allow any valid account into an ERP that requires administrative provisioning. Both layers have a narrower job.
+
+## Why FastAPI runs through Mangum
+
+FastAPI is an ASGI application. Lambda receives API Gateway events, not ASGI requests. Mangum is the adapter between those models: it translates the proxy event into an ASGI scope, invokes the FastAPI app, and translates the response back into the shape API Gateway expects.
+
+The ERP's database access is synchronous, so its routes are normal `def` functions. FastAPI moves those functions into a thread pool rather than letting blocking PostgreSQL calls occupy the event loop.
+
+The Lambda handler also owns runtime-specific concerns that do not belong in route modules, such as disabling an unnecessary server lifespan cycle and ensuring the local threaded development gateway has a usable event loop. That keeps the application testable as FastAPI while preserving the event contract Lambda needs.
+
+## Pin Python 3.14 across every application environment
+
+Runtime upgrades become unreliable when each layer carries a different answer. This project declares Python 3.14 in three places that serve different readers:
+
+```toml
+# pyproject.toml
+requires-python = ">=3.14"
+```
+
+```dockerfile
+# local development image
+FROM python:3.14-slim
+```
+
+```hcl
+# Lambda runtime
+variable "runtime" {
+  default = "python3.14"
+}
+```
+
+The type checker targets the same language version. The local interpreter, container, dependency resolution, and application Lambda package are therefore meant to fail together if the code depends on a version-specific behavior. The separately packaged custom authorizer has its own runtime and dependency layer; it is not the ERP application.
+
+Terraform provider support matters too. A provider can reject a newly available Lambda runtime client-side if its own validation table is stale. The infrastructure root uses a provider generation that recognizes Python 3.14 rather than downgrading the application to satisfy an older local enum.
+
+## Packaging is part of the infrastructure graph
+
+The application code and its dependencies have different deployment characteristics. The source package is small and changes frequently. Compiled dependencies are larger, change less often, and must be built for Lambda's Linux environment.
+
+The Terraform root models them separately:
+
+1. Archive the application source.
+2. Upload the source archive to an artifacts bucket.
+3. Build a dependency layer from the locked dependency set.
+4. Upload the layer archive through S3.
+5. Publish a Lambda layer compatible with the configured Python runtime.
+6. Attach that layer to the application function.
+7. Use content hashes so a changed artifact produces a real deployment diff.
+
+The layer goes through S3 instead of a direct upload because binary dependencies make the archive large enough that encoding overhead becomes relevant. More importantly, Terraform owns the relationship. A manual layer ARN is no longer an undocumented prerequisite someone has to publish before `apply` can succeed.
+
+## What Terraform owns
+
+The infrastructure root defines the application boundary as a connected resource graph:
+
+| Resource | Responsibility |
+|---|---|
+| Lambda function | Python 3.14 runtime, handler, timeout, memory, environment, and attached layers |
+| Execution role | CloudWatch logging and narrowly scoped parameter access |
+| Parameter access | Database connection values are resolved at runtime instead of committed to Terraform variables |
+| REST API Gateway | Regional HTTP front door and greedy Lambda proxy route |
+| Custom authorizer | Firebase token verification before the application is invoked |
+| API key and usage plan | Client usage tracking and throttling |
+| Lambda permissions | Explicit gateway permission to invoke the authorizer and application |
+| Deployment and stage | A versioned, addressable gateway surface |
+
+That list matters because a Lambda function by itself is not a deployed API. The gateway needs permission to invoke it. The authorizer needs its own permission. The deployment needs to change when the integration or package changes. The role needs access to the exact runtime parameters the app reads.
+
+Infrastructure as code is where those otherwise invisible edges become reviewable.
+
+## The multi-tenant boundary that exists today
+
+The application already carries tenant context, but it does not pretend every planned layer is complete.
+
+At request time, the current stack:
+
+1. Normalizes the requested tenant code.
+2. Rejects it unless it matches the deployment's configured tenant.
+3. Resolves a principal from that tenant's database.
+4. Carries the tenant identifier through query scoping and object-storage calls.
+5. Uses tenant-aware seams for the database engine and S3 bucket.
+
+Today those seams resolve one configured PostgreSQL database and one configured asset bucket. They make future routing possible; they do not make it real by naming it.
+
+| Implemented now | Still required for broader SaaS tenancy |
+|---|---|
+| One tenant code and identifier per stack | A trusted tenant registry or control plane |
+| Tenant-aware principal and query scope | Dynamic tenant-to-database resolution |
+| Tenant-aware object keys and bucket seam | Automated tenant storage provisioning |
+| Fail-closed mismatch handling | Tenant lifecycle, rotation, migration, and offboarding |
+| Terraform-defined application stack | Repeatable per-tenant or shared-stack orchestration |
+
+This distinction protects both architecture and public credibility. A function named `get_engine(tenant_id)` is a useful interface. If it always returns the sole configured engine, it is still a single-tenant implementation behind a tenant-shaped seam.
+
+## IaC does not replace runtime verification
+
+A successful Terraform plan proves that Terraform can construct a proposed resource graph. It does not prove that the dependency layer imports, the gateway event shape matches Mangum, the authorizer forwards the claims the application expects, the database certificate exists, or an authenticated ERP request reaches PostgreSQL.
+
+The deployment ladder therefore needs separate evidence:
+
+1. Format and validate the Terraform configuration.
+2. Review the plan for resource replacement and permission expansion.
+3. Build the package and dependency layer in a compatible environment.
+4. Apply the approved graph.
+5. Invoke the Lambda directly to prove package health.
+6. Call through API Gateway without credentials and expect a fail-closed response.
+7. Call through the gateway with an authorized identity.
+8. Exercise a database-backed route and an S3-backed asset flow.
+
+Each step crosses a boundary the previous one cannot see.
+
+## The takeaway
+
+Terraform gives this ERP backend a reproducible deployment model, but its more important contribution is honesty. It shows Python 3.14, the package and layer, the Lambda, gateway, authorizer, permissions, parameters, and current tenant configuration in one reviewable graph.
+
+The system is moving toward SaaS multi-tenancy. Today it is one configured tenant per stack with tenant-aware seams. Calling that boundary explicit makes the next phase easier to design and safer to implement than calling an intention complete.
+
+---
+
+*I'm Ehnand Azucena, backend and full-stack developer. I build Python 3.14 backend systems with FastAPI, Mangum, PostgreSQL, AWS Lambda, API Gateway, and Terraform. I take remote contract and backend engagements. [Get in touch](https://ehnand.com/#contact).*

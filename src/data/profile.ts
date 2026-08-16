@@ -1,0 +1,22 @@
+export const PROFILE = {
+  name: "Ehnand Azucena",
+  role: "Full Stack Systems Engineer",
+  alternateRole: "Full Stack Developer",
+  email: "contact@ehnand.com",
+  phoneDisplay: "+63 953 467 8287",
+  phoneE164: "+639534678287",
+  whatsappUrl: "https://wa.me/639534678287",
+  location: "Initao, Northern Mindanao 9022, Philippines",
+  timezone: "UTC+8",
+  githubUrl: "https://github.com/blank0810",
+  linkedinUrl: "https://www.linkedin.com/in/ehnand-azucena-3028a7194",
+  resumeUrl: "/files/Ehnand-Azucena-CV.pdf",
+  resumeFilename: "Ehnand-Azucena-CV.pdf",
+  portrait: {
+    src: "/images/profile-new.jpg",
+    width: 768,
+    height: 1152,
+    alt: "Portrait of Ehnand Azucena",
+  },
+  availability: "Available for contract and project-based work",
+} as const

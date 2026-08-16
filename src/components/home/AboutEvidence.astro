@@ -1,0 +1,157 @@
+---
+import {
+  CERTIFICATES,
+  EDUCATION,
+  EXPERIENCES,
+  SKILL_GROUPS,
+} from "@/data/career"
+import { PROFILE } from "@/data/profile"
+---
+
+<section id="about" class="section about-evidence" aria-labelledby="about-title">
+  <div class="container">
+    <div class="about-evidence__intro">
+      <div class="about-evidence__portrait">
+        <img
+          src={PROFILE.portrait.src}
+          width={PROFILE.portrait.width}
+          height={PROFILE.portrait.height}
+          alt={PROFILE.portrait.alt}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div>
+        <h2 id="about-title">Engineering evidence, not a proficiency score</h2>
+        <p>
+          {PROFILE.role} based in {PROFILE.location}, working in {PROFILE.timezone}.
+          {" "}{PROFILE.availability}.
+        </p>
+        <div class="about-evidence__actions">
+          <a
+            class="button button--secondary"
+            href={PROFILE.resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View résumé
+          </a>
+          <a
+            class="text-link"
+            href={PROFILE.resumeUrl}
+            download={PROFILE.resumeFilename}
+          >
+            Download PDF
+          </a>
+          <a class="text-link" href={`mailto:${PROFILE.email}`}>Contact Ehnand</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-evidence__section">
+      <h3 id="experience">Professional experience</h3>
+      <div class="experience-list">
+        {
+          EXPERIENCES.map((experience) => (
+            <article class="experience-record record">
+              <div>
+                <h4>{experience.title}</h4>
+                <a
+                  href={experience.companyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {experience.company}
+                </a>
+              </div>
+              <div class="experience-record__meta mono-label">
+                <span>{experience.period}</span>
+                <span>{experience.location}</span>
+              </div>
+              <ul>
+                {experience.description.map((item) => <li>{item}</li>)}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="about-evidence__section">
+      <h3 id="skills">Technical skills</h3>
+      <div class="skill-groups">
+        {
+          SKILL_GROUPS.map((group) => (
+            <section aria-labelledby={`skill-${group.title.toLowerCase().replace(/\W+/g, "-")}`}>
+              <h4 id={`skill-${group.title.toLowerCase().replace(/\W+/g, "-")}`}>
+                {group.title}
+              </h4>
+              <p>{group.skills.join(" · ")}</p>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="about-evidence__section">
+      <h3 id="education">Education</h3>
+      <div class="education-list">
+        {
+          EDUCATION.map((item) => (
+            <details class="evidence-details">
+              <summary>
+                <span>
+                  <strong>{item.degree}</strong>
+                  <span>{item.institution}</span>
+                </span>
+                <span class="mono-label">{item.period}</span>
+              </summary>
+              <div>
+                <p>{item.location}</p>
+                <p>{item.description}</p>
+                <ul>{item.achievements.map((achievement) => <li>{achievement}</li>)}</ul>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="about-evidence__section">
+      <h3 id="certificates">Certificates and achievements</h3>
+      <div class="certificate-list">
+        {
+          CERTIFICATES.map((certificate) => (
+            <details class="certificate-record evidence-details">
+              <summary>
+                <span>
+                  <strong>{certificate.title}</strong>
+                  <span>{certificate.issuer}</span>
+                </span>
+                <span class="mono-label">{certificate.date}</span>
+              </summary>
+              <div class="certificate-record__body">
+                <img
+                  src={certificate.image.src}
+                  width={certificate.image.width}
+                  height={certificate.image.height}
+                  alt={certificate.image.alt}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <p>{certificate.category}</p>
+                <a
+                  href={certificate.verificationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Verify certificate
+                </a>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

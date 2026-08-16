@@ -1,0 +1,27 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+---
+
+<BaseLayout
+  title="Record Not Found | Ehnand Azucena"
+  description="The requested portfolio record could not be found."
+  canonicalPath="/404"
+  robots="noindex,nofollow"
+>
+  <main id="main-content" class="missing-record container">
+    <div class="missing-record__code" aria-hidden="true">404</div>
+    <div class="missing-record__body">
+      <p class="mono-label">Trace result · no matching record</p>
+      <h1>Record not found</h1>
+      <p>
+        The address may have changed, or the record may not be part of the public
+        portfolio.
+      </p>
+      <nav aria-label="Missing page alternatives">
+        <a class="button button--primary" href="/">Return home</a>
+        <a class="button button--secondary" href="/projects">Review projects</a>
+        <a class="button button--secondary" href="/articles">Read articles</a>
+      </nav>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,129 @@
+---
+import "@fontsource-variable/ibm-plex-sans"
+import "@fontsource/ibm-plex-mono/400.css"
+import "@fontsource/ibm-plex-mono/500.css"
+import "@/styles/global.css"
+
+import Footer from "@/components/site/Footer.astro"
+import Header from "@/components/site/Header.astro"
+import JsonLd from "@/components/site/JsonLd.astro"
+import { absoluteUrl, SITE_NAME } from "@/config/site"
+import { constrainDocumentTitle } from "@/lib/metadata"
+import { buildPersonSchema } from "@/lib/schema"
+
+interface Props {
+  title: string
+  description: string
+  canonicalPath?: string
+  imagePath?: string
+  robots?: "index,follow" | "noindex,nofollow"
+  ogType?: "website" | "article"
+  publishedTime?: string
+  modifiedTime?: string
+  tags?: string[]
+  schemas?: unknown[]
+}
+
+const {
+  title,
+  description,
+  canonicalPath = Astro.url.pathname,
+  imagePath = "/images/profile-new.jpg",
+  robots = "index,follow",
+  ogType = "website",
+  publishedTime,
+  modifiedTime,
+  tags = [],
+  schemas = [],
+} = Astro.props
+
+const canonicalUrl = absoluteUrl(canonicalPath)
+const imageUrl = absoluteUrl(imagePath)
+const documentTitle = constrainDocumentTitle(title)
+const googleSiteVerification = import.meta.env.GOOGLE_SITE_VERIFICATION
+const directionContract = `<!--
+THESIS: Production Trace makes delivery inspectable and refuses the generic dark hero and card-grid portfolio.
+OWN-WORLD: Cold technical paper, graphite ink, cobalt working marks, one amber live accent, grotesk plus mono type, numbered records, calibration rules, and sharp or clipped corners.
+STORY: A visitor understands the service, sees proof, understands AI's role and human accountability, then contacts Ehnand.
+FIRST VIEWPORT: Navigation; large service statement left; five-project rotating evidence record right; horizontal Problem to Production rail; primary Discuss a project action.
+FORM: Horizontal commissioning rail from grounded candidate 4, seed dc307738.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->`
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (() => {
+        const storageKey = "ehnand-theme"
+        let storedTheme = null
+
+        try {
+          storedTheme = localStorage.getItem(storageKey)
+        } catch {
+          // Storage can be unavailable in privacy-restricted browsing contexts.
+        }
+
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches
+        const theme = storedTheme === "light" || storedTheme === "dark"
+          ? storedTheme
+          : prefersDark
+            ? "dark"
+            : "light"
+
+        document.documentElement.dataset.theme = theme
+        document.documentElement.style.colorScheme = theme
+      })()
+    </script>
+    <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    {googleSiteVerification && (
+      <meta name="google-site-verification" content={googleSiteVerification} />
+    )}
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" type="application/rss+xml" title="Ehnand Azucena Articles" href="/rss.xml" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content={ogType} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+
+    {ogType === "article" && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
+    {ogType === "article" && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime} />
+    )}
+    {ogType === "article" && tags.map((tag) => (
+      <meta property="article:tag" content={tag} />
+    ))}
+
+    <JsonLd value={buildPersonSchema()} />
+    {schemas.map((schema) => <JsonLd value={schema} />)}
+  </head>
+  <body data-motion-root>
+    <Fragment set:html={directionContract} />
+    <Header />
+    <slot />
+    <Footer />
+    <script>
+      import "@/scripts/featured-projects"
+      import "@/scripts/site-motion"
+      import "@/scripts/theme"
+    </script>
+  </body>
+</html>

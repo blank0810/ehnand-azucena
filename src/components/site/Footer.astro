@@ -1,0 +1,41 @@
+---
+import { PROFILE } from "@/config/site"
+
+const year = new Date().getUTCFullYear()
+---
+
+<footer class="site-footer">
+  <div class="site-footer__grid container">
+    <div class="site-footer__identity">
+      <a class="site-brand" href="/">Ehnand Azucena</a>
+      <p>{PROFILE.role} / {PROFILE.alternateRole}</p>
+      <p>Built with Astro.</p>
+    </div>
+
+    <nav aria-label="Footer navigation">
+      <p class="mono-label">Navigate</p>
+      <a href="/projects">Projects</a>
+      <a href="/articles">Articles</a>
+      <a href="/#about">About</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <div class="site-footer__contact">
+      <p class="mono-label">Connect</p>
+      <a href={`mailto:${PROFILE.email}`}>Email</a>
+      <a href={PROFILE.whatsappUrl} target="_blank" rel="noopener noreferrer">
+        WhatsApp
+      </a>
+      <a href={PROFILE.linkedinUrl} target="_blank" rel="noopener noreferrer">
+        LinkedIn
+      </a>
+      <a href={PROFILE.githubUrl} target="_blank" rel="noopener noreferrer">
+        GitHub
+      </a>
+      <a href={PROFILE.resumeUrl} target="_blank" rel="noopener noreferrer">
+        Résumé
+      </a>
+    </div>
+  </div>
+  <p class="site-footer__legal container">© {year} Ehnand Azucena</p>
+</footer>

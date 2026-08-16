@@ -1,0 +1,66 @@
+---
+import type { NarrativeRecord } from "@/lib/project-narrative"
+
+interface Props {
+  records: NarrativeRecord[]
+}
+
+interface NarrativeGroup {
+  kind: "record" | "bullets"
+  records: NarrativeRecord[]
+}
+
+const { records } = Astro.props
+const groups: NarrativeGroup[] = []
+
+for (const record of records) {
+  const previous = groups.at(-1)
+  if (record.kind === "bullet" && previous?.kind === "bullets") {
+    previous.records.push(record)
+  } else {
+    groups.push({
+      kind: record.kind === "bullet" ? "bullets" : "record",
+      records: [record],
+    })
+  }
+}
+---
+
+<div class="prose project-narrative">
+  {
+    groups.map((group) => {
+      if (group.kind === "bullets") {
+        return (
+          <ul>
+            {group.records.map((record) => (
+              <li>
+                {record.parts.map((part) =>
+                  part.strong ? <strong>{part.text}</strong> : part.text,
+                )}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      const record = group.records[0]
+      if (record.kind === "heading") {
+        return (
+          <h2>
+            {record.parts.map((part) =>
+              part.strong ? <strong>{part.text}</strong> : part.text,
+            )}
+          </h2>
+        )
+      }
+
+      return (
+        <p>
+          {record.parts.map((part) =>
+            part.strong ? <strong>{part.text}</strong> : part.text,
+          )}
+        </p>
+      )
+    })
+  }
+</div>

@@ -1,0 +1,12 @@
+---
+const tableAttributes = Astro.props
+---
+
+<div
+  class="prose-table-region"
+  role="group"
+  aria-label="Scrollable data table"
+  tabindex="0"
+>
+  <table {...tableAttributes}><slot /></table>
+</div>

@@ -1,0 +1,98 @@
+---
+import { render } from "astro:content"
+import { absoluteUrl, PERSON_ID } from "@/config/site"
+import {
+  getProjectStartDate,
+  PROJECTS,
+  type Project,
+} from "@/data/projects"
+import ProjectLayout from "@/layouts/ProjectLayout.astro"
+import {
+  assertContentIntegrity,
+  entrySlug,
+  getCaseStudyByProjectSlug,
+  getPublishedArticles,
+} from "@/lib/content"
+import { parseProjectNarrative } from "@/lib/project-narrative"
+
+export function getStaticPaths() {
+  return PROJECTS.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }))
+}
+
+interface Props {
+  project: Project
+}
+
+const { project } = Astro.props
+await assertContentIntegrity()
+
+const canonicalPath = `/projects/${project.slug}`
+const canonicalUrl = absoluteUrl(canonicalPath)
+const caseStudy = await getCaseStudyByProjectSlug(project.slug)
+const renderedCaseStudy = caseStudy ? await render(caseStudy) : undefined
+const CaseStudyContent = renderedCaseStudy?.Content
+const narrative = parseProjectNarrative(
+  project.longDescription ?? project.description,
+)
+
+const publishedArticles = await getPublishedArticles()
+const relatedArticles = project.relatedArticleSlugs
+  .map((slug) =>
+    publishedArticles.find((article) => entrySlug(article.id) === slug),
+  )
+  .filter((article): article is (typeof publishedArticles)[number] => article !== undefined)
+
+const dateCreated = getProjectStartDate(project)
+const dateModified = project.updated ?? caseStudy?.data.updated
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": canonicalUrl + "#software",
+  name: project.title,
+  description: project.description,
+  applicationCategory: project.category,
+  url: canonicalUrl,
+  image: absoluteUrl(project.image.src),
+  author: { "@id": PERSON_ID },
+  ...(dateCreated ? { dateCreated } : {}),
+  ...(dateModified ? { dateModified } : {}),
+}
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: absoluteUrl("/"),
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Projects",
+      item: absoluteUrl("/projects"),
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: project.title,
+      item: canonicalUrl,
+    },
+  ],
+}
+---
+
+<ProjectLayout
+  project={project}
+  canonicalPath={canonicalPath}
+  schemas={[softwareSchema, breadcrumbSchema]}
+  narrative={narrative}
+  relatedArticles={relatedArticles}
+>
+  {CaseStudyContent && <CaseStudyContent slot="case-study" />}
+</ProjectLayout>

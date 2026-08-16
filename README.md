@@ -1,62 +1,111 @@
-# ehnand.com — Portfolio of Ehnand Azucena
+# ehnand.com
 
-Personal portfolio site for **Ehnand Azucena**, a Full Stack Developer at [Cloudesk](https://cloudesk.co/) based in Initao, Northern Mindanao, Philippines (UTC+8).
+Ehnand Azucena's professional portfolio and technical-writing site. It presents verified full-stack systems work, project evidence, career history, and weekly engineering articles to prospective clients and employers.
 
-**Live: [ehnand.com](https://ehnand.com)** · [LinkedIn](https://www.linkedin.com/in/ehnand-azucena-3028a7194) · contact@ehnand.com
+Live site: [ehnand.com](https://ehnand.com)
 
-Built with Next.js 14 (App Router), React 18, TypeScript, and Tailwind CSS. Deployed on Vercel.
+## Stack
 
-## Development
+- Astro static output with strict TypeScript
+- MDX content collections for articles and case studies
+- Plain CSS using the Production Trace system in `DESIGN.md`
+- Cloudflare Workers Static Assets with no Worker runtime entry
+- pnpm, Node 22, and Docker Compose for local operation
 
-This project is **containerized** — run everything through Docker, not on the host.
+## Interface and evidence
+
+- Neutral light and dark themes follow the operating system on first visit; a header control persists an explicit visitor choice.
+- The first viewport progressively rotates through Adam AI, REPSShield, Water Billing System, MemberPulse, and Swiss Energy Platform Suite. All five records and fallback links remain in the generated HTML.
+- `/projects` keeps all published project records in a named, keyboard-focusable bounded register so a growing archive does not extend the page indefinitely.
+- The current CV is served first-party at `/files/Ehnand-Azucena-CV.pdf`, with separate view and download actions.
+- Entry, project-state, and native page transitions are removed for visitors who prefer reduced motion.
+
+## Local development
+
+Run every Node, Astro, pnpm, build, and test command through Docker Compose. Do not install or build on the host.
 
 ```bash
-docker compose up          # Dev server at localhost:3001
-docker compose up --build  # Rebuild after dependency changes
+docker compose up
+docker compose up --build
+```
 
-# Production build — the NODE_ENV override is required, see below
-docker compose run --rm --no-deps -e NODE_ENV=production app pnpm build
+The development site is available at [http://localhost:3001](http://localhost:3001). Docker maps port `3001` to Astro's container port `4321`.
 
+### Verification commands
+
+```bash
+docker compose run --rm --no-deps app pnpm check
 docker compose run --rm --no-deps app pnpm lint
+docker compose run --rm --no-deps -e NODE_ENV=production app pnpm build
+docker compose run --rm --no-deps app pnpm validate:html
+docker compose run --rm --no-deps app pnpm test
+docker compose run --rm --no-deps app pnpm test:integration
 ```
 
-Two gotchas worth knowing up front:
+The integration suite temporarily copies a known draft fixture into the article collection, builds the site, verifies it through local Wrangler, removes only that fixture, and rebuilds clean production output.
 
-1. **Host builds fail.** `docker-compose.yml` mounts anonymous volumes over `/app/node_modules` and `/app/.next`. Docker creates the host-side stubs root-owned, so a host `pnpm build` dies with `EACCES: permission denied, open '.next/trace'`.
-2. **`next build` needs an explicit `NODE_ENV=production`.** Compose sets `NODE_ENV=development` for the dev server and that value leaks into `docker compose run`. Building under it loads the dev React runtime and every route fails prerender — the errors look like app bugs, but the app is fine.
+Use pnpm only. `pnpm-lock.yaml` is authoritative.
 
-The project standardizes on **pnpm**. Do not run `npm install`: npm's flat `node_modules` pulls in a duplicate React that breaks `next build` with a `useContext` null error during prerender.
+## Content workflow
 
-## Architecture
+### Articles
 
-A server-rendered single-page home plus statically-generated per-project detail routes.
+Add articles to `content/articles/<slug>.mdx`. The filename becomes `/articles/<slug>`.
 
+```yaml
+---
+title: "Visible article headline"
+seoTitle: "Optional concise document title"
+date: 2026-08-16
+updated: 2026-08-20 # optional; never earlier than date
+category: "Engineering Practice & Reliability"
+tags: [testing, reliability]
+summary: "A specific summary used in listings and metadata."
+draft: false
+syndicated: # optional
+  devto: "https://dev.to/example"
+  hashnode: "https://example.hashnode.dev/post"
+---
 ```
-RootLayout (app/layout.tsx — metadata + Person JSON-LD)
-  └─ ThemeProvider (next-themes, class-based dark mode, defaults to dark)
-       ├─ app/page.tsx — server component; FAQPage JSON-LD
-       │    └─ Hero → About → Experience → Projects → Skills
-       │       → Education → Certificates → FAQ → Contact → Footer
-       └─ app/projects/[slug] — SSG per project, own metadata + JSON-LD
-```
 
-Section components are client components (`"use client"`) for Framer Motion animations; the pages that host them are server components, so all content is server-rendered for search engines and AI crawlers.
+Valid categories are defined in `src/data/article-categories.ts`. Draft pages build for direct local review with `noindex,nofollow`, but drafts stay out of the homepage, article archive, related articles, RSS, and sitemap.
 
-**Content lives in `lib/`, not in the components** — this is the single source of truth:
+The layout supplies the page `h1`; article bodies should begin below that level. GFM tables are supported.
 
-| File | Feeds |
-|---|---|
-| `lib/projects.ts` | Project cards, `/projects/[slug]` detail pages, sitemap |
-| `lib/faq.ts` | The FAQ section *and* the FAQPage JSON-LD (they must match) |
-| `lib/site.ts` | `SITE_URL`, from `NEXT_APP_URL` (falls back to `https://ehnand.com`) |
+### Projects and case studies
 
-Edit data there, not in the JSX.
+Project metadata lives in `src/data/projects.ts` and feeds the homepage, project archive, detail routes, schema, internal links, and sitemap. Do not duplicate it in components.
 
-## SEO notes
+An optional narrative lives at `content/case-studies/<project-slug>.mdx`; its filename must match a slug in `src/data/projects.ts`. A project without a case study falls back to its verified long description or description.
 
-Structured data is split deliberately: `Person` schema is in the root layout (every page), while `FAQPage` schema lives in `app/page.tsx` only — Google discounts FAQPage markup whose answers don't appear on the page, so it must not be emitted on project routes.
+## Cloudflare Workers setup
 
-`app/sitemap.ts` and `app/robots.ts` generate `/sitemap.xml` and `/robots.txt` from `lib/projects.ts` and `SITE_URL`.
+`wrangler.jsonc` deploys `dist/` as asset-only Workers Static Assets. `_redirects` and `_headers` are copied from `public/` during the build.
+
+For the production handoff:
+
+1. Confirm `ehnand.com` is an active Cloudflare zone and preserve all mail records, especially MX, SPF, DKIM, and DMARC.
+2. Connect the GitHub repository under Cloudflare Workers Builds.
+3. Set `main` as the production branch.
+4. Set the build command to `pnpm build`.
+5. Let `wrangler.jsonc` deploy the generated `dist/` directory.
+6. Add `SITE_URL=https://ehnand.com` and optional `GOOGLE_SITE_VERIFICATION` build variables.
+7. Verify the generated `workers.dev` deployment before attaching the domain.
+8. Add `ehnand.com` as the apex custom domain and configure a permanent `www`-to-apex redirect that preserves paths and query strings.
+9. Verify TLS, email delivery, `/robots.txt`, `/sitemap.xml`, `/rss.xml`, and Search Console.
+10. Remove old Vercel routing only after the Cloudflare domain is verified.
+
+A local `pnpm deploy` script exists, but do not run it without explicit owner authorization and valid Cloudflare credentials. Local deploy commands must still run through Docker Compose.
+
+## Public routes
+
+- `/`
+- `/projects` and `/projects/<slug>`
+- `/articles` and `/articles/<slug>`
+- `/rss.xml`
+- `/sitemap.xml`
+- `/robots.txt`
+- `/blog` and `/blog/*` as permanent redirects to `/articles`
 
 ## License
 

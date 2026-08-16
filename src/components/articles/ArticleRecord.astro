@@ -1,0 +1,47 @@
+---
+import type { ArticleListItem } from "@/data/article-categories"
+import { formatIsoDate } from "@/lib/dates"
+
+interface Props {
+  article: ArticleListItem
+}
+
+const { article } = Astro.props
+const visibleTags = article.tags.slice(0, 3)
+const remainingTagCount = Math.max(0, article.tags.length - visibleTags.length)
+const searchableText = [
+  article.title,
+  article.summary,
+  article.category,
+  ...article.tags,
+]
+  .join(" ")
+  .toLowerCase()
+---
+
+<article
+  class="article-library-record record"
+  data-article-record={article.slug}
+  data-search={searchableText}
+  data-category={article.category}
+>
+  <div class="article-library-record__meta">
+    <time datetime={article.date}>{formatIsoDate(article.date)}</time>
+    <span>{article.category}</span>
+  </div>
+
+  <div class="article-library-record__body">
+    <h2><a href={`/articles/${article.slug}`}>{article.title}</a></h2>
+    <p>{article.summary}</p>
+    <ul class="article-tag-list">
+      {visibleTags.map((tag) => <li>{tag}</li>)}
+      {remainingTagCount > 0 && (
+        <li>+{remainingTagCount} more</li>
+      )}
+    </ul>
+  </div>
+
+  <a class="text-link article-library-record__link" href={`/articles/${article.slug}`}>
+    Read article
+  </a>
+</article>

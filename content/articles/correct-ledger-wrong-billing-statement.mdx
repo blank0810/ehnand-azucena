@@ -1,0 +1,169 @@
+---
+title: "Why a Correct Ledger Total Can Still Produce a Wrong Billing Statement"
+seoTitle: "Correct Ledger, Wrong Billing Statement"
+date: 2026-08-16
+category: "Business Systems & Data Integrity"
+tags: [ledger, billing, accounting, data-integrity, reporting]
+summary: "A ledger correction can balance an account and still make every intermediate statement misleading. The missing distinction is often transaction chronology versus reporting-period placement."
+---
+
+A billing ledger can end on the correct balance and still tell the wrong story all the way down.
+
+I ran into this while correcting migrated history in a utility billing system. A compensating credit brought the account total back to the right number. Every balance check at the end of the account passed. But the credit had been placed on the date the correction was entered, months after the migration boundary it was meant to correct.
+
+The final balance was right. Every running balance before the correction was inflated. The customer's statement was mathematically consistent and operationally misleading.
+
+The bug was not in debit-versus-credit arithmetic. It was in **which clock each report used**.
+
+## One row can participate in several timelines
+
+Financial systems usually carry more than one date-like field, even when the UI presents a single date.
+
+| Field | Question it answers |
+|---|---|
+| `txn_date` | When should this entry take effect in chronological account history? |
+| `period_id` | Which billing or accounting period owns this entry? |
+| `post_ts` | When was the entry actually recorded in the system? |
+| `created_at` | When did the database row come into existence? |
+
+Those values often agree during normal processing, which makes them look interchangeable. Corrections, migrations, late-arriving data, and reopened periods are where the differences become load-bearing.
+
+In this case, two screens consumed the same ledger rows in different ways.
+
+The statement of account was chronological:
+
+```sql
+ORDER BY txn_date, post_ts, ledger_entry_id
+```
+
+The Billing Statement was period-based:
+
+```text
+balance forward = rows whose period starts before the selected From period
+current section = rows grouped under each selected period
+```
+
+Changing `txn_date` affected the first view. Changing `period_id` affected the second. A correction that updated only one could make one report look fixed while the other remained wrong.
+
+## A total is a lossy projection
+
+Suppose imported history contains old charges that were already settled before migration. A corrective credit removes those charges from the current balance.
+
+If the credit is effective on the day an engineer discovers the problem, the ledger reads like this:
+
+```text
+migration boundary    old imported balance remains visible
+following months      every running balance includes that balance
+correction date       one large credit finally removes it
+today                 final balance is correct
+```
+
+An assertion over the final number sees no defect:
+
+```text
+sum(debits) - sum(credits) == expected_balance
+```
+
+That assertion discards sequence. It cannot tell whether a balance was correct after each row, whether the balance forward entering a period was correct, or whether the correction appeared in the month it explains.
+
+This is why a total is not a substitute for a statement. It is one projection of the ledger, and a particularly lossy one.
+
+## Effective time and audit time should not be collapsed
+
+The useful correction model separates when an adjustment **takes effect** from when someone **posted it**:
+
+```text
+txn_date = migration boundary
+period_id = boundary period
+post_ts = actual correction time
+```
+
+The effective date and period make the historical presentation coherent. The posting timestamp preserves the audit fact that the adjustment was entered later.
+
+That is not permission to rewrite history casually. Moving an entry into a closed period can affect period summaries and needs explicit authorization, a recorded reason, before-and-after evidence, and a review of every report that consumes the period. The point is to model both truths rather than force one field to impersonate both:
+
+- The adjustment corrects a balance as of an earlier boundary.
+- The adjustment was actually entered today.
+
+Destroy either fact and the system becomes harder to audit.
+
+## `NULL` is not an unassigned month
+
+The same investigation exposed another presentation trap: ledger rows whose `period_id` was `NULL`.
+
+The amount still contributed to the grand total. But the Billing Statement's normal loop iterated known periods, so a row with no period could not appear beside the month it belonged to. It fell into a final catch-all row for other payments and charges.
+
+That behavior is easy to dismiss as cosmetic because the arithmetic remains correct. It is not cosmetic. A reader now sees a charge detached from the event and month that explain it. The report has preserved value and lost meaning.
+
+There are only three defensible policies for an unassigned period:
+
+1. Reject the write because period membership is required.
+2. Resolve the period deterministically from an effective date.
+3. Present the row explicitly as unassigned and make that state actionable.
+
+Silently sweeping it to the bottom is the worst combination: the system accepts incomplete classification and hides the incompleteness inside a plausible total.
+
+## Period identifiers are identities, not chronology
+
+Another common mistake is treating a numeric period ID as an ordered date:
+
+```sql
+WHERE period_id BETWEEN :from_id AND :to_id
+```
+
+That works only while IDs happen to increase in calendar order. Imports, repairs, test data, and recreated periods can break that assumption. A period's identity is useful for joins; its `start_date` and `end_date` define chronology.
+
+Range logic should therefore select or order by effective dates:
+
+```sql
+WHERE period.start_date >= :from_date
+  AND period.start_date <= :to_date
+ORDER BY period.start_date
+```
+
+This is the same broader rule: **a field should be consumed according to the concept it represents, not according to the shape of its value**.
+
+## Verify every projection that carries meaning
+
+The original correction passed the checks engineers usually reach for:
+
+- ledger net equals the expected balance;
+- the customer record shows the expected amount due;
+- the payment screen agrees with the ledger total.
+
+All three were total-based projections. They agreed with one another because they discarded the same information.
+
+A financial correction needs a wider acceptance set:
+
+1. **Final total:** debits minus credits reaches the approved balance.
+2. **Boundary balance:** the balance forward entering the first retained period is correct.
+3. **Running sequence:** each visible row produces a defensible intermediate balance.
+4. **Period ownership:** every adjustment appears in the reporting period it explains.
+5. **Audit chronology:** the system still records when and by whom the correction was posted.
+6. **Rendered artifact:** the actual HTML or PDF statement reads correctly, not merely the query result behind it.
+
+The sixth check matters because a renderer can add grouping, carry-forward rows, fallbacks, and catch-all sections that do not exist in the ledger service. Inspecting the ledger alone cannot prove the statement.
+
+## Design the correction before writing it
+
+Before posting a migrated-balance adjustment, I now want five questions answered in plain language:
+
+- What exact boundary is being corrected?
+- Which date controls chronological placement?
+- Which field controls reporting-period placement?
+- Which timestamp preserves the real audit event?
+- Which user-facing artifacts must be compared before and after?
+
+If the team cannot answer those questions, the correction is not ready to run. A backup protects the bytes. It does not protect the meaning of the resulting statement.
+
+## The takeaway
+
+A correct balance is necessary, but it is not sufficient. Financial systems are read as sequences, periods, aging buckets, statements, and audit trails. Every one of those is a projection over the same underlying events, and each can apply a different ordering rule.
+
+Model effective time, period ownership, and posting time separately. Place corrections at the boundary they explain while preserving when they were actually made. Treat missing period membership as an explicit data-quality state. Then verify the artifact a customer or accountant will read.
+
+That is how a ledger becomes not only balanced, but explainable.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This article draws from production work on the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system), alongside the broader ledger design covered in [Designing a Double-Entry Ledger for Utility Billing](https://ehnand.com/articles/utility-billing-ledger). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

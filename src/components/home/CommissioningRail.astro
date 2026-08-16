@@ -1,0 +1,101 @@
+---
+const stages = [
+  {
+    icon: "problem",
+    stage: "Problem",
+    line: "Clarify constraints",
+    responsibility: "HUMAN-LED DISCOVERY",
+  },
+  {
+    icon: "architecture",
+    stage: "Architecture",
+    line: "Design the system",
+    responsibility: "HUMAN-OWNED DECISIONS",
+  },
+  {
+    icon: "delivery",
+    stage: "Delivery",
+    line: "Build and verify",
+    responsibility: "CLAUDE CODE + CODEX",
+  },
+  {
+    icon: "production",
+    stage: "Production",
+    line: "Operate and improve",
+    responsibility: "AGENT-ASSISTED CI/CD + IAC",
+  },
+]
+---
+
+<section
+  id="production-trace"
+  class="commissioning section"
+  aria-labelledby="commissioning-title"
+>
+  <div class="container">
+    <div class="commissioning__heading">
+      <h2 id="commissioning-title">From problem to production</h2>
+      <p>
+        AI agents accelerate execution; engineering judgment and accountability remain
+        human.
+      </p>
+    </div>
+    <div class="commissioning__trace">
+      <svg viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+        <path class="commissioning__line" d="M12 20H988"></path>
+      </svg>
+      <ol>
+        {
+          stages.map((item, index) => (
+            <li>
+              <span class="commissioning__marker" aria-hidden="true">
+                <svg
+                  class="commissioning__icon"
+                  data-stage-icon={item.icon}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  {item.icon === "problem" && (
+                    <>
+                      <circle cx="10" cy="10" r="5.5"></circle>
+                      <path d="m14 14 6 6"></path>
+                    </>
+                  )}
+                  {item.icon === "architecture" && (
+                    <>
+                      <circle cx="6" cy="6" r="2.5"></circle>
+                      <circle cx="18" cy="6" r="2.5"></circle>
+                      <circle cx="12" cy="18" r="2.5"></circle>
+                      <path d="M8.5 6h7M7.4 8.1l3.2 7.8M16.6 8.1l-3.2 7.8"></path>
+                    </>
+                  )}
+                  {item.icon === "delivery" && (
+                    <>
+                      <path d="m8 6-5 6 5 6M16 6l5 6-2.5 3"></path>
+                      <path d="m11 17 2.5 2.5 6-7"></path>
+                    </>
+                  )}
+                  {item.icon === "production" && (
+                    <>
+                      <path d="M14.5 4.5c2.6-1.7 5.5-2 5.5-2s-.3 2.9-2 5.5l-6.5 6.5-4-4 7-6Z"></path>
+                      <path d="m9 9-4.5.5-2 2 5 1M15 15l-.5 4.5-2 2-1-5"></path>
+                      <circle cx="15.5" cy="7" r="1.5"></circle>
+                      <path d="M6 17c-1.5.4-2.6 1.5-3 3 1.5-.4 2.6-1.5 3-3Z"></path>
+                    </>
+                  )}
+                </svg>
+              </span>
+              <span class="commissioning__index mono-label">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3>{item.stage}</h3>
+              <p>{item.line}</p>
+              <strong class="mono-label">{item.responsibility}</strong>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>

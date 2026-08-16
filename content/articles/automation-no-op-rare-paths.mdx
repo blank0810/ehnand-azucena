@@ -1,0 +1,178 @@
+---
+title: "Automation That Usually No-Ops Has Not Proved It Can Act"
+seoTitle: "Automation No-Op Paths Need Real Tests"
+date: 2026-08-16
+category: "Engineering Practice & Reliability"
+tags: [ci-cd, github-actions, testing, reliability, automation]
+summary: "A recurring job can stay green for months because its happy path does no work. The first real action is then the first real test, usually on the day the automation matters most."
+---
+
+A scheduled workflow can run successfully every day and still be completely untested at the only thing it exists to do.
+
+I saw this in a branch-sync automation. The workflow ran whenever `main` changed and kept `staging` current. Its history was green, so it looked proven.
+
+But nearly every run was a fast-forward. Git only had to move a branch reference. The first time the histories genuinely diverged, Git had to create a merge commit. That path required an author name and email, neither of which the runner configured.
+
+The workflow failed on its first real merge.
+
+It had run many times. It had acted zero times.
+
+## Frequency of execution is not path coverage
+
+The workflow had two materially different paths:
+
+| Repository state | Git behavior | Needs commit identity? |
+|---|---|---|
+| Target is strictly behind source | Fast-forward the reference | No |
+| Target and source both have unique commits | Create a merge commit | Yes |
+
+A green fast-forward proved that checkout, fetch, authentication, and push were working. It said nothing about creating a commit because that code path did not run.
+
+The dangerous inversion was that the workflow succeeded whenever synchronization was easy and failed exactly when synchronization was necessary.
+
+Recurring automation earns confidence only for the states it has actually traversed. Ten thousand executions of one branch are still zero executions of the other.
+
+## The happy path may be a no-op
+
+Many operational jobs are shaped this way:
+
+| Automation | Common green path | Rare path that carries the real value |
+|---|---|---|
+| Branch synchronization | Already aligned or fast-forward | Resolve divergent history into a commit or pull request |
+| Retry handler | First request succeeds | Classify a failure, back off, and retry safely |
+| Backup job | Command starts and a file appears | Produce a complete, restorable snapshot after a real read failure or large dataset |
+| Rollback script | Prints help or validates inputs | Revert a deployed version under production pressure |
+| Alerting | No threshold crossed | Deliver, group, and route a real incident notification |
+| Disaster recovery | Replica is healthy | Promote it and restore service with current data |
+
+The rare branch is often the reason the code exists. It is also the branch least likely to be reached during routine operation.
+
+This is why a long green history can be negative evidence: it may show that the triggering condition never occurred.
+
+## Make harmless prerequisites unconditional
+
+The immediate fix for the Git workflow is small:
+
+```bash
+git config user.name "github-actions[bot]"
+git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+git merge origin/main --no-edit
+```
+
+The important decision is not the exact identity. It is configuring it **on every run**, including runs that fast-forward.
+
+If a prerequisite is cheap and harmless, make it unconditional. Then the common path at least exercises the setup that the uncommon path will consume.
+
+This pattern generalizes:
+
+- install the restore tool during every backup job, not during the first incident;
+- validate the destination before the first failover;
+- construct the notification client even when no alert fires;
+- load and parse the rollback manifest during deployment, not only during rollback;
+- verify credentials before the first recovery write.
+
+Unconditional setup does not prove the action path, but it removes an entire class of latent missing-prerequisite failures.
+
+## Force the state the automation was built for
+
+The stronger test is to manufacture the rare condition in a disposable environment.
+
+For a branch-sync workflow:
+
+1. Create a temporary repository.
+2. Add one unique commit to `main`.
+3. Add a different unique commit to `staging`.
+4. Run the same workflow command in the same runner image.
+5. Assert that it produces the expected merge artifact.
+6. Inspect the author, parents, diff, and destination branch.
+
+The test should fail if the workflow only fast-forwards, cannot create a commit, pushes the wrong branch, or produces no review artifact.
+
+This is closer to a mutation test than a smoke test: deliberately put the system in the state that makes its special branch unavoidable.
+
+## Assert the action artifact
+
+Exit status alone is weak evidence for automation whose success is a side effect.
+
+A backup command can exit zero because the final compressor in a pipeline succeeded, even if the database dump before it failed. A deployment command can succeed while the gateway still points at an older function. A test process can exit zero after every integration suite skipped itself because an environment variable was missing.
+
+For action-oriented automation, assert the artifact that only the action can create:
+
+- a merge commit with two expected parents;
+- a pull request targeting the right base;
+- a backup with plausible size, valid structure, and a successful restore rehearsal;
+- a deployment whose served version matches the built artifact;
+- a test report with the expected executed-test count;
+- an alert received through the real routing destination.
+
+The question is not only, "Did the command report success?" It is, "What now exists that could not exist unless the intended action occurred?"
+
+## Model the state machine explicitly
+
+Rare-path bugs hide when a workflow is reviewed as a straight list of shell commands. Write down the states and transitions instead.
+
+For the sync job:
+
+```text
+aligned      -> no change
+behind       -> fast-forward
+diverged     -> create merge result
+conflicted   -> publish a human-review artifact
+unauthorized -> fail visibly before changing a branch
+```
+
+Each transition has different prerequisites and a different success artifact. Once those branches are named, it becomes obvious that repeated coverage of `behind -> fast-forward` does not cover `diverged -> create merge result`.
+
+This exercise also exposes ambiguous failure handling. If a conflict occurs, should the workflow abort, push a conflict branch, or open an issue? Silence is not a neutral outcome. It leaves the next release to discover the unresolved state later.
+
+## Verify that verification actually ran
+
+The same principle applies to tests guarding the automation.
+
+A green check may mean:
+
+- the matching test ran and passed;
+- the filter matched zero tests;
+- the integration suite skipped because its database was absent;
+- a prior artifact remained on disk;
+- a command in a pipeline failed but a later command supplied the final zero exit code;
+- the action branch was never entered.
+
+Useful verification therefore records positive evidence:
+
+- names or counts of tests executed;
+- the state that selected each branch;
+- the artifact produced by the action;
+- a fresh timestamp or content hash tied to this run;
+- the exact exit code of the producer, not only the final pipeline stage.
+
+When a result is unexpectedly clean, ask what the output would look like if nothing ran. If the answer is "the same," the check has not earned a verdict.
+
+## A practical rare-path review
+
+Before trusting recurring automation, I now review it with this sequence:
+
+1. **Name its purpose.** What bad or uncommon day justifies this job?
+2. **List every path.** Which state selects each one?
+3. **Count actual exercises.** Do logs prove the action path ran, or only that the schedule fired?
+4. **Make prerequisites unconditional.** Configure cheap requirements on every run.
+5. **Force the rare state.** Reproduce divergence, failure, expiry, or recovery in a safe environment.
+6. **Assert the artifact.** Verify the side effect rather than the wrapper's exit status.
+7. **Practice failure handling.** Confirm a conflict or partial failure becomes visible and actionable.
+8. **Repeat periodically.** Dependencies, permissions, and runner images change even when the workflow does not.
+
+This costs more than reading a green badge. It costs far less than discovering the path during an incident.
+
+## The takeaway
+
+Automation is not proven by how often its trigger fires. It is proven by the states it has entered and the artifacts it has successfully produced.
+
+Look for jobs whose common path is a no-op, fast-forward, skip, cache hit, or early return. Those paths can build a long history of green runs while preserving the action branch in pristine, untested condition.
+
+Make harmless prerequisites unconditional. Force the rare condition before production does. Verify the artifact that proves the action happened.
+
+Anything written for the bad day needs a rehearsal before the bad day arrives.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This reliability lesson came from delivery automation around [Adam AI](https://ehnand.com/projects/adam-ai), a multi-tenant document intelligence platform. For another stateful reliability pattern, see [Multi-Provider LLM Failover](https://ehnand.com/articles/llm-provider-failover). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

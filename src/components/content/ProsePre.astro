@@ -1,0 +1,9 @@
+---
+const preAttributes = Astro.props
+---
+
+<pre
+  {...preAttributes}
+  aria-label="Scrollable code block"
+  tabindex="0"
+><slot /></pre>
