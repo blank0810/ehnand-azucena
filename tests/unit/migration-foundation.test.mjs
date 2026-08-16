@@ -46,3 +46,7 @@ test("Cloudflare Workers serves static assets without a runtime entry", () => {
 test("Cloudflare Workers persists observability logs", () => {
   assert.equal(wranglerJson.observability?.enabled, true)
 })
+
+test("Cloudflare does not publish an alternate workers.dev hostname", () => {
+  assert.equal(wranglerJson.workers_dev, false)
+})
