@@ -9,6 +9,9 @@ const dockerfile = readText("Dockerfile.dev")
 const compose = readText("docker-compose.yml")
 const astroConfig = readText("astro.config.mjs")
 const wranglerConfig = readText("wrangler.jsonc")
+const wranglerJson = JSON.parse(
+  wranglerConfig.replace(/,\s*([}\]])/g, "$1"),
+)
 
 test("package scripts target Astro and Docker-facing port 4321", () => {
   assert.equal(packageJson.scripts.dev, "astro dev --host 0.0.0.0")
@@ -38,4 +41,8 @@ test("Cloudflare Workers serves static assets without a runtime entry", () => {
   assert.match(wranglerConfig, /"not_found_handling":\s*"404-page"/)
   assert.doesNotMatch(wranglerConfig, /"main"\s*:/)
   assert.doesNotMatch(wranglerConfig, /"(?:kv_namespaces|d1_databases|r2_buckets)"\s*:/)
+})
+
+test("Cloudflare Workers persists observability logs", () => {
+  assert.equal(wranglerJson.observability?.enabled, true)
 })
