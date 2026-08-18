@@ -122,7 +122,7 @@ export const PROJECTS: Project[] = [
       Protects millions in tax benefits for real estate professionals -- reducing audit anxiety, saving time, and delivering up to 130x ROI for individual users and major efficiency gains for accounting firms.
     `,
     image: {
-      src: "/images/projects/repsshield.png",
+      src: "/images/projects/repsshield.webp",
       width: 1825,
       height: 816,
       alt: "REPSShield real estate tax compliance platform screenshot",
@@ -326,7 +326,7 @@ export const PROJECTS: Project[] = [
     status: "Live Production",
     category: "Finance",
     relatedArticleSlugs: [],
-    liveUrl: "https://ehnand-budget.vercel.app/",
+    liveUrl: "https://budget.umbra.build",
   },
   {
     slug: "playnow",
@@ -363,7 +363,7 @@ export const PROJECTS: Project[] = [
     slug: "weather-forecasting-application",
     title: "Weather Forecasting Application",
     description:
-      "A React single-page weather application using the OpenWeather API with geolocation-based lookup, current conditions, and multi-day forecasts, deployed on Vercel at roughly 95% uptime. A focused front-end project demonstrating third-party API integration, asynchronous data handling, and responsive UI design.",
+      "A React single-page weather application using the OpenWeather API with geolocation-based lookup, current conditions, and multi-day forecasts. A focused front-end project demonstrating third-party API integration, asynchronous data handling, and responsive UI design. The public deployment has been retired; the source remains available on GitHub.",
     image: {
       src: "/images/weather_app.png",
       width: 1870,
@@ -373,10 +373,9 @@ export const PROJECTS: Project[] = [
     technologies: ["React", "OpenWeather API", "Vercel", "Geolocation"],
     period: "Jan 2025 – Feb 2025",
     role: "Solo Developer",
-    status: "Live",
+    status: "Archived",
     category: "Web App",
     relatedArticleSlugs: [],
-    liveUrl: "https://ehnand-weather-app.vercel.app/",
     githubUrl: "https://github.com/blank0810/weather-app",
   },
   {
