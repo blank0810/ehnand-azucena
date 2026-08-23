@@ -1,0 +1,129 @@
+---
+title: "A Recovery Path Is Judged by the Happy Path's Output, Not by the Error It Clears"
+seoTitle: "Recovery Paths Must Restore Every Invariant"
+date: 2026-08-23
+category: "Business Systems & Data Integrity"
+tags: [error-handling, data-integrity, invariants, code-review, workflow]
+summary: "Clearing the error is the visible half of a recovery path. Re-establishing every invariant the normal path would have set is the half that gets forgotten, and the result is a record that looks repaired while being permanently unusable."
+---
+
+Every system with a queue eventually grows a second way to write the same record: the fix-it action, the exception resolver, the dead-letter replay, the admin override. It runs only when the normal path already failed, which means it runs when nobody is watching closely.
+
+I found one of these in a document intake pipeline. Resolving a stuck record assigned it an owner, cleared it from the exception queue, and reported success. Everything about that was correct. The record was still permanently broken, and nobody would learn that for hours, in a different part of the system, from a different person.
+
+The bug is not a typo. It is what happens when a recovery path is specified by its **trigger** rather than by its **target**.
+
+## Two writers, one record, different field sets
+
+The happy path did three things in one transaction:
+
+```text
+assignFromEmail  ->  owner_user_id
+                 ->  sales_code
+                 ->  header.rep
+```
+
+The recovery path, which exists precisely because that transaction did not run, did one:
+
+```text
+resolveIntakeException  ->  owner_user_id
+```
+
+Both succeed. Both clear the visible problem. The record now has an owner, leaves the exception queue, and appears in the right person's list. Only one of the two produces a record the rest of the system can actually use.
+
+The missing fields were not decorative. A downstream validation rule refuses the record when the routing code and the header disagree, so writing one and not the other does not produce an incomplete record. It produces a **differently broken** one. The record stayed visible, editable, and priceable right up to the final irreversible step, where it refused with an error naming a field nobody on that screen had ever touched.
+
+## Why every instrument said it was fine
+
+This class of defect survives review because each available check is aimed at the error, and the error is genuinely gone.
+
+| Check | What it confirmed | What it could not see |
+|---|---|---|
+| The exception row | `resolved = true`, resolver recorded | Whether the record is usable |
+| The owner assignment | Correct user, tenant and active-role verified | The two fields nobody wrote |
+| The queue | Item gone | Downstream validity |
+| The unit test | "Resolving an exception assigns the owner" passes, and is a correct test of what it claims | The claim is too narrow |
+| Manual QA | The record appears where expected | The failure is at the last step, not the first |
+
+And the happy path actively hides the gap. Because the normal route sets all three fields inside one function, **nobody ever sees them as separable**, so nobody thinks to ask which of them the recovery path also sets. The coupling is real, but it is held only by the fact that one function happens to do all three. That is not an invariant. That is a coincidence with good habits.
+
+## The acceptance criterion is a comparison, not a clearance
+
+The single change that finds this class of bug is rewriting the recovery path's acceptance criterion.
+
+Not this:
+
+> The exception is resolved.
+
+This:
+
+> The record is now indistinguishable from one the normal path produced.
+
+That sentence alone surfaces the gap, because it forces you to open the normal path and enumerate what it writes. Everything else in this article follows from taking that comparison seriously.
+
+## Recovery paths that need the same audit
+
+The shape is not specific to intake queues. Anywhere a second writer exists for a record that a primary writer normally creates, the same asymmetry is available:
+
+| Recovery path | The error it clears | The invariant it tends to skip |
+|---|---|---|
+| Dead-letter replay | Message is off the queue | Side effects the original consumer performed before failing |
+| Import repair | Row now parses | Derived fields the importer computes on the normal path |
+| Manual admin override | Record has the value support was asked for | Audit rows, denormalized copies, cache invalidation |
+| Retry handler | Request eventually succeeded | Idempotency state written by the first, partial attempt |
+| Reconciliation job | Balances agree | Status transitions the balance change should have driven |
+| Migration backfill | Column populated | Indexes, counters, and search documents the write path maintains |
+
+In every row, the left column is what a monitoring dashboard shows and the right column is what a customer eventually reports.
+
+## Prefer calling the happy path over re-deriving it
+
+The fix in my case was small: the lookup that derives the missing code already existed inside the normal assignment module. The recovery path needed to call it, not to reimplement it.
+
+That preference is worth stating as a rule, because the alternative fails on a delay. **A recovery path that duplicates the primary path's logic will drift from it the first time the primary path changes**, and it will drift silently, because the recovery path runs rarely and by definition runs when things are already going badly.
+
+Where the two genuinely must differ, whether in permissions, defaults, or a deliberately narrower write, say so in the code:
+
+```ts
+// Recovery only: header.rep is intentionally left unset here because
+// the operator chooses it on the review screen. sales_code is NOT
+// optional and is derived exactly as assignFromEmail derives it.
+```
+
+A stated exception is reviewable. An omission is not.
+
+## Watch for fields that must move together
+
+The sharpest lesson from this bug is about field coupling.
+
+`sales_code` and the header's rep are not two independent columns. There is a validation rule that refuses the record when they disagree. That makes them a single logical value stored in two places, and it means **any writer must satisfy the rule, not merely the field it cares about.**
+
+Whenever you find a validation rule spanning two fields, you have found a constraint that every write path must honor, including the ones written months apart by different people for different reasons. Those rules deserve to be enforced where they cannot be bypassed, in a database constraint, a domain object that refuses construction, or a single function every writer must go through, rather than restated in each writer's head.
+
+## Test to the terminal action, not to the disappearance of the error
+
+The last rule is about where recovery tests stop.
+
+A test that ends at "the item is no longer in the queue" tests the queue. It does not test the recovery. The recovery is only proven when the repaired record completes the operation the original record existed to perform: the push, the invoice, the export, the payment, whatever the terminal step is.
+
+That test is more expensive to write. It is also the only one that would have caught this, and the distance between the two is measured in how far the failure travels before someone sees it.
+
+## A checklist for any fix-it path
+
+1. **State the criterion as a comparison.** "Indistinguishable from a normally-produced record," never "the error is gone."
+2. **Enumerate the happy path's writes.** Open the normal function, list every field it sets, and confirm the recovery path sets each one or documents why it does not.
+3. **Call the shared logic rather than re-deriving it**, so the two paths cannot drift.
+4. **Identify fields with cross-field validation rules** and treat them as one value with one writer.
+5. **Test through to the terminal action**, not to the point where the error disappears.
+6. **Check the side effects the primary path has, not just its columns.** Audit entries, notifications, cache invalidation, search indexing.
+7. **Ask where the failure would surface** if an invariant were missed. If the answer is "much later, to someone else," raise the priority accordingly.
+
+## The takeaway
+
+A recovery path is not defined by the problem it solves. It is defined by the state it must produce, and that state is already specified by the path that normally produces it.
+
+Specify recovery by its target, and the missing fields become obvious the moment you write the criterion down. Specify it by its trigger, and you will ship something that clears the error, satisfies every check you thought to run, and leaves a record that fails at the last possible moment, to the last person who can do anything about it.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This pattern came out of pipeline work on [Adam AI](https://ehnand.com/projects/adam-ai), a multi-tenant document intelligence platform. For a related integrity failure where every total was correct and every intermediate report was wrong, see [Why a Correct Ledger Total Can Still Produce a Wrong Billing Statement](https://ehnand.com/articles/correct-ledger-wrong-billing-statement). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

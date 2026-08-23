@@ -1,0 +1,125 @@
+---
+title: "Rehearsability Is a Property of the Target, Not of Your Discipline"
+seoTitle: "Rehearsability Is a Property of the Target"
+date: 2026-08-23
+category: "Engineering Practice & Reliability"
+tags: [production, database, terraform, risk, operations]
+summary: "Backups, dry runs, staging copies, and in-transaction assertions are not virtues you bring to a task. They are affordances the target either offers or does not, and where they are missing, no amount of care substitutes for them."
+---
+
+How carefully you can act on a live system is capped by what that system lets you rehearse. Not by how careful you are.
+
+This sounds obvious written down, and it is routinely ignored in practice, because the language we use for production safety is the language of personal virtue. We say someone was careful, or reckless. We promise a plan is safe "because we'll be careful." But backups, dry runs, isolated copies, and post-condition assertions are not things you bring to the task. They are **affordances the target offers or withholds**, and the list is fixed before you start.
+
+Where the target offers them, use every one and the write becomes ordinary engineering. Where it does not, the only control left is the decision to send, which therefore has to carry the entire weight, be made in advance, and be made by whoever owns the consequence.
+
+Here are three production writes I made inside about twenty-four hours, on three unrelated systems. The discipline was constant. The achievable safety was not.
+
+## Ceiling 1: full rehearsal available, and taken
+
+A municipal water billing system on production MySQL had a service reconnection applied to the wrong account weeks earlier: a fee, a status change from disconnected to active, and a payment, all on an account that should never have received them. Undoing it meant six coupled writes against live financial data.
+
+The target permitted all of this, and all of it was used:
+
+- **A dry run against live production making no writes**, validating every precondition. It passed before an `--execute` flag existed as an option at all.
+- **A backup before and a backup after**, each verified to read.
+- **All six steps in one transaction**, with post-conditions asserted **inside** the transaction, so a violated expectation rolls the entire correction back rather than reporting a problem after the fact.
+- **Idempotence by refusal**, so a second run fails its own preconditions instead of applying the correction twice.
+- **End state verified independently of the script's own assertions.**
+
+Note the ordering of the last two lines. A script that checks its own work is checking the thing most likely to share its bug. The independent verification is what converts "the script says it worked" into "it worked."
+
+## Ceiling 2: rehearsal available in a copy, and taken
+
+The same period, a different system: thirty rows in production PostgreSQL had been removed by an earlier intentional cleanup that took more than it should have. They needed to come back from an archive.
+
+Same ceiling, reached by a different route, because Postgres makes a throwaway copy cheap:
+
+- **A fresh full production backup taken first**, its archive listing validated, file mode restricted.
+- **The thirty rows staged in an isolated recovery database and compared field for field** against what production would receive, before production saw anything.
+- **One transaction**, an insert that skips conflicts, with in-transaction assertions requiring exactly thirty staged identifiers and zero field mismatches. Any failure aborts the whole restore.
+- **Post-restore verification against the snapshot's own manifest**, plus an anonymous fetch of the public page as a stranger would see it.
+
+The isolated database *was* the rehearsal. It is the same control as the dry run in the first example, bought with a different mechanism because this target made that mechanism cheap. **Do not confuse the technique with the affordance.** The affordance is "I can find out what will happen before it happens." Dry runs, staging copies, and recovery databases are three ways to buy it.
+
+## Ceiling 3: no rehearsal exists, and the plan has to end in a question
+
+The third write went into a customer's live ERP through an integration. It was the first deliberate write of its kind, and it created real business documents in a system I do not own.
+
+What that target permitted:
+
+| Affordance | Available? |
+|---|---|
+| Dry run or sandbox | No. There is no confirmation or approval step to abort against |
+| Backup | No. You cannot snapshot someone else's ERP |
+| Transaction | No. A push is one irreversible external effect |
+| Undo | **Not uniform.** One document type can be voided. Another cannot be voided at all. A created master record is permanent |
+| Audit of the deciding field | No. The audit log covered people, roles, and codes, but not the draft field that determines attribution |
+
+That last row produced the concrete consequence. The attribution field was changed between record creation and the push, so the document went out attributed to a real, active employee, with **no record anywhere of who changed it or when**.
+
+Every control in the first two examples was unavailable here. The written exit procedure for the created documents was, in effect, *ask the customer's owner how these should be disposed of*. That is not negligence. It is what the ceiling leaves.
+
+**The mitigation that did the real work was chosen before the send**: every line marked as a test record with a provenance comment. That decision was fully reversible right up until the moment it wasn't, which is precisely the point.
+
+## The counter-case that proves it is the target, not the operator
+
+I ran a project's first ever `terraform apply` on a new AWS stack that same day. Two latent defects surfaced immediately, and **both cost nothing, because that target rehearses**:
+
+- The AWS provider rejected the Lambda runtime version from a compiled-in enum, **at plan time**, before a single resource existed.
+- The dependency layer build failed as unsatisfiable, **at build time**, because one library published no compatible wheel for the new Python ABI.
+
+Neither of these is a smaller mistake than the ERP one. They are the same class of mistake meeting a target that offers a plan step, a destroy step, and a build step. The difference in outcome was produced entirely by the target.
+
+## The affordance checklist
+
+Before acting on any live system, enumerate what the target itself offers, and treat the list as the **ceiling** rather than the starting point:
+
+| Affordance | Question to ask |
+|---|---|
+| Rehearsal | Can I run this for real, against real data, with the writes disabled? |
+| Copy | Can I stage it somewhere isolated and diff before committing? |
+| Snapshot | Can I take a restorable point-in-time backup, and have I confirmed it *reads*? |
+| Atomicity | Can the whole change succeed or fail as one unit? |
+| Assertion | Can post-conditions be checked **inside** the boundary that can still roll back? |
+| Undo | Is undo uniform, or does it differ per artifact? |
+| Record | Does the system log the field that actually matters, not just the ones it happens to log? |
+
+Where every row has an answer, the write is ordinary engineering and should carry all of them.
+
+Where rows are blank, stop treating the gap as something to be careful around. Two things remain, and only two:
+
+1. **Move the decision earlier.** Everything that will be irreversible after the send is still fully reversible before it. Naming, scoping, marking, and choosing *which* artifacts to create is the entire safety budget. Spend it there.
+2. **Route the decision to whoever owns the consequence, in advance.** An exit procedure that ends in "ask them" is a plan to ask *after* the irreversible act. Ask first, or do not send.
+
+## The anti-pattern this exists to kill
+
+*"We'll be careful"* offered as a substitute for a control the target does not provide.
+
+Care is real and it changes outcomes. But it operates entirely on point 1 above, and it cannot manufacture a rollback. When someone answers "what happens if this is wrong?" with a statement about their own diligence, the question has not been answered.
+
+## A blank row is a product finding
+
+The last observation is the one worth carrying into design work rather than only into operations.
+
+An affordance the target does not offer is not merely an operational inconvenience. In the ERP example, the missing audit on the attribution field became a real business problem the first time anyone pushed. The correct response is **to add the record**, not to push more carefully.
+
+So when you enumerate the affordances of a system you are building, as opposed to one you are integrating with, the blank rows are your backlog:
+
+- If there is no dry run, that is a feature request, and it is usually cheap: the same code path with the commit suppressed.
+- If undo is non-uniform, document which artifacts are permanent *at the point of creation*, not in a runbook someone reads later.
+- If the field that decides money or attribution is not audited, audit it.
+
+Every system that is pleasant to operate against got that way because someone treated these as requirements rather than as luck.
+
+## The takeaway
+
+Ask what the target permits before you decide how careful to be, because the answer to the first question determines how much the second one can buy you.
+
+The same mistake costs nothing against a Terraform plan, costs a rolled-back transaction against a database that supports one, and is permanent against someone else's ERP. Nothing about the operator changed between those three. Everything about the ceiling did.
+
+Enumerate the affordances. Use all of them when they exist. When they do not, move every decision you can into the reversible window, and put it in front of the person who owns the outcome, before the send and not after.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These writes span the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system), the [Personal Budget & Finance Manager](https://ehnand.com/projects/personal-budget-finance-manager), [Adam AI](https://ehnand.com/projects/adam-ai), and the Terraform-managed backend described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

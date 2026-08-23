@@ -17,7 +17,7 @@ test("article archive server-renders all published entries and controls", async 
     html,
     /<script type="module">[\s\S]*data-article-library[\s\S]*<\/script>/,
   )
-  assert.equal((html.match(/data-article-record=/g) ?? []).length, 9)
+  assert.equal((html.match(/data-article-record=/g) ?? []).length, articles.length)
 
   for (const article of articles) {
     assert.ok(html.includes(article.title))

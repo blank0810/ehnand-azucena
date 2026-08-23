@@ -1,0 +1,141 @@
+---
+title: "Every Authorization Defect Is Invisible to an Identity That Outranks It"
+seoTitle: "Test Authorization as the Least-Privileged User"
+date: 2026-08-23
+category: "SaaS, Cloud & Security"
+tags: [authorization, rbac, permissions, security, testing]
+summary: "If the only person who has ever used a feature is an admin, the system has not been tested. It has been demonstrated. Four production examples of authorization defects that the privileged tester was structurally unable to reproduce."
+---
+
+An administrator cannot fail a permission check. That is the entire problem.
+
+If the only account that has ever opened a feature is a super admin, or the developer whose account predates the role model, then the feature's access control has never been exercised. It has been demonstrated. Those are different things, and the difference surfaces on the first day real users exist, which is the worst possible day for it to surface.
+
+The one-line test I now apply: **name the least-privileged persona who must succeed at this, and say who has actually logged in as them.** If the answer is "nobody yet," the access model is unverified no matter how many tests are green.
+
+Four examples follow. Three are role-based. The fourth is not about a user at all, and it is the one that changed how I think about this.
+
+## The bypass makes the most available tester unable to fail
+
+In the Laravel water billing system I maintain for a municipal client, a global gate short-circuits everything for one role:
+
+```php
+Gate::before(function ($user) {
+    if ($user->hasRole(Role::SUPER_ADMIN)) {
+        return true;
+    }
+});
+```
+
+This is correct, standard, and in most codebases desirable. It is also a **test-visibility defect long before it is a security defect**. Every gate below it is untested by construction, because the person most likely to click through the feature during development is precisely the person the bypass exempts.
+
+That is what hid the next two problems.
+
+## A permission no role holds is an unreachable feature
+
+An SMS announcement feature deliberately split two trusts, with a comment in the route file defending the split: permission to *send* does not imply permission to *view* history. Reasonable policy.
+
+The seeder that assigns permissions to roles contained zero references to either permission. Both belonged to no role at all.
+
+| Layer | What it said |
+|---|---|
+| Route definitions | Two independent permissions, `send` and `view` |
+| Role seeder | Neither permission granted to any role |
+| Navigation | One menu entry, shown to holders of either permission |
+| That menu entry's target | A route inside the `view` group |
+| Only link to the compose screen | A button *inside* the view-gated page |
+
+Read the last three rows together. A send-only operator is shown a menu item that returns 403. The person allowed to compose has no route to the compose screen. **The route file and the interface implemented opposite policies**, and neither was reachable by anyone on deploy day except the super admin, whose bypass granted both.
+
+Two conclusions I now treat as rules:
+
+- **Seeding the grant is part of shipping the permission.** A permission constant that no role holds is not a cautious security posture. It is a dead feature with a security-shaped explanation.
+- **Route-level assertions cannot see navigation.** The routes had tests asserting the correct middleware in both directions, and they were green the entire time. The question a test must answer is *"can this persona reach the screen?"*, not *"is this route protected?"*
+
+## Privilege is a property of the token, not of the person
+
+The inverse case is more interesting, and it came from a Next.js side project using NextAuth.
+
+The JWT callback wrote the user's role **only at sign-in**:
+
+```ts
+async jwt({ token, user }) {
+  if (user) {
+    token.role = user.role
+  }
+  return token
+}
+```
+
+Promote a user to admin in the database and nothing happens. The check reads the token, the token was minted before the promotion, and the grant does not exist as far as the application is concerned until the session cycles. I hit this myself: promoted my own account, was still locked out of the admin area, and fixed it with a full sign-out and sign-in.
+
+The important part is the field next to it. A `disabled` flag resolved the same way has the same shape, and that direction is a **revocation with a silent grace period**. Disabling a user does not lock them out until their token cycles.
+
+I hit the promotion bug because I was the privileged user and the defect was in *acquiring* privilege. The revocation bug can only ever be observed by someone who is not an admin, which is why nobody had seen it.
+
+So in any session-token system, ask two questions before signing off:
+
+1. Where does this check read the grant from?
+2. How old is that value allowed to be?
+
+If the answer to the first is "a JWT written at sign-in," then every grant change has a propagation delay and every revocation has a grace period. Say what the window is. If it is unbounded, that is the finding.
+
+## The least-privileged identity may be a credential, not a user
+
+The same project had an admin panel button that verified the configured email provider was reachable. It called the provider's domain-listing endpoint and treated any error as failure.
+
+An API key created the **correct** way, scoped to sending access on a single domain, is refused that call. It comes back `401` with an error code meaning *this key is restricted*, not *this key is invalid*.
+
+So the panel would have told an operator that a perfectly good, correctly scoped key had failed verification. And the obvious way to make the red light turn green was to delete the key and recreate it with full account access.
+
+This extends the pattern past role-based access control. The over-privileged identity hiding the defect was not an account. It was the **implicit assumption of a full-access credential** while writing a verification routine, because the mental model during development was "a key that can do everything."
+
+It is also the worst failure mode in this article. An authorization defect that blocks someone gets reported. One that **rewards over-privileging gets obeyed.**
+
+The fix was to distinguish the error codes rather than collapse them:
+
+| Provider error | Meaning | Verdict |
+|---|---|---|
+| `restricted_api_key` | Key authenticated, endpoint out of scope | Valid. The key proved itself by being refused |
+| `invalid_api_key` | Key did not authenticate | Fail |
+| `missing_api_key` | No credential presented | Fail |
+
+A refusal that required successful authentication is evidence of validity. Collapsing it into a generic failure discarded the signal.
+
+**Extended test: name the least-privileged persona or credential that must succeed here. If the honest answer is "we have only ever run this with full access," the check is unverified regardless of how green it looks.**
+
+## The rehearsal that proves the workflow and nothing about access
+
+The fourth case is procedural rather than technical, and it is easy to walk into.
+
+A go-live rehearsal for a deployed module was scheduled to run as the single seeded account that was deliberately kept working so the run could proceed at all. The run would have proved the workflow end to end. It would have said nothing whatsoever about the role model, because the identity executing it was the one identity guaranteed not to meet a gate.
+
+Meanwhile most of the real users could not sign in yet, because their invitations had never been sent. The runbook itself named that as the actual go-live gate.
+
+A rehearsal executed by a privileged account is a **feature demonstration**. That is worth doing. It is just not access-control verification, and a write-up that does not say which one it was lets a green run imply coverage it never had.
+
+## A practical review sequence
+
+Before signing off any authorization work, I now go through this:
+
+1. **Write down the persona list**, including service accounts and API credentials, and record who has actually signed in as each. Any persona with nobody behind it is an untested surface. Say so explicitly in the write-up.
+2. **Do one pass with the bypass disabled.** A second account without the privileged role costs minutes, and it is the only way defects like the ones above get *experienced* rather than *read*.
+3. **Test the negative direction with a real least-privileged user**, not by asserting a middleware string. Navigate. Open the menu. Try to reach the screen.
+4. **Verify every permission constant is granted to at least one role in the seeder**, and that the seeder has run on the target environment. Existing in code is not the same as existing in the database.
+5. **Trace each gate to where it resolves the grant**, whether that is a live row, a cached claim, or a token minted at sign-in, and state the staleness window.
+6. **Check the fix-it path of every failed check.** If the easiest way to clear an error is to widen a permission or a credential scope, the error message is the defect.
+7. **Distinguish "authenticated but refused" from "not authenticated"** wherever you consume a third-party API. They are different facts, and only one of them means something is wrong.
+
+## The takeaway
+
+Authorization defects are not usually subtle. They are usually invisible, and they are invisible for a structural reason: the identity most available to test the feature is the identity the checks do not apply to.
+
+Privilege is not a property of a person. It is a property of the token, row, or bypass that a particular check happens to read. Two people can hold the same role and resolve completely different grants because one signed in this morning and the other signed in last week.
+
+So the useful question is never "does it work?" It is **"who has it worked for, and are they the people it has to work for?"**
+
+Until a least-privileged persona has actually reached the screen, all you have is a demonstration.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These examples come from production and side-project work including the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system) and the [Personal Budget & Finance Manager](https://ehnand.com/projects/personal-budget-finance-manager). For a related verification pattern, see [Automation That Usually No-Ops Has Not Proved It Can Act](https://ehnand.com/articles/automation-no-op-rare-paths). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

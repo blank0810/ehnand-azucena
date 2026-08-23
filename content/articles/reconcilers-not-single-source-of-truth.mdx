@@ -1,0 +1,113 @@
+---
+title: "When One Copy Isn't Yours, You Need a Reconciler, Not a Single Source of Truth"
+seoTitle: "Reconcilers Beat Single Source of Truth"
+date: 2026-08-23
+category: "Engineering Practice & Reliability"
+tags: [data-integrity, drift, verification, testing, monitoring]
+summary: "\"Single source of truth\" quietly assumes both copies are yours. When one is a row a user edits, a site a third party owns, or a document a human maintains, there is nothing to extract, and the only control that works is something that compares the copies and reports the delta."
+---
+
+"Single source of truth" is good advice that stops describing anything actionable the moment one of the copies is outside your process.
+
+The phrase implies a choice between one copy and two. Often the real choice is between **two copies with a reconciler** and **two copies without one**, and the second is what most systems ship by accident.
+
+There is a mechanical test that tells you which situation you are in:
+
+> **Can copy A read copy B at the moment A has to be correct?**
+
+If yes, you do not have a reconciliation problem. You have a duplication problem, and the fix is to extract one accessor and delete the copy. If no, because B is a database row a user edits, a website a third party owns, or a document a human maintains, then no accessor exists to extract, and the only control that works is something that periodically compares the two and reports the difference.
+
+Three examples from one day across three unrelated codebases, all with the same shape and three different correct answers.
+
+## Copies that cannot read each other: a registry and the rows a user toggles
+
+A notification preferences system had the fact "which notification types exist" in two places. A code-side registry was authoritative for **existence**. Database rows were authoritative for the user's **choice**, and users edit them.
+
+The production build script ran migrations and never ran the seed. Six notification types shipped with zero rows behind them.
+
+The preferences screen rendered three toggles and **looked completely correct**. There is no visual difference between a screen that shows every option and a screen that shows every option it found rows for. Nothing errored. Nothing logged.
+
+The fix is worth copying verbatim, because it is not "make the database the source of truth":
+
+| Path | Trigger | Purpose |
+|---|---|---|
+| Sync step in the production build | Automatic, every deploy | Convergence on the common path |
+| A "Sync now" button in the admin panel | Human, on demand | Immediate correction without a deploy |
+| Daily scheduled job | Time | Fallback when both of the above are skipped |
+| Registry count vs row count, displayed | Every admin page view | **Makes the drift visible before it is corrective** |
+
+That last row does most of the work. **A reconciler that silently repairs is a reconciler you cannot audit.** Show the delta first: count on the left, count on the right, difference in the middle. Then offer the fix. It is a small amount of work, and it converts an invisible class of bug into a number a person reads on their way to something else.
+
+## Copies that cannot read each other: your data and the live internet
+
+The second example is this portfolio, which makes it the honest one.
+
+Project records carry a `liveUrl`. That field is a claim about the public internet, and the internet is owned by other people and changes without telling you. A static site cannot fetch those URLs at build time and still be correct at read time, because the fact changes *after* you look.
+
+Two records had rotted. One pointed at a host the app had moved off, and stayed wrong for over a month. Another was marked `Live` while its deployment had been taken down and returned 404.
+
+The unit suite passed the whole time, and the suite is not weak. It asserts that every record renders, that the schema is well formed, that each slug routes, that related-article references resolve. **Not one assertion fetches a URL**, and that is not an oversight. It is the correct scope for a test that must run offline and deterministically.
+
+The general form is worth stating plainly:
+
+> **A test that asserts internal consistency proves the copies are well formed. It never proves they agree.**
+
+A dead link is syntactically perfect data. No amount of schema validation will ever say otherwise. The check that catches it is a **different kind** of check: slow, external, and allowed to fail for reasons your code did not cause. That is exactly why it tends not to exist. It belongs in a scheduled job, not in the unit suite. (The fix here was a commit correcting both records; the missing scheduled check is the actual remedy.)
+
+## Copies that *can* read each other: delete one, do not reconcile it
+
+The third example is the classic case, and it is included to mark the boundary.
+
+An SMS composer enforced a length ceiling twice. A service constant capped a message at three segments. A form request capped the body at 459 characters. Same repository, same process, same request lifecycle, so these two copies **can** read each other, which means this is not a reconciliation problem at all.
+
+The interesting part is *how* they disagreed. They did not drift apart by someone editing one and forgetting the other. They were never measuring the same thing:
+
+| Constant | Unit | Hidden assumption |
+|---|---|---|
+| `MAX_SEGMENTS = 3` | Segments | None. It counts what the carrier bills |
+| `MAX_BODY = 459` | Characters | That every message is GSM-7, where a concatenated segment holds 153 characters |
+
+459 is exactly three GSM-7 segments. The two constants agree perfectly, right up until a character outside GSM-7 appears. Add a single peso sign and the whole message becomes UCS-2, a concatenated segment drops to 67 characters, and 459 characters is **seven** segments.
+
+So a 459-character message with one currency symbol passes the form, gets priced at seven segments on the review screen, and is then refused at send. Three gates, two units, one silent assumption.
+
+The remedy here is not a reconciler and not a drift report. It is one function that computes segments from the body, called by everything that needs to know. **Reaching for a reconciler where an accessor would do is over-engineering, and it leaves the divergence in place.**
+
+## Where the answer differs
+
+| Situation | Can A read B? | Correct control |
+|---|---|---|
+| Constant duplicated across modules | Yes | One accessor, delete the copies |
+| Code registry vs user-editable rows | No | Sync paths plus a visible delta |
+| Your data vs a third-party URL | No | Scheduled external probe |
+| Docs describing code | No, without tooling | Make the doc enumerable, then diff it against the tree |
+| Config in the repo vs config on the host | No | Drift report on deploy |
+
+The row about documentation deserves a note, because it is the cheapest win on the list. A paragraph cannot be checked. A **table of identifiers, paths, or literals** can be extracted and diffed against the source tree with a short script. If you cannot make something execute, make it enumerable.
+
+## The reconciler is code, and inherits every hazard
+
+One warning, because a reconciler is easy to trust more than it deserves.
+
+The sync described in the first example uses a find-then-create, which is a check-then-act race protected only by a deterministic identifier. It runs on every deploy, and on nearly every deploy there is nothing to do. That combination of rarely acting and always reporting success is the exact profile of automation that has never proved it can act, and that will keep reporting green after it stops working.
+
+**A reconciler decays into decoration unless it can fail loudly.** Give it an assertion, a count, and somewhere for a human to see the number.
+
+## How to apply
+
+1. **At design time, for every fact you are about to write down twice, ask whether the two places can read each other at the moment they must agree.** That single question routes you to the right control.
+2. **If they can: delete the copy.** One accessor, referenced everywhere. Do not write a drift report for a problem a refactor removes.
+3. **If they cannot: name the reconciler in the same document that names the copy.** A copy with no named reconciler is an unfunded maintenance obligation.
+4. **Make the delta a screen, not a log line.** Invisible reconciliation cannot be audited and cannot be trusted.
+5. **Test the copy you do not own from outside your process** with a scheduled link check, a nightly fetch, or a probe running on someone else's clock. It belongs in cron precisely because it is allowed to fail for reasons your code did not cause.
+6. **Check the units before you check the values.** Two constants that agree numerically can still encode incompatible assumptions, and that disagreement will not look like drift.
+
+## The takeaway
+
+The vocabulary of "single source of truth" is built for facts you fully own. Most interesting facts are not.
+
+When a copy lives in a user's row, on someone else's server, or in a human's document, you are not choosing whether to have two copies. You already have two. The only decision left is whether anything in your system is responsible for noticing when they disagree, and whether that noticing produces a number somebody actually sees.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These examples come from the [Personal Budget & Finance Manager](https://ehnand.com/projects/personal-budget-finance-manager), the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system), and this site itself. For the closely related question of whether a check ever runs at all, see [Automation That Usually No-Ops Has Not Proved It Can Act](https://ehnand.com/articles/automation-no-op-rare-paths). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

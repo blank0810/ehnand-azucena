@@ -24,14 +24,24 @@ export interface Project {
 }
 
 const RELATED_ARTICLES: Record<string, string[]> = {
-  "adam-ai": ["document-matching-strategies", "automation-no-op-rare-paths"],
+  "adam-ai": [
+    "document-matching-strategies",
+    "automation-no-op-rare-paths",
+    "recovery-path-invariants",
+    "rehearsability-production-writes",
+  ],
   repsshield: ["llm-provider-failover"],
   "initao-water-billing-system": [
     "offline-first-laravel",
     "utility-billing-ledger",
     "correct-ledger-wrong-billing-statement",
+    "authorization-testing-least-privilege",
   ],
   "swiss-energy-platform-suite": ["document-matching-strategies"],
+  "personal-budget-finance-manager": [
+    "authorization-testing-least-privilege",
+    "reconcilers-not-single-source-of-truth",
+  ],
 }
 
 export const PROJECTS: Project[] = [
@@ -325,7 +335,7 @@ export const PROJECTS: Project[] = [
     role: "Solo Developer",
     status: "Live Production",
     category: "Finance",
-    relatedArticleSlugs: [],
+    relatedArticleSlugs: RELATED_ARTICLES["personal-budget-finance-manager"],
     liveUrl: "https://budget.umbra.build",
   },
   {
