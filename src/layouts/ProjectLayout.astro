@@ -13,10 +13,17 @@ interface Props {
   schemas: unknown[]
   narrative: NarrativeRecord[]
   relatedArticles: ArticleEntry[]
+  hasCaseStudy: boolean
 }
 
-const { project, canonicalPath, schemas, narrative, relatedArticles } = Astro.props
-const hasCaseStudy = Astro.slots.has("case-study")
+const {
+  project,
+  canonicalPath,
+  schemas,
+  narrative,
+  relatedArticles,
+  hasCaseStudy,
+} = Astro.props
 const title = `${project.title} | Ehnand Azucena`
 ---
 

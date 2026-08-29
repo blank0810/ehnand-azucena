@@ -93,6 +93,7 @@ const breadcrumbSchema = {
   schemas={[softwareSchema, breadcrumbSchema]}
   narrative={narrative}
   relatedArticles={relatedArticles}
+  hasCaseStudy={Boolean(CaseStudyContent)}
 >
   {CaseStudyContent && <CaseStudyContent slot="case-study" />}
 </ProjectLayout>

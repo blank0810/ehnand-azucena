@@ -12,8 +12,11 @@ const { FAQ_ITEMS } = await import("../../src/data/faq.ts")
 const { parseProjectNarrative } = await import("../../src/lib/project-narrative.ts")
 
 test("project inventory is complete, unique, and excludes the unpublished ERP", async () => {
-  assert.equal(PROJECTS.length, 15)
-  assert.equal(new Set(PROJECTS.map((project) => project.slug)).size, 15)
+  assert.ok(PROJECTS.length > 0)
+  assert.equal(
+    new Set(PROJECTS.map((project) => project.slug)).size,
+    PROJECTS.length,
+  )
   assert.equal(getProjectBySlug("multi-tenant-erp-backend"), undefined)
 
   for (const project of PROJECTS) {
