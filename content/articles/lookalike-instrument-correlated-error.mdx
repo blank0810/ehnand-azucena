@@ -1,0 +1,81 @@
+---
+title: "A Lookalike Instrument Fails Hardest Exactly Where You Need It"
+seoTitle: "Measure With the Real Parser, Not a Lookalike"
+date: 2026-08-29
+category: "Engineering Practice & Reliability"
+tags: [measurement, verification, testing, debugging, data-quality]
+summary: "A measuring script that re-implements the system inherits the system's assumptions, so its errors are correlated with the defects you are hunting rather than random. It is not merely imprecise. Its error runs in the direction that conceals."
+---
+
+When you write a script to measure your system, you usually write a small version of the system. That is the problem, and it is worse than it sounds.
+
+A re-implementation inherits the original's assumptions. So wherever the original is wrong, **the instrument is wrong in the same direction**, and the same direction is precisely where you are looking. The error is not noise around a true value. It is correlated with the defect, which means the instrument is least trustworthy at exactly the moment you need it most.
+
+The test that catches it:
+
+> **Did this measurement execute the production code path, or re-derive it? If re-derived, name the assumption both copies share.**
+
+Five instances follow, from two unrelated projects. The first is the cleanest statement of the shape.
+
+## The harness concealed the defect it existed to find
+
+A comparison harness existed to find discrepancies between our output and a reference implementation's. It reported a healthy match rate.
+
+The defect it was blind to lived in a rule gated on one product value, where the engine resolves a *different* value from the same source label. The harness had collapsed those two values into one, because collapsing them was the obvious simplification when you re-derive the logic rather than call it.
+
+Follow the consequence through. The harness called the rule with the collapsed value. Under the collapsed value the rule behaved correctly. So the comparison built to expose the discrepancy **called the code in the one way that made it look right.**
+
+Nothing in the output hinted at this. A green comparison and a comparison that cannot see the defect render identically, which is the property that makes this class expensive.
+
+The honest response, once found, was not just to fix the harness. It was to correct the claim that had been built on it: the fix that shipped was recorded as **verified by regression tests and by reading the code path, explicitly not by the parity number**. When your instrument turns out to be a lookalike, the numbers it produced do not retroactively become evidence for anything.
+
+## A quality score that almost drove a real change to fix nothing
+
+The sharpest instance, because it nearly cost work rather than just confidence.
+
+A quality check scored records on one field. The production parser routes records by currency into three separate handlers, and only one of them populates that field. The check knew nothing about the routing, because it had re-derived the scoring rather than calling the parser.
+
+Result: **every record in two of the three currencies scored zero.** That condemned roughly fifty real data blocks, some five thousand rows, as defective. On the strength of that measurement, a rule was proposed to handle the apparently broken records.
+
+Corrected to run through the real parser, the lowest-scoring genuine block came in at 0.99. The data was fine. It had always been fine. **The rule that had been designed to fix it would have done nothing at all**, because there was nothing to fix, and it would have shipped as permanent complexity justified by a number nobody re-derived.
+
+That is the cost worth remembering. A bad instrument does not merely mislead you about health. It generates work.
+
+## Three shorter ones, same shape
+
+**A whitelist declared safe by a scan that read the wrong thing.** A crude column scan checked a tab that the real parser never opens. The verdict was "safe," and the verdict was about a document the system does not read.
+
+**Twenty-two problems that were five.** A count of apparently fixable labels came to twenty-two. Once cross-matching on a shared word was excluded, which the real matcher does exclude, the true count was five. The instrument was more permissive than the system, so it invented seventeen problems.
+
+**A contrast ratio measured on a colour that does not exist.** In a completely different project, a hand-written luminance helper parsed a 7 percent tint as an opaque saturated blue, and reported contrast ratios of 4.31 and 2.22, comfortably failing. Composited properly against the surface behind it, the real ratios are 16.47 and 7.02, comfortably passing.
+
+That last one carries the sting worth ending on: **the false reading had already driven a real change** before anyone questioned the instrument. The colours were never the problem.
+
+## Why this is not just "measurements can be wrong"
+
+Ordinary measurement error is random. It scatters around the truth, it is visible as noise, and averaging helps. None of that applies here.
+
+A lookalike instrument is a *systematic* error whose direction is determined by the same assumptions that produced the bug. Three consequences follow, and they are why this deserves its own rule:
+
+1. **It is silent on exactly the cases you built it for.** Its blind spots and the system's blind spots are the same set.
+2. **More data does not help.** Running the lookalike over ten times as many records reproduces the same error ten times as confidently.
+3. **It produces false problems as readily as false confidence.** Two of the five instances above invented defects rather than hiding them, and the invented ones cost more, because someone starts building.
+
+## What to actually do
+
+1. **Import the production code path. Do not re-implement it.** If measuring means calling the real parser, matcher, or renderer, then call it, even when that is slower and more awkward to set up. Convenience is what produces the lookalike.
+2. **When you must re-derive, write down the assumptions the copy makes**, then check each one against the original. The collapsed value, the ignored routing, the unread tab, and the skipped exclusion were all single lines that seemed obviously safe.
+3. **Be suspicious of a measurement that makes a large population look uniformly bad.** Uniformity is usually a property of instruments, not of real data. Real defects are lumpy.
+4. **Before acting on a measurement, ask what would have to be true of the instrument for this number to be wrong**, and check that one thing. Five minutes against the alternative of shipping a rule for a problem that does not exist.
+5. **When an instrument is found to be a lookalike, restate every conclusion that rested on it.** Say what your evidence actually is now, which is often "the code path and the regression tests" rather than "the number."
+6. **Prefer instruments that can fail loudly.** A measurement that cannot produce a surprising answer is not measuring.
+
+## The takeaway
+
+The instinct behind a quick measuring script is good: get a number, get it fast, decide. The trap is that the fast way to get a number is to reimplement the system in miniature, and a miniature of the system shares the system's mistakes.
+
+So ask the one question before trusting any figure your own tooling produced. **Did this call the real thing, or a small copy of it that agrees with it by construction?** If it is the copy, the number is not a measurement. It is your own assumptions, restated with more decimal places.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build measurement and reconciliation systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

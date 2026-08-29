@@ -1,0 +1,100 @@
+---
+title: "Nothing Re-Reads a Value That Was Resolved at Deploy Time"
+seoTitle: "Nothing Re-Reads a Deploy-Time Value"
+date: 2026-08-29
+category: "SaaS, Cloud & Security"
+tags: [secrets, terraform, aws-lambda, docker, deployment]
+summary: "The secret lives in a secret store and the running code reads the secret store are different claims, and the first is routinely stated as though it implied the second. Rotation then needs two actions, and forgetting the second fails silently."
+---
+
+"The secret lives in a secret store" and "the running code reads the secret store" are two different claims. The first gets stated as though it implies the second constantly, including by me, and the gap between them is where credential rotation goes to die.
+
+Here is the shape. Your infrastructure-as-code resolves a parameter from the secret store and injects the value as an environment variable on the function. That is a completely reasonable design and the store genuinely is the source of truth, **at apply time**. Afterwards the running function holds a frozen copy, and **no code path in it ever calls the store again.**
+
+The store remains perfectly updatable. It is also perfectly ignored.
+
+## The tell is that rotation takes two actions
+
+The diagnostic that exposes this arrangement is simple: count the actions required to rotate.
+
+If the answer is one, the running system reads the store. If the answer is two, update the parameter *and then* redeploy or update the function configuration, then you do not have a secret store in the operational sense. You have a build input that happens to be stored securely.
+
+**The second action is invisible from the secret store's own interface.** Someone rotating a credential at three in the morning sees a successful update, a new version, a green checkmark, and no indication whatsoever that something else must now happen.
+
+And here is why it is genuinely dangerous rather than merely untidy: **if they forget, nothing fails.** The job keeps running, successfully, against the old credential. There is no error, no alert, no degraded mode. The system stays healthy right up until the old credential is actually revoked, at which point everything fails at once, at a time chosen by whoever did the revoking rather than by whoever could fix it.
+
+Two further costs come with resolving at deploy time, and both are worth weighing before choosing the pattern:
+
+- The plaintext value lands in **infrastructure state files**, which are frequently less protected than the secret store it came from.
+- It lands in the **function's own configuration**, readable by anyone holding read access to the function, which is a much wider group than read access to the secret.
+
+## The general question
+
+Once you have the shape, one question generalises it to everything else:
+
+> **What would make the running system notice a change to this value?**
+
+If the honest answer is "a deploy," then it is not configuration. It is a build input with a configuration-shaped user interface, and it should be documented, reviewed, and rotated as such.
+
+Two more instances of the same shape, from the same fortnight, in completely different layers.
+
+## An immutable version is not an update
+
+Publishing a new version of a shared dependency artifact does not move anybody onto it.
+
+Each version is an independent, immutable object that happens to share a name with its siblings. Consumers attach a full identifier ending in a version number, and they stay pinned there until a human edits each consumer individually.
+
+This one is worth knowing because it cuts both ways, and both directions are useful:
+
+- **Publishing needs no coordination.** Publishing a new version into a name another team created did not touch their functions at all. Theirs stayed pinned to the older version and kept running exactly as before. That turned "we need to coordinate with the other developer before we can do this" into "we should tell the other developer that we did this," which is what let the work ship the same day.
+- **Migration is entirely manual.** Nobody arrives on the new version by default, ever. So "the account is standardised on one dependency layer" is not something a publish accomplishes. It is a per-consumer edit, and until every one is done the true state is a mixture.
+
+The reframe that resolves most confusion here: the version number is part of the identity of the artifact, not a pointer to the latest one.
+
+## A seed file that is read exactly once
+
+The third instance is the most quietly frustrating, because the tool is doing something sensible.
+
+A database administration container imports its declarative server list from a seed file **only when its data directory is empty**, which in practice means on the container's very first start. Edit that file afterwards, restart the container, and precisely nothing happens. No error. No warning. The only tell is a log line on first run reporting how many entries were added, and its absence later.
+
+So you now have two stores that drift apart:
+
+| Store | What it is | Who writes it |
+|---|---|---|
+| The seed file | declarative, version-controlled intent | you, in the repository |
+| The live database | what the tool actually reads | first-run import, then the UI |
+
+Anything added by hand through the interface goes only into the second. Anything edited in the repository after first run goes only into the first. The version-controlled file looks authoritative, is reviewed like it is authoritative, and has not been consulted since the volume was created.
+
+Making an edit take effect requires either destroying the data volume and re-initialising, which loses saved passwords and history, or editing the live store directly and restarting so nothing survives in memory.
+
+## The shared shape
+
+All three are the same event followed by the same silence:
+
+| | Resolved when | What a later change to the source does |
+|---|---|---|
+| Injected secret | at deploy | nothing, until redeployed |
+| Pinned artifact version | at attach | nothing, until each consumer is edited |
+| Seed file | at first init | nothing, ever, silently |
+
+In each case something reads a source once, produces a copy, and then the copy is the operative value forever. In none of them does anything report the divergence, because a copy that has stopped matching its source is not an error condition. It is just a value.
+
+## What to actually do
+
+1. **Count the actions required to change a value.** More than one means you have a frozen copy, and the extra actions belong in the runbook next to the first one.
+2. **Decide deliberately between resolving at deploy and reading at runtime.** Reading at runtime costs a call and some latency, and it buys rotation that actually takes effect. Both are legitimate. Choosing accidentally is not.
+3. **Where you resolve at deploy, write the second action where the first one happens.** The note belongs in the secret store's description field, not in a document nobody opens at three in the morning.
+4. **Check whether your secret's plaintext lands in state files or in readable resource configuration**, and weigh that against the convenience.
+5. **Treat a version-pinned dependency as an identity, not a pointer.** Audit which consumers are on which version rather than assuming a publish standardised anything.
+6. **Assume any seed, bootstrap, or fixture file is read once.** If it is version-controlled and the system initialised months ago, it is documentation of an intention, not a description of the running state.
+
+## The takeaway
+
+A value with a good home is not the same as a value that gets read. Secret stores, parameter stores, seed files, and version-controlled configuration all give you an authoritative-looking place to make a change, and none of them can tell you whether anything is still listening.
+
+So ask the question of every value that matters. **What would make the running system notice?** If the answer is a deploy, a volume rebuild, or a per-consumer edit, then the source of truth is only true at one instant, and you are looking at a copy for the rest of its life.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build and deploy cloud infrastructure for systems including [Adam AI](https://ehnand.com/projects/adam-ai) and [REPSShield](https://ehnand.com/projects/repsshield). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

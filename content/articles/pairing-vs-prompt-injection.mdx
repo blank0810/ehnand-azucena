@@ -1,0 +1,92 @@
+---
+title: "Pairing and Prompt Injection Are Orthogonal Threats"
+seoTitle: "Pairing Does Not Protect an Agent from Injection"
+date: 2026-08-29
+category: "AI & Automation"
+tags: [ai-agents, prompt-injection, security, authorization, tool-use]
+summary: "Restricting who can message an agent says nothing about what the agent is talked into doing by the untrusted content it reads. Those are two independent axes, and locking one down hard produces no movement at all on the other."
+---
+
+"Only I can message it" is the most common answer to whether an AI agent is safe to give real tools. It is a good control, it is worth having, and it does not answer the question that was asked.
+
+Authenticating **who can talk to the agent** and constraining **what the agent can be talked into doing** are independent axes. You can max out the first and land exactly nowhere on the second, because the agent's instructions do not only arrive from the person holding the credential. They arrive from every piece of content the agent reads on that person's behalf.
+
+For an assistant, reading untrusted content is not an edge case. **It is the entire job.** Web search results, email bodies, forwarded documents, calendar invitations, issue threads, pull request descriptions, scraped pages. Every one of those is attacker-influenceable text that will pass through the model's context and compete with your instructions for authority.
+
+## The two axes, stated plainly
+
+| | Pairing / allowlist | Prompt injection |
+|---|---|---|
+| Question it answers | who may issue a request | what content may steer a request |
+| Attacker's position | must obtain your identity | must get text in front of the agent |
+| Cost to attack | high, needs credential compromise | often zero, publish a page or send a mail |
+| What fixes it | authentication, allowlists, per-person identity | capability limits, review gates, isolation |
+
+Look at the third row, because it is the whole argument. To defeat pairing, someone has to compromise an identity. To defeat the model's instruction hierarchy, someone has to write words on a page your agent might read. **These are not remotely comparable costs**, and the cheap one is unaffected by the expensive one's controls.
+
+An agent locked to a single operator, reading a poisoned web result, executes the poisoned instruction *as that operator*. The allowlist worked perfectly the entire time. It was never the control under test.
+
+## This does not make the allowlist useless
+
+Worth saying clearly, because the conclusion people draw from this is often wrong in the other direction.
+
+An allowlist is a genuinely valuable control. It removes the drive-by attacker, it removes the enumeration risk, it makes abuse attributable, and it collapses your exposure from the whole internet to one identity. Keep it. Configure it explicitly rather than relying on an empty value to mean the restrictive thing.
+
+The error is not having it. **The error is spending it as though it were the answer to a different question**, then granting broad capability on the strength of it. "Only I can message it, so it is safe to give it shell access" is two true clauses joined by a false implication.
+
+## The question that actually governs the risk
+
+Once you accept that the agent will, at some point, receive an instruction you did not write, the security question stops being about the channel and becomes:
+
+> **When the agent is successfully persuaded, what is the worst thing it is able to do?**
+
+That is a question about capability, not about authentication, and it has a satisfying property: it is answerable in advance, by inspection, without predicting anything about attacker cleverness. You do not need to know *how* the injection will work. You only need the list of actions available to a persuaded agent.
+
+That list is the blast radius. Everything else is commentary.
+
+## Prefer a narrow capability over a broad one that is merely gated
+
+The instinct when an agent needs to do something in a repository, a filesystem, or a shell is to enable the general-purpose tool and then be careful about it. That is the wrong shape, because "be careful" is a property of the operator and the operator is not the one being persuaded.
+
+The better shape is a **narrow, purpose-built capability plus a review gate.** Instead of file and terminal access, give it exactly the operation the use case requires, in a form where the consequential step is performed by a human.
+
+The general pattern is the one good assistants already apply to email, where the norm is to draft rather than send. Generalise it: **the agent produces a proposal, a person promotes it.**
+
+For repository work, the concrete version:
+
+```text
+agent  -> writes to a draft branch, using a repo-scoped deploy key
+human  -> reads the diff, merges
+CI     -> deploys from the protected branch only
+```
+
+Now consider the same task with the naive arrangement, and assume the target repository auto-deploys on every push, which is extremely common:
+
+```text
+agent  -> pushes to the default branch
+CI     -> deploys, immediately, to production
+human  -> finds out afterwards
+```
+
+Both designs "work" for the intended use case. They differ entirely in what a persuaded agent achieves, and the difference is not subtle: in the second, a successful injection is a production deployment.
+
+Notice that the fix required no ability to detect the injection. It removed the capability instead. **Controls that depend on recognising a malicious instruction are in an arms race. Controls that remove the action are not.**
+
+## Design rules that follow
+
+1. **Never argue from the channel to the capability.** Who can reach the agent and what the agent may do are separate decisions, made with separate evidence. Deciding one does not license the other.
+2. **Enumerate the persuaded-agent action list, in writing.** For every tool the agent holds, write the worst legitimate-looking action it enables. If that list contains anything irreversible, outward-facing, or money-touching, the gate belongs before the action rather than around the channel.
+3. **Prefer a purpose-built skill to a general tool.** "Append a row to this sheet" has a blast radius. "Run arbitrary shell commands" has a perimeter. Narrow the grant to the shape of the use case, even when the general tool is less work.
+4. **Put the human on the consequential step, not on the request.** Approving the ask is not review, because at that point nothing untrusted has been read yet. Review the output, after the untrusted content has done whatever it was going to do.
+5. **Make the irreversible path structurally unavailable.** A draft branch and a scoped key beat a policy about which branch to push to, for the same reason a guard beats a comment.
+6. **Assume the injection succeeds when you design.** Not as pessimism. As the only assumption that produces a design you can reason about, because it removes the unknowable variable.
+
+## The takeaway
+
+Pairing answers "whose request is this." Injection defeats "whose instruction is this." An agent whose job is to read the open internet will eventually be handed an instruction its operator did not write, and no amount of authentication on the front door changes what happens next.
+
+So do not spend the allowlist as though it settled the capability question. Keep it, configure it explicitly, and then answer the real one separately: **when this thing is persuaded, and it will be, what is it able to do?** Design until that answer is something you can live with, and the rest of the threat model gets a great deal simpler.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build and operate AI systems including [Adam AI](https://ehnand.com/projects/adam-ai) and [REPSShield](https://ehnand.com/projects/repsshield). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

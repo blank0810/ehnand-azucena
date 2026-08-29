@@ -1,0 +1,111 @@
+---
+title: "A Word That Sounds Like a Criterion Gets Read as One"
+seoTitle: "Read the Criterion, Not the Label"
+date: 2026-08-29
+category: "Engineering Practice & Reliability"
+tags: [verification, deployment, aws-lambda, metrics, code-review]
+summary: "A label that names its own test gets believed instead of the test. The word may be stronger than the check behind it, wider than the act it reports, or narrower than the request it carries, and the gap is invisible because the word already sounds like an answer."
+---
+
+Any check that reports a verdict is really two artifacts: the comparison it performs, and the word it prints for that comparison. Only one of those is ever tested.
+
+The word is what everybody reads. It propagates into status updates, commit messages, dashboards, and eventually into a sentence somebody says to a customer. The comparison sits underneath, usually a few lines away, and it may be narrower or wider than the word by a large margin.
+
+The repair is one sentence long and it is not "be skeptical of labels":
+
+> **Open the comparison the verdict was printed for, and name the population it ranged over. If the criterion is not written down anywhere, that is the finding.**
+
+Two halves, and the second is the one that gets skipped. I will come back to it, because fixing a label's criterion and leaving its population wrong is how a number becomes *more* convincing and no more correct.
+
+## The clearest case is machine-readable, which is why it is first
+
+If this were only about prose, it would be a writing problem. It is not, and the sharpest instance involves no prose at all.
+
+A cloud function's dependency layer declared its compatible runtimes as three versions of Python, including the newest. That field is a normal part of the deployment descriptor, it is structured data, and it is the field every tool in the chain reads to decide whether the layer belongs with the function.
+
+Inside the archive were seven compiled extension modules, every one of them hard-tagged for a single older interpreter version. The actual import test, which means extracting the archive, putting it on the path, and importing what the function imports, on the target runtime, returned this:
+
+```text
+python3.12   IMPORT OK
+python3.13   ModuleNotFoundError
+python3.14   ModuleNotFoundError
+```
+
+A build for one runtime, wearing a label for three.
+
+Two properties make this the instance I now reach for first. The failure lands at **import time, before the handler runs**, so no error handling inside the function can catch it or degrade gracefully. And **nothing in an infrastructure plan opens a layer archive to look inside**, so the deployment succeeds, the plan is green, and the label survives every check anyone in the pipeline actually runs.
+
+That declared-compatibility field is not a fact the platform verifies. It is **the publisher's assertion, recorded verbatim**, and it is treated by every downstream reader as though something had checked it. Nothing had.
+
+## The label was stronger than the comparison
+
+The second instance is the one that cost me a morning.
+
+A comparison harness printed `byte-for-byte identical` for matching records. The criterion producing that verdict lived sixteen lines further up in the same file: an equality test between two maps of key to rate, with a floating-point tolerance. It never opens a byte. Sort order, header names, and cell formatting are all completely invisible to it.
+
+The numbers the harness produced were never wrong. What was wrong was every sentence built on the word, including the framing of the day's actual question, which was whether our coverage figure was comparable to a vendor's or whether theirs was scored against a laxer bar.
+
+Saying the criterion out loud settled that in a paragraph, and settled it in our favour: the vendor used the same class of comparison, a code-set and rate equality, ignoring the same cosmetics. **Comparable criteria.** Good news, arrived at honestly, and it should have been the end of it.
+
+## Fixing the criterion does not fix the population
+
+It was not the end of it, and this is the part worth the whole article.
+
+Nine hours later the same word failed again one level up, and the morning's fix is what exposed it. Establishing that both sides used the same *kind* of comparison said nothing about *what each side had counted*.
+
+Our harness iterated the records **we had parsed** and looked for a matching output file. The vendor's process iterated **its own output files** and went looking for the data. Same underlying corpus, opposite directions.
+
+```text
+ours:    for each record we attempted  -> is there a matching file?
+theirs:  for each file they produced   -> is there matching data?
+```
+
+So our ratio meant "matched, out of the ones we chose to attempt." **A file nobody thought to build was absent from the denominator rather than counted as a miss.** Records we produced that the vendor shipped nothing for were counted in neither direction. The two ratios were never comparable, and the gap was larger than the first analysis implied.
+
+The generalisation, and it is the sharpest thing here: **fixing a label's criterion does not fix its population, and the population is the half that gets quoted to a customer.** Both halves hide inside the same word. Worse, correcting the criterion makes the number look more rigorous, so the population error inherits the credibility the fix just earned.
+
+The architecture and its own test shared the blind spot, which is exactly why the figure looked respectable while a set of expected outputs had never been attempted at all.
+
+## The same word, three surfaces, three spellings
+
+A smaller instance, included because it takes ten seconds to check for in any codebase.
+
+One product moved through the system under three different names: one in the generated filename, a second in the summary output, a third on screen, because an unrelated validation returned a default for anything it did not recognise. A change had fixed the display name and written a comment saying so. The filename and the summary were never looked at, so the corrected label was dead code on two of the three surfaces.
+
+Nobody was confused, which is the point. Three surfaces disagreeing produces no error anywhere.
+
+## The sign flips, and the reader's mistake is identical
+
+Everything above is **over-trust**: a word that sounds stronger than its test. The same defect runs the other way and it is worth recognising, because it costs real time.
+
+Working next to a client's live customer database, two alarms were raised in one session and neither was caused by any action taken. A verification restore was reported as a "restore," which read as production and was a throwaway container. A cleanup was described as deleting "the row," which read as customer data and was a saved connection entry in a local desktop application's own settings file.
+
+Both checks were clean. Both sessions stopped anyway. **The reader's error was identical to the over-trust cases: they took the word's plain meaning instead of asking what it ranged over.**
+
+The fix costs nothing. Name the object *and* its store. Not "deleted the row," but "deleted the saved connection entry from the local application settings." Next to production, wording is not documentation. It is an action.
+
+## The control case, which is why this is not "distrust all labels"
+
+In the same codebase, in the same week, a branch prefix conventionally associated with urgency turned out to mean something narrower: it selects which deployment route runs, and reads nothing about risk.
+
+That one cost nothing, because it was named accurately for what it does the first time, and because anyone reading it could find the criterion, a routing rule, immediately.
+
+This is the boundary. The defect is not that labels exist or that shorthand is dangerous. Systems need short names for long criteria and always will. **The defect is a label whose apparent extension is wider or narrower than the criterion it fronts, with nothing written down to reveal the difference.** A well-named label with a discoverable criterion is free.
+
+## What to actually do
+
+1. **When a check prints a verdict, open the comparison.** Not the docstring, not the variable name, the actual predicate. Sixteen lines was the distance in the case above, and it reframed a headline number.
+2. **Then name the population.** Ratios especially. What is in the denominator, what was excluded before counting started, and would a thing that was never attempted appear as a miss or not appear at all?
+3. **Treat any declared-compatibility field as an unverified assertion.** Compatible per whom, checked by what, and against which artifact? If the answer is "the publisher said so," you are holding a claim, not a guarantee.
+4. **Next to production, name the object and its store.** Every time, in every message, for every destructive verb.
+5. **Quote the population alongside any number you hand to a customer.** A ratio without its denominator is not a smaller truth. It is a different claim.
+
+## The takeaway
+
+Words that sound like criteria stop people from looking for the criterion. That is their whole cost, and it is why the failure mode is confidence rather than confusion. Nobody in any of these cases was unsure.
+
+So do the cheap thing. Read the comparison, name the population, and if neither is written down anywhere, you have not found a documentation gap. You have found the finding.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I work on verification and deployment correctness in production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

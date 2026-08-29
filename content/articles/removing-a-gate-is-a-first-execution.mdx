@@ -1,0 +1,97 @@
+---
+title: "Removing a Gate Is the First Execution of Everything Behind It"
+seoTitle: "Removing a Gate Is a First Execution"
+date: 2026-08-29
+category: "Engineering Practice & Reliability"
+tags: [debugging, feature-flags, typescript, type-safety, regression-testing]
+summary: "When you remove a filter and things break immediately, the instinct is that you broke them. Usually you ran them. A skip condition suppresses the code behind it, so removing one is not a change to that code, it is the first time it has executed."
+---
+
+I removed a confirmation gate, and a production job failed four times in a row within the hour.
+
+The obvious reading is that the change broke the job. That reading is wrong often enough that it is worth a rule, and the rule is this: **a filter, a feature flag, a confirmation step, and a skip condition all suppress the code paths behind them.** Removing one is not a behaviour change to that code. It is that code's first execution.
+
+So the failures that follow are not evidence that your change was wrong. They are the arrears.
+
+## What actually happened
+
+A weekly generation job started aborting with a type-narrowing error on a product value. Every run, immediately, all the way through.
+
+The gate I had removed required records to be confirmed before they were processed. Remove it, and unconfirmed records reach generation for the first time. Exactly one record on production carried the newer product tier, it had never been confirmed, and it had been created **before** my change.
+
+The guard that rejected it had been broken since the day that product tier was added. Nobody had seen it because the only record that could trigger it was, until that hour, being skipped before it ever reached the guard.
+
+**The gate was not protecting anything. It was hiding something.**
+
+And it hid it well: a single unprocessable record aborted the run for every other record in it, so the blast radius of a latent defect in one row was the entire job.
+
+## The diagnostic that settles attribution in one query
+
+The useful question is not "what did I break?" It is:
+
+> **Could the failing record have reached this code before my change?**
+
+That is answerable, cheaply, and it settles the argument without reading any of the code you just modified. Here the answer was a single row: the record had `confirmed_at` null and a creation timestamp predating the change. Under the previous code path it was unreachable by construction.
+
+Attribution resolved in one query. Without that question the natural next step is reverting a correct change, which restores the appearance of health by re-hiding the defect.
+
+Whenever you unsuppress a path, the first move is to establish whether the failing input is new or merely newly reachable. Timestamps and state flags usually answer it immediately.
+
+## The defect it unmasked was worth more than the gate
+
+The guard failed for a reason that generalises past this codebase.
+
+A union type listed the valid products. A runtime guard narrowed an arbitrary stored string back into that union. Those two things describe the same set, and **nothing forced them to agree.** A product had been added to the type and never to the guard.
+
+Worse, the same list had been hand-rolled at three separate call sites, and they had already drifted apart:
+
+| Call site | Products listed | Behaviour on the new value |
+|---|---|---|
+| Generation | four | **threw** |
+| Client resolution | four | **threw** |
+| Route types | three | **silently coerced to a default** |
+
+Three copies, two behaviours, one of them silent. The two that threw are the reason anything was noticed at all. **The third is the genuinely dangerous one**, because a value quietly rewritten to a default produces no error anywhere and simply makes the system wrong about which product a record is.
+
+That is the ordinary fate of a list that exists in more than one place. It does not drift all at once, and it does not drift consistently.
+
+## Fix the class, not the instance
+
+Adding the missing product to the broken guard is a one-line fix and it would have left the next one to be discovered the same way, in production, by aborting a run.
+
+The repair that closes the class inverts the dependency. **One constant array becomes the single source, and the type is derived from it** rather than declared alongside it:
+
+```text
+TARIFF_PRODUCTS   const array, the single source of truth
+TariffProduct     derived from TARIFF_PRODUCTS
+isTariffProduct   one shared predicate, used by all three call sites
+```
+
+Now the list and the type cannot diverge, because one is computed from the other. Every site narrows through the same predicate, so there is one behaviour rather than three.
+
+The last piece is the test, and it matters that it is written against the array rather than against the values:
+
+> The regression test iterates every member of `TARIFF_PRODUCTS` through every guard.
+
+That means **the next product added is covered automatically**, without anyone remembering to add a case. A test that enumerates the values by hand would have had exactly the drift problem it was written to prevent.
+
+This is the shape worth stealing: when a bug comes from two representations disagreeing, the fix is usually to make one of them derived rather than to synchronise them more carefully.
+
+## What to actually do
+
+1. **When removing a suppressor, budget for failures and treat them as pre-existing until proven otherwise.** A gate removal is a deployment of everything behind it, and it should be planned like one.
+2. **Ask whether the failing input could have reached the code before.** State flags and creation timestamps usually settle attribution in a single query, before anyone proposes a revert.
+3. **Do not revert a correct change to restore a green signal.** Re-hiding a latent defect looks identical to fixing it and leaves you strictly worse off, because now you also believe it is gone.
+4. **Find every hand-rolled copy of a list before fixing one of them.** Grep for the values, not the identifier. Copies drift independently and rarely announce themselves.
+5. **Prefer a silent coercion to nothing at all, and prefer a throw to both.** Of the three call sites, the one that quietly substituted a default was the only one that could have corrupted data rather than stopping.
+6. **Derive types from data, then test the derivation.** A const array plus a derived type plus one shared predicate plus a test that iterates the array is four small pieces that together make a whole class of drift impossible.
+
+## The takeaway
+
+Latent defects are not evenly distributed through your code. They accumulate exactly where execution has been suppressed, because suppression is what let them stay latent.
+
+That is why removing a gate feels so much more dangerous than it should, and why the failures come in a cluster: you have not introduced a bug, you have paid off the interest on everything that path was never asked to do. **Expect that, ask whether the input is new or newly reachable, and fix the class you just uncovered rather than putting the gate back.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I work on production reliability in systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

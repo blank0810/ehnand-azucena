@@ -1,0 +1,86 @@
+---
+title: "An AI Implementer's Sandbox Is Your Verification Boundary"
+seoTitle: "Your AI Implementer's Sandbox Is a Boundary"
+date: 2026-08-29
+category: "AI & Automation"
+tags: [ai-assisted-development, code-review, delegation, verification, workflow]
+summary: "The useful question about AI-written code is not whether a human reviewed it. It is which checks the thing that wrote it could actually execute, because every check outside its sandbox silently becomes yours and its report will not mention them."
+---
+
+"AI writes it, a human reviews it" is not a workflow. It is a slogan, and it does not tell you what to review.
+
+The version that does tell you is a single question about the tool, asked before the work is handed over:
+
+> **Which of this task's checks can the implementer actually execute?**
+
+Everything outside that set is yours. Not as a matter of diligence, but structurally, because the implementing agent will report success on the work it did while remaining silent about the checks it never ran. **The reviewer owns every check the implementer's sandbox cannot reach**, and the sandbox draws that line, not the reviewer's judgement.
+
+I run a two-agent arrangement on production work: one agent plans, decomposes, specifies, reviews, and commits; another implements. This is what I have learned about where the seam actually falls.
+
+## The sandbox draws the line, and the report will not mention it
+
+The implementing agent I use has no container runtime in its sandbox. On this codebase the typecheck runs inside a container. Therefore it cannot typecheck its own work, and its completion report is entirely sincere in not saying so.
+
+One diff came back with two real type errors. A `string | null` passed where `string | undefined` was expected, and a property probe of the form `if ("fieldErrors" in outcome)`, which TypeScript will not narrow a union on. The fix was an explicit `ok: false` discriminant.
+
+Both were genuine defects. Both were invisible from inside the sandbox. **The review was the only typecheck that ran on that code**, which is a very different statement from "the review was thorough."
+
+That is the whole principle in one incident. The implementer was not careless and the report was not dishonest. Its green simply had a smaller scope than the word suggests, and only the boundary tells you how much smaller.
+
+## The boundary belongs in the plan, not in the postmortem
+
+Once you accept that the sandbox has a shape, the consequence is not "review harder." It is that **the boundary is an input to decomposition.**
+
+Consider a task written as "generate and apply the database migration" handed to an agent that cannot reach a database. That task can only ever come back half-done. Not because the agent failed, but because the task was specified across a wall that existed before anyone started.
+
+The correction is to partition at plan time. Schema edits go to the implementer; migration generation and application stay on the planning side, deliberately, written into the task from the beginning. The work is the same. What changes is that nobody discovers the wall at the moment of hitting it, holding half-finished work.
+
+This is the practical payoff of thinking in boundaries. **Discovering a capability limit mid-task returns partial work; knowing it at plan time is just a decomposition.**
+
+## Prefer an implementer that declines over one that guesses
+
+This is the selection criterion I did not expect, and it is now the property I value most.
+
+On one task, the agent wrote every file it had been asked for, and then **refused to generate the migration**, giving a reason that was better than the task: pending migrations are wrapped in a single transaction, so shipping an `ALTER TABLE` together with a long backfill holds the `ALTER TABLE` lock for the entire duration of the backfill. It declined to produce an artifact it could not verify, and it explained the mechanism.
+
+On another, it declined to modify three existing test files as outside its brief, and flagged that they were not passing beforehand. Those tests turned out to be **pinning the old, buggy behaviour** in place, which is a finding worth considerably more than the edit it refused to make.
+
+And on a third, while implementing from a plan, it stopped to report a data-loss bug it had noticed **in the plan** rather than implementing the plan as written. That defect would have shipped behind a fully green test suite, because the suite posted payloads directly and never rendered the markup where the bug lived.
+
+Three refusals, three findings. An implementer that pushes through produces a completed task and a silent liability. **An implementer that stops at the edge of its evidence produces an unfinished task and a fact**, and the fact is worth more than the completion every time.
+
+If you are choosing tools for this, weight that behaviour heavily. It is easy to mistake it for being less capable.
+
+## Where the arrangement actually fails
+
+The honest half, because a workflow article that only lists wins is marketing.
+
+**A non-interactive run burned a large budget and produced nothing.** The harness paused to request design sign-off, and a non-interactive invocation has nobody to answer. It sat there. That failure is silent and expensive, and it is a property of how the agent was invoked rather than of the work.
+
+**A green deploy proved less than it appeared to.** Migrations ran clean against a staging database, which established that they *apply*. The table they transformed was empty on staging, so it established nothing whatsoever about what the transformation does to real rows. A verification surface with no data verifies syntax.
+
+**A circular dependency between two tasks was found at implementation time rather than plan time.** Task A's tests could not pass until task B landed, and task B asserted behaviour that did not exist until task A landed. That is a planning defect, surfaced by the implementer, which is the wrong place to catch it.
+
+**A specification was pushed before it was built, and building it revealed two wrong instructions in it.** This one has its own lesson, sharper than the workflow point: **a spec is an unverified claim about the code.** Handing it to a capable implementer converts your unverified claim into its confident action, at speed. The version that had been merged would have directed it to delete the wrong things.
+
+And the note I will keep making because it is true: on a recent push, the two changes that broke were the ones I made directly, not the delegated ones.
+
+## What to actually do
+
+1. **Enumerate the implementer's executable checks before delegating.** Typecheck, unit tests, linter, container, database, network, browser. The list is short and stable per tool, and it is the single most useful thing to know about it.
+2. **Treat everything outside that list as unreviewed until you run it.** A completion report is scoped to what ran. It will not enumerate what did not.
+3. **Partition tasks along the boundary at plan time.** Anything requiring a capability the implementer lacks belongs in a separate task on your side, specified that way from the start.
+4. **Never accept a green from a surface without data.** An empty table proves migrations apply. It proves nothing about what they do.
+5. **Value declining over guessing when choosing a tool**, and read every refusal as a finding rather than a failure.
+6. **Verify specs against the code before handing them over.** Delegation multiplies the speed at which a wrong instruction becomes a wrong change.
+7. **Invoke non-interactively only for work that cannot need a decision**, or you will pay full price for a run that produced nothing.
+
+## The takeaway
+
+Reviewing AI-written code well is less about reading the diff harder than you would read a colleague's, and more about knowing precisely which assurances came with it.
+
+The sandbox is what determines that. It defines a boundary that is invisible in the output, unmentioned in the report, and completely stable once you have measured it. Measure it once, plan around it, and the review stops being a vague obligation to be careful and becomes a specific, finite list of the checks nobody else could have run.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I direct AI-augmented delivery on production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

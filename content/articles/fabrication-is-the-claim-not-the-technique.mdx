@@ -1,0 +1,103 @@
+---
+title: "The Fabrication Is the Claim, Not the Technique That Carries It"
+seoTitle: "The Fabrication Is the Claim, Not the Technique"
+date: 2026-08-29
+category: "Engineering Practice & Reliability"
+tags: [structured-data, schema-org, local-seo, client-work, integrity]
+summary: "Refusing to build a gallery because stock photography is dishonest, and shipping invented branch addresses because the schema wanted them, are the same mistake: not saying precisely which claim on the page is false."
+---
+
+An over-cautious refusal and an outright fabrication can come from the same failure. In both cases nobody said out loud **which specific claim on the page is the false one.**
+
+Get that sentence wrong in one direction and you ban a perfectly legitimate technique, ship something that looks broken, and annoy a client who was right. Get it wrong in the other direction and you publish invented facts about a real business. I did both within a few days, on two sites for the same client, and the correction in each case was the same move.
+
+## Refusing the technique instead of the claim
+
+The first one I got wrong by being too strict.
+
+A kitchen fitting business needed a before-and-after section. There was no photography of completed jobs yet. My reasoning: stock photographs of kitchens, presented as this company's finished work, are a fabricated portfolio, and in that jurisdiction that is unfair-competition exposure rather than merely an SEO problem.
+
+So I shipped it as deliberately ugly generated placeholder panels behind a feature flag, with a loud banner explaining the section was pending real photography.
+
+The client's response was short: *that is just a demo, so it is not really fabricating.*
+
+**He was right about the premise, and I want to be precise about why.** A mockup shown to the client, before launch, in a review, induces nobody to hire anyone. There was no audience being misled because there was no audience. I had aimed a launch-time safeguard at a pre-launch artifact, and the only thing it accomplished was making a finished piece of work look unfinished.
+
+What I got wrong was not the caution. It was **treating "stock photography" as the thing to refuse**, when the thing to refuse was a specific sentence: *these are our projects.*
+
+Once you name the actual false claim, the fix stops being a refusal and becomes three ordinary decisions:
+
+1. **Use real licensed photographs**, so the section looks finished, because it is.
+2. **Word it as illustration rather than authorship.** "Three typical starting points and what becomes of them," never "our projects." Keep a discreet attribution line, which the licence obliges anyway.
+3. **Name the flag after the fact, not the intent.** The constant started life as `REFERENCES_ARE_REAL`, set to `false`. That is a trap: it reads as a statement that becomes a lie the moment someone flips it, and someone will flip it. Renamed to `REFERENCES_ARE_OUR_OWN_PROJECTS`, still `false`, it stays true as a description no matter who touches it.
+
+The honesty now lives in the wording and the markup rather than in a warning box. That is strictly better on both axes: a yellow banner makes the site look broken and is easy to delete, while a sentence that never overclaims costs nothing visually and survives.
+
+## Three questions that people answer as one
+
+The reason this gets muddled is that "is this honest?" is actually three separate questions with three different answers and three different fixes:
+
+| Question | Kind of problem | Fixed by |
+|---|---|---|
+| Is the asset licensed? | legal | licence compliance, attribution |
+| Does the visible page claim we made it? | fabrication | copy, wording |
+| Does the **markup** claim we made it? | machine-readable fabrication | structured data |
+
+The third one deserves separate attention, because it is the one that gets forgotten and the one with the least forgiveness. **Human copy is read in context. Structured data is consumed without any.** A visitor sees a gallery captioned "typical starting points" and understands it as illustration. A crawler reading a `CreativeWork` node attached to those same images sees an unqualified assertion of authorship, with no caption anywhere near it.
+
+So unowned work stays out of the schema, regardless of how carefully the visible copy is worded.
+
+## Inventing the technique's required input
+
+The second one I nearly got wrong in the opposite direction, and the pull was much stronger because it came from good practice.
+
+The same business serves several towns from a single address. It needs to rank in those towns. The obvious structure, and the one every local SEO guide describes, is a page per town with a `LocalBusiness` node on each.
+
+That structure has an input requirement: **each `LocalBusiness` node needs a street address.** There are five towns and one address. The only way to satisfy the schema is to invent four addresses.
+
+The pull was strong for a specific and instructive reason. A sibling project, same client, same stack, same five towns, correctly has five `LocalBusiness` nodes, because that business genuinely has five offices. The pattern was sitting right there, already working, in a codebase I had written. **It looked like the house convention rather than like a claim about the world.**
+
+The distinction that resolves it:
+
+| | Branch office | Service area |
+|---|---|---|
+| The claim | "we are here" | "we work here" |
+| Requires | a real street address | a town and a catchment |
+| Schema | `LocalBusiness` per premises | one organisation plus `Service` with `areaServed` |
+| Map | street-level pin | town-centred |
+
+One business is the left column and one is the right. They are not interchangeable, and which one you are is a fact about the client, not a choice about markup.
+
+**The stakes here are higher than ordinary SEO error, and worth stating exactly:** local search ranks substantially on name, address, and phone consistency across the web. An invented address is not a neutral placeholder that ranks slightly worse. It is a wrong value in the precise field being scored, propagating into aggregators and citations. **It is worse than shipping no address at all**, because the fabrication is the signal.
+
+## Make the fabricated field impossible rather than empty
+
+The implementation lesson generalises past addresses:
+
+- **Drop the field from the data model entirely**, rather than leaving it blank or filled with a placeholder marker. A `street` key that exists, empty, is an invitation. Somebody helpful will fill it, and they will be able to tell themselves they were completing the model rather than inventing a fact.
+- **Centre the map on the town, not a street.** A street-level pin where no premises exists is a fabrication with a marker on it. Build the query from postcode and town.
+- **Derive the "we serve X" list from the same array as `areaServed`**, so the page cannot advertise a place that nothing backs up.
+- **Reference the single organisation by `@id`** from each page's `Service` node, so every page consolidates into one entity instead of several lookalikes competing with each other.
+- **Write down the boundary where the next person will feel the pull.** Both of these decisions went into the repository's own instructions, next to the flag and next to the data model, because the next session will feel exactly the same gravity I did. A rule that lives only in someone's memory of a conversation is not a rule.
+
+One thing this is emphatically not: an argument for vagueness. The pages carry a real catchment, real municipality names, and locally specific content. **The only thing omitted is the one fact that would have had to be invented.**
+
+## What to actually do
+
+1. **Before refusing a technique, write down the sentence that would be false.** If you cannot produce that sentence, you do not have an objection yet, you have discomfort. Frequently the sentence is one wording change away from being true.
+2. **Before adopting a schema, list the inputs it requires and check you have every one.** Any field you would have to invent is the schema telling you it models a different business than yours.
+3. **Separate the legal question, the copy question, and the structured-data question.** They have different answers, and answering one does not discharge the others.
+4. **Keep unowned work out of machine-readable claims** even when the visible copy is carefully qualified. Markup travels without its context.
+5. **Delete fields you must not fill.** An absent field cannot be fabricated. An empty one is a prompt.
+6. **Name flags and constants after facts, not intentions**, so they cannot become lies when someone changes the value.
+7. **Do not copy a sibling project's structure without re-deriving the claim it encodes.** A pattern that is correct in one repository can be a fabrication in another, and it will look like consistency the whole time.
+
+## The takeaway
+
+Both mistakes, the excessive refusal and the invented address, come from operating on techniques rather than on claims. "Stock photos are dishonest" and "every location page needs a `LocalBusiness`" are both rules about mechanisms, and mechanisms are not true or false. Only claims are.
+
+So name the claim. Then either make it true, reword it until it is, or remove the field that would have carried it. That is usually all the integrity work there is, and it is a great deal cheaper than either the refusal or the fabrication.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. Both decisions above come from client sites I built and deployed: [Niko Küchenbau](https://ehnand.com/projects/niko-kuechenbau) and [Niko Immobilienmakler](https://ehnand.com/projects/niko-immobilienmakler). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

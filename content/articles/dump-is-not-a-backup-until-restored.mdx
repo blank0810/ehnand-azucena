@@ -1,0 +1,76 @@
+---
+title: "A Dump Is Not a Backup Until You Have Restored It"
+seoTitle: "A Dump Is Not a Backup Until You Restore It"
+date: 2026-08-29
+category: "Business Systems & Data Integrity"
+tags: [postgresql, backups, verification, data-integrity, disaster-recovery]
+summary: "Listing an archive's contents proves it parses, not that it restores. The only check worth anything is restoring into something disposable and comparing row counts against the source, and it takes about ten minutes."
+---
+
+`pg_restore -l` on a dump file will happily list seven hundred objects and tell you nothing about whether you have a backup.
+
+It proves the archive is not truncated and that its table of contents parses. That is worth something. It is not worth what people spend it on, which is confidence, because **the listing is generated from the archive's own header.** If the dump captured less than you think, the listing is correspondingly shorter and just as internally consistent. Nothing in it can report what did not make it in.
+
+The only check that means anything is restoring the thing somewhere disposable and comparing it against the source it came from.
+
+## The verification, end to end
+
+I did this recently for a client's production ERP database, and the whole procedure is short enough that there is no excuse for skipping it.
+
+Restore the dump into a throwaway container of the matching major version, then count every table on **both** sides and compare. The naive version of that comparison is one round trip per table, which for a hundred-table schema is slow enough that people talk themselves out of it. It can be one statement:
+
+```sql
+select table_name,
+       (xpath('/row/cnt/text()',
+              query_to_xml(format('select count(*) as cnt from %I.%I','public',table_name),
+                           false, true, '')))[1]::text::bigint
+from information_schema.tables
+where table_schema='public' and table_type='BASE TABLE';
+```
+
+`query_to_xml` runs a dynamically built query per row and returns the result inline, so the whole census comes back from a single execution.
+
+The result on that database: **103 of 103 tables present, 20,080 of 20,080 rows, zero mismatches.** That comparison is the thing that converts a file on disk into a backup. Without it you have an artifact that is *probably* fine, and "probably fine" is not a recovery position.
+
+Both count queries ran inside `BEGIN TRANSACTION READ ONLY`. That is belt and braces given the operations involved, and it matters for a different reason: it makes the read-only claim **checkable rather than asserted**. Anyone reviewing the transcript can see the guarantee rather than take my word for it.
+
+## Three things that cost time if you do not know them
+
+**The client must not be older than the server.** `pg_dump` 16 refuses a 17.x server outright, and it refuses late, after you have already scheduled the window. Do not trust whatever version happens to be on the host. Run a version-matched client from a container:
+
+```text
+docker run --rm postgres:17 pg_dump ...
+```
+
+**`pg_dump` is read-only, and you should be able to say why.** It takes `ACCESS SHARE` locks and issues SELECTs inside a single repeatable-read transaction. It blocks DDL. It does not block reads or writes. This matters because when you propose dumping a production database, the question you get back is anxiety about a live system, and the useful answer is the mechanism rather than reassurance. Being able to state the lock mode is what makes it a technical answer instead of a promise.
+
+**Take the custom format and derive everything else from it.** Dump once with `-Fc`, then produce plain SQL, schema-only renderings, or selective extracts later with `pg_restore -f` against the local artifact. Production gets read exactly once, and every downstream representation is provably from the same snapshot rather than from three separate reads of a moving database.
+
+## Why the listing feels like verification
+
+Worth naming the trap directly, because it is the same one that hides missing rows in a settlement file or a routing table.
+
+An artifact that is generated from a source can only be as complete as that source, and it will always look internally consistent. Ask the diagnostic question of your archive listing: **if half the tables had failed to dump, what in this output would look wrong?** Nothing. It would be a shorter list of objects, correctly formatted, parsing cleanly.
+
+I am sharpening my own earlier position here, so it is worth saying directly. I have previously described taking a production backup and **validating its archive listing** as part of a safe production write, and listed "have I confirmed the backup reads?" as the question to ask. Validating the listing is the weaker check, and I would no longer count it. The listing confirms the file parses. Only a restore plus a comparison confirms the file contains what it should.
+
+That is why the comparison has to come from outside the artifact. The source database is the only thing that knows what should have been captured, which makes it the only valid instrument.
+
+## What to actually do
+
+1. **Restore every backup you rely on, at least once, into something disposable.** A backup procedure that has never been executed in the restore direction is a hypothesis.
+2. **Compare against the source, not against the archive's own metadata.** Row counts per table are cheap, mechanical, and sufficient to catch the failures that actually happen.
+3. **Version-match the client to the server, in a container**, so the host's installed version is irrelevant.
+4. **Dump once in a format you can derive from**, so production is read a single time and every artifact traces to one snapshot.
+5. **Make your read-only claims checkable.** Wrapping verification reads in an explicitly read-only transaction costs nothing and converts an assurance into evidence.
+6. **Automate the parity check before you automate the dump.** Most teams schedule backups and verify manually or never. The scheduled thing should be the one that can fail silently, and that is the dump, not the restore you would notice skipping.
+
+## The takeaway
+
+The word "backup" describes a capability, not a file. The file is a claim that the capability exists, and the claim is only ever settled by exercising it.
+
+Ten minutes, a disposable container, and one comparison query is the entire distance between those two states. **Until you have crossed it, what you have is a dump.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I work on data integrity and recovery in production business systems, including the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system) and [Adam AI](https://ehnand.com/projects/adam-ai). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

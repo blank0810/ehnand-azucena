@@ -1,0 +1,126 @@
+---
+title: "A Control With One Possible Answer Is Not Failing, It Is Not Running"
+seoTitle: "Always-Deny and Always-Open Are the Same Defect"
+date: 2026-08-29
+category: "SaaS, Cloud & Security"
+tags: [authorization, access-control, testing, fail-open, reliability]
+summary: "Always-deny and always-open are the same defect wearing opposite clothes. In both cases the check runs, returns, and never discriminates, so nothing downstream can tell the difference between a rule that decided and a rule that was never consulted."
+---
+
+A permission check that returns the same answer for every input has stopped being a permission check.
+
+It still runs. It still returns. It still appears in the stack trace, and it produces output that is indistinguishable from the output of a control that works. The only thing it has lost is the ability to *discriminate*, and nothing downstream, including every test written against it, can detect that loss.
+
+The question I have started asking instead of "did the check pass?" is:
+
+> **What input makes this answer the other way?**
+
+If I cannot name one, the control is not protecting anything. It is a constant with a function signature.
+
+What follows are two measured instances from one production system, both stuck on *deny*, and then the two shapes that produce the far more dangerous mirror: a control stuck on *allow*. The polarity turns out to be incidental. The defect is the same one.
+
+## A negative test is a tautology when everything denies
+
+Start with the one that is most likely to be sitting in your test suite right now.
+
+A settings test file covered a restricted admin screen. Among its cases were two negative tests: an unauthorised user requests the page, assert `403`. Standard, correct, the kind of test a reviewer approves without comment.
+
+At some point a route gate moved, and the test helper that authenticated the privileged user was not updated with it. From that moment **every request in the file returned `403`**, including the ones that were supposed to succeed.
+
+Nine of sixteen tests failed loudly, which is fine, that is what failure is for. The interesting part is the seven that passed. **Both deny-tests were among them**, and they passed for a reason that has nothing to do with authorization: everything was `403` now, so asserting `403` could not fail.
+
+```text
+intended:   privileged user -> 200
+            unauthorised    -> 403      (a real discrimination)
+
+actual:     privileged user -> 403      (fails loudly, gets noticed)
+            unauthorised    -> 403      (passes, and means nothing)
+```
+
+The file had been dead for months. Repairing the helper took the suite from seven passing to eighteen.
+
+**A negative test only tests something if the positive case is reachable.** When the whole file denies, `assertForbidden()` is a tautology, and a tautology is green. The pass column cannot show you this, because a test that passes for the wrong reason and a test that passes for the right one render identically.
+
+## An undefined permission is not an error, it is a `false`
+
+The second instance is the same defect one layer deeper, and it is the one with real money attached.
+
+A permission existed. It was declared as a constant in code. The seeder granted it to the administrator role. The Access Control screen listed it as granted, and had done for as long as anyone had looked.
+
+It was missing from exactly one place: the list that the service provider iterates to register abilities with the framework's gate. So the ability was never actually defined, and the controller checked it with `->can()`, **which returns `false` for an ability it has never heard of.** Not an exception. Not a warning. A clean, quiet `false`.
+
+Measured on a single real administrator account, the two calls disagreed:
+
+| Call | Result |
+|---|---|
+| `hasPermission()` on the role model | `true` |
+| `->can()` on the same ability | `false` |
+
+The blast radius came from an unrelated fact about the data. With **220 of 225 accounting periods closed**, the guarded action applied to almost every historical payment in the system. In practice nearly every historical payment was untransferable by anyone except the single superuser role, for as long as the gap existed, while the administration UI showed the permission as granted the entire time.
+
+**Three artifacts agreed with each other and none of them was the decider.** The constant, the seeder, and the admin screen all described a permission that the authorization layer had never been told about. This is worth internalising as a general habit: when you verify a permission, verify it against the thing that actually decides, not against the three things that describe it.
+
+The reason it survived so long is worth separating out, because it is the part that generalises. The failure was **silent and partial**. Route middleware in this application checks the pivot table directly rather than going through the gate, so every route guard kept working correctly. Only the one code path that asked the gate was dark. A control that is broken everywhere gets found on the first day. A control that is broken on one of its two paths gets found whenever somebody finally exercises that path, which in this case meant a specific action on historical records that most users never take.
+
+The fix that mattered was not the missing line. Adding the constant to the registration list took one line, and it would have closed the bug while leaving the class of bug wide open. So I audited every permission constant against the registered gates first, found **exactly one** missing, and then wrote the guard that asserts the invariant: every string constant on the permission model must have a defined gate. One line closes the instance. The audit plus the guard closes the class.
+
+One honest note on the change itself, because it belongs in the record: this was an access **widening** on a money-touching path. Before the fix, only the superuser role could perform the override. After it, anyone holding the permission can, which is what the permission was always supposed to mean. That is the correct outcome and it is still a widening, and it was written down as one in the deployment notes rather than shipped as a silent bug fix.
+
+## An empty value is a decision somebody already made for you
+
+The billing cases are both stuck on *deny*. The mirror image is a control stuck on *allow*, and the most common way to get one is an empty collection whose meaning you never checked.
+
+Every allowlist, denylist, and filter has to answer a question that its configuration file cannot express: **what does empty mean?** An unset allowlist can reasonably mean "nobody has been permitted yet," and it can just as reasonably mean "no restriction has been configured, so do not restrict." Both are defensible library defaults, both appear in real software, and **the configuration looks identical either way.**
+
+That is the whole trap. An operator reading a config with an empty allowlist sees what looks like a maximally restrictive setting. Whether it actually is depends on a decision made by whoever implemented the check, recorded nowhere the operator is looking. The only ways to know are to read the implementation or to send a request from an identity that should be refused and watch what happens.
+
+So the discipline generalises past authorization: for every empty, null, or absent value that participates in a control, find out which way it resolves, and prefer configurations that state the restrictive case explicitly rather than relying on emptiness to imply it. An explicit "permit exactly these" cannot be misread. An empty list always can.
+
+## A fallback keyed on the wrong taxonomy cannot fire
+
+The last pattern is not authorization at all, which is why it convinced me this generalises.
+
+Consider a model fallback chain, the standard resilience arrangement: if the primary provider fails, move to the next. It has been exercised, and it "works."
+
+Now suppose the production failure mode is a **silent hang**, and a hang is recorded as `interrupted` rather than as `failed`, while the trigger fires on `failed`. The one failure mode that actually occurs is outside the trigger vocabulary, and the chain can never fire for it.
+
+A fallback that cannot fire is a fallback that is not running. It looks like resilience in the architecture diagram and it is a comment.
+
+The repair here is not a better fallback, it is a corrected vocabulary: enumerate the failure modes you have actually observed in production, then check that each one is spelled the way your trigger expects. A hang, a timeout, a refusal, and an error are four different words in most codebases, and a trigger that knows only one of them protects you against only one of them.
+
+## The polarity does not matter, and that is the point
+
+Lay the two polarities side by side and the asymmetry is not in the defect, it is in how long you get to keep it.
+
+| | Stuck on deny | Stuck on allow |
+|---|---|---|
+| Looks like | correct, strict security | correct, configured security |
+| Typical cause | a moved gate, an ability never registered | an empty value that resolves permissive |
+| How it presents | friction, workarounds, escalation to a superuser | nothing at all |
+| Found when | somebody who should have access complains | an audit, or an incident |
+
+The mechanism is identical in both columns: the check runs, returns, and never discriminates. What differs is only whether the resulting constant happens to be the safe one. **That is luck, not architecture**, and it is why "we fail closed, so we are fine" is not an answer to this. Failing closed is a good property of a control that runs. It tells you nothing about whether yours runs.
+
+The right column is the one that should worry you, because its entire symptom set is the absence of symptoms. A control jammed shut generates complaints within days. A control jammed open generates a quiet, well-behaved system that is not enforcing anything, and nothing in it will ever raise its hand.
+
+It is worth sitting with how close those two outcomes are. The billing system's undefined gate denied everyone, which was inconvenient. The identical defect with the default inverted, an ability that resolves permissive instead of restrictive, would have meant unauthorised transfers into closed accounting periods, silently, with the admin screen showing exactly the same thing it showed in the real case. That did not happen here and I am not claiming it did. I am pointing at the distance between the version that wasted people's afternoons and the version that would have been a financial incident, which is one framework default, in one direction, on the same broken control.
+
+## What to actually do
+
+1. **Name the input that produces the other answer, then supply it.** This is the whole technique. If you cannot construct a request that flips the result, you have not tested a control, you have observed a constant.
+2. **Assert both directions, and confirm the positive case is reachable.** A deny-test is only meaningful in a file where something is allowed. If every case in a suite returns the same status, the suite has stopped measuring.
+3. **Check the decider, not its descriptions.** A constant, a seeder, a grants table, and an admin screen can all agree with each other while the layer that actually decides has never heard of the permission.
+4. **Ask what your empty values mean.** For every allowlist, denylist, and filter, find out whether unset means everyone or no one, and confirm that is the choice you would have made deliberately. The same applies to any conditional that lets a request **skip** a control rather than satisfy it: treating a network position as trusted is not authentication passing, it is authentication not running.
+5. **Match your fallback's taxonomy to the failures you actually get.** Enumerate the failure modes you have really observed in production, then check that each one is spelled the way the trigger expects. A hang, a timeout, and an error are three different words in most codebases.
+
+## The takeaway
+
+Tests tell you whether a control returned the expected answer. They rarely tell you whether it was *capable of returning a different one*.
+
+That capability is the thing being tested for, and it goes missing silently, from ordinary maintenance: a moved route, a list that was not updated, a default that means the opposite of what you assumed, a status word that drifted. In every case the check keeps running and keeps returning, which is precisely why nobody notices.
+
+Before you trust any gate, allowlist, negative test, or fallback, name the input that makes it answer the other way. Then go and supply it.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I work on authorization and data integrity in production systems including the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system) and [Adam AI](https://ehnand.com/projects/adam-ai). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

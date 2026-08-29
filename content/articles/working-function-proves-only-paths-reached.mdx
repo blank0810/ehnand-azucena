@@ -1,0 +1,91 @@
+---
+title: "A Working Function Proves Only the Code Paths It Reached"
+seoTitle: "A Working Function Proves Only What It Ran"
+date: 2026-08-29
+category: "SaaS, Cloud & Security"
+tags: [aws-lambda, python, packaging, dependencies, verification]
+summary: "A dependency that degrades gracefully hides a substrate mismatch until the one import that cannot degrade finally runs, which can be months later. Health is evidence only about the paths that actually executed."
+---
+
+Here is a piece of reasoning that sounds airtight and is not:
+
+> This function runs on the newer runtime, and it uses that shared dependency layer. Therefore the layer works on the newer runtime.
+
+It does not follow, and the gap is not subtle once you see it. **That function never imports the package that is broken.** Its health is evidence about the code paths it executes, and about nothing else.
+
+I hit this while auditing a serverless dependency layer, and the reasoning error turned out to be more interesting than the packaging error underneath it.
+
+## What was actually inside
+
+The layer's declared compatibility said one thing. The binaries inside said another, and the only way to find out was to ask the runtime rather than the metadata: extract the archive, put it on the path, and import what the function imports, on each target runtime.
+
+```text
+python3.12   IMPORT OK
+python3.13   ModuleNotFoundError
+python3.14   ModuleNotFoundError
+```
+
+A build for one interpreter version, packaged as though it served three. (The declared-compatibility field is its own lesson, which I have written about separately: it is a publisher's assertion that nothing in the deployment path validates.)
+
+## Why "mostly portable" was the wrong summary
+
+The first pass at assessing the damage counted the shared objects. Roughly 46 of 53 carried the stable-ABI tag, which reads as reassuring: mostly portable, a handful of stragglers.
+
+That summary is wrong in a way worth internalising. **The stable-ABI tag describes one file. It says nothing about that file's dependency graph.**
+
+The specific chain that broke it: a cryptography package's own compiled extension was correctly tagged as portable, and it imports a C foreign-function-interface backend that shipped version-tagged. The portable file depends on the non-portable one. Counting tags across files measures the wrong unit, because portability is a property of a graph and the tag is a property of a node.
+
+## The degradation table, and why the good citizens are the trap
+
+This is the part that generalises past Python packaging entirely. Three dependencies, three behaviours under the same substrate mismatch:
+
+| Dependency | Extension present? | Behaviour on the wrong runtime |
+|---|---|---|
+| A | optional accelerator | **falls back to pure Python, keeps working, slower** |
+| B | the extension *is* the library | **hard fails on import** |
+| C | own extension portable | **hard fails indirectly**, through its FFI dependency |
+
+Two of these announce the problem immediately. One does not, and **the one that does not is the dangerous one.**
+
+A library that degrades gracefully is doing exactly what good library design says it should. It is also, in this situation, suppressing the only signal that the substrate is wrong. Every request that touches only dependency A succeeds, a little slower, and produces a system that looks healthy and is running on a mismatched runtime.
+
+So the mismatch survives until the first request that reaches B or C. That can be months. And when it arrives, it arrives at **import time, before your handler runs**, which means no error handling inside the function can catch it, log it, or degrade it. The first symptom is every request failing.
+
+Meanwhile the deployment reports success, because nothing in an infrastructure plan opens an archive to look inside it.
+
+## The test that would have caught it in a minute
+
+> **Name the code path that would fail if this assumption were wrong, then confirm something has actually executed that path.**
+
+Applied to the original claim, it collapses instantly. If the layer were broken on the newer runtime, which line would fail? The import of the cryptography package. Does the healthy function import it? No. Then the healthy function is not evidence, and never was.
+
+This reframes what a green production service tells you. It is a real measurement of the paths it exercises, and it is silent about everything else in the same artifact. Uptime is not a property of a deployment. It is a property of the subset of code your traffic happens to touch.
+
+## Measure the objection, do not argue it
+
+A smaller lesson from the same session, and I think it is the most transferable thing here. Three confident objections came up while working out the fix, and every one of them dissolved against a measurement rather than a discussion:
+
+- *"A combined layer will not fit."* The cap is 250 MB. The combined build measured 193 MB.
+- *"Merging is impossible, this is a build for the older interpreter."* A new layer version is a fresh build, not an edit of the old one. Built it: 138 MB, imports clean on the target.
+- *"We cannot change it without coordinating with the other developer."* Their functions pin an older layer version, so they are unaffected by a new one.
+
+Each objection was plausible, each would have justified abandoning the approach, and each took a couple of minutes to settle with a number. The pattern is worth naming: **an architectural objection stated as a fact is usually a hypothesis, and hypotheses in packaging are unusually cheap to test.**
+
+## What to actually do
+
+1. **Test imports per runtime, against the artifact.** Extract, set the path, import what the function actually imports, on each runtime you claim to support. It takes a minute and it is the only check that is not an assertion.
+2. **Never infer a dependency's health from an unrelated function's health.** Name the import that would fail, then find something that executes it.
+3. **Treat portability tags as node properties, not graph properties.** Walk the dependency chain of anything compiled, because a portable extension can pull in a version-tagged one.
+4. **Treat graceful degradation as a suppressed signal.** Where a library silently falls back, log the fallback loudly. Otherwise it will keep a broken substrate invisible for as long as your traffic avoids the hard-failing path.
+5. **Remember that import-time failures are outside your error handling.** No `try` block inside a handler helps when the handler never loads.
+6. **Measure objections instead of debating them**, particularly size limits, build feasibility, and blast radius. They are almost always one command away from a number.
+
+## The takeaway
+
+"It works in production" is a real measurement with a small scope. It covers the paths your traffic reached, on the artifacts it touched, and it extends no further, however healthy the dashboard looks.
+
+So before you generalise from one healthy component to another, say out loud which line would break if you were wrong, and go and find something that has actually run it. **If nothing has, you do not have evidence. You have an absence of counterexamples.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build and deploy cloud backends including [REPSShield](https://ehnand.com/projects/repsshield) and [Adam AI](https://ehnand.com/projects/adam-ai). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

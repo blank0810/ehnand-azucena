@@ -1,0 +1,107 @@
+---
+title: "The Submitted Set Is a Property of Your State, Never of Your Viewport"
+seoTitle: "Filtered Lists Silently Delete What They Hide"
+date: 2026-08-29
+category: "Business Systems & Data Integrity"
+tags: [forms, data-loss, alpine, laravel, testing]
+summary: "A multi-select form whose checkboxes are rendered by a filtered loop submits only what the filter matched. Saving while a search is active silently deletes everything the filter hid, and no server-side test can see it."
+---
+
+Put a search box and a multi-select in the same form and you have built a data-loss bug, unless you did one specific thing to prevent it.
+
+I caught this in a role permission editor before it shipped. The screen lists every permission in the system grouped by module, with a search box at the top so an administrator can find what they want among a few dozen entries. Entirely ordinary. The kind of screen nobody reviews twice.
+
+Type `billing` into the search, tick the one box you came for, hit Save, and **every permission that role held outside the billing module is revoked.** No error. No warning. On an edit form, that is silent, permanent data loss, caused by the user doing exactly what the interface invited.
+
+## The mechanism is one line of markup
+
+Here is the shape of it, in the framework I hit it in. The pattern translates directly to any other.
+
+```blade
+{{-- WRONG: the name attribute lives on a row the filter can remove --}}
+<template x-for="perm in visible(module)">
+    <input type="checkbox" name="permissions[]" :value="perm.name" :checked="has(perm.name)">
+</template>
+```
+
+The loop iterates `visible(module)`, which is the filtered array. **List rendering unmounts non-matching rows**, it does not merely hide them. An input that is not in the DOM is not in the form. An input that is not in the form submits nothing.
+
+So the browser posts exactly the permissions that matched the search, the server receives that as the complete intended set, and it dutifully makes it so. Every checkbox the filter removed is read as "unchecked," which is indistinguishable from "the user deliberately turned this off."
+
+## The distinction that decides whether you have this bug
+
+This is the part worth memorising, because two directives that look interchangeable behave completely differently here:
+
+| Approach | What it does | Does it still submit? |
+|---|---|---|
+| `x-show`, `v-show`, a `hidden` class | sets `display: none`, element stays mounted | **Yes** |
+| `x-for`, `v-for`, `.map()` over a filtered array | removes the element from the DOM | **No** |
+
+A visibility toggle is safe. A list render is not. And the dangerous one is the one you reach for when the list is long, which means the bug arrives precisely when the form is big enough for the user to need the search.
+
+It also is not limited to search. **Anything that unmounts rows produces it**: a collapsed accordion section, pagination, tab panels, virtualised scrolling. If the user can put a row into a state where the framework stops rendering it, that row stops being part of the submission.
+
+## Why the test suite was green
+
+The feature tests for this screen were thorough and they were structurally incapable of catching it. They post arrays straight to the endpoint:
+
+```php
+$this->put(route('roles.update', $role), ['permissions' => [...]])
+```
+
+That exercises the controller, the validation, the service, and the persistence. It never renders the template. **The defect lives entirely in markup that no server-side assertion touches.**
+
+This is the generalisable half: a green suite tells you what your server does with a submission. It says nothing whatsoever about **what the browser will actually submit**. Those are two different questions, and only one of them is answered by tests that construct the payload themselves.
+
+Any test that builds its own request body has assumed away the entire class of bug where the form produces a different body than you expected.
+
+## The fix is to stop deriving submission from rendering
+
+The repair is not a smarter filter. It is decoupling the two jobs that were accidentally welded together. One array becomes the source of truth for **both** display and submission, and the rendered controls stop carrying the submission at all:
+
+```blade
+{{-- rendered rows: pure UI, no name attribute, nothing submits from here --}}
+<input type="checkbox" :value="perm.name" :checked="has(perm.name)" @change="toggle(perm.name)">
+
+{{-- the ONLY thing that submits, rendered outside every filter and collapse --}}
+<template x-for="name in selected" :key="'submit-' + name">
+    <input type="hidden" name="permissions[]" :value="name">
+</template>
+```
+
+The visible checkbox is now an input device. It mutates state. The hidden inputs are a projection of that state, rendered from the unfiltered selection array, outside every conditional that could unmount them.
+
+There is a second benefit that is easy to miss and worth as much as the bug fix: this **dissolves the whole class of checked-versus-state drift**. When the same array drives both the rendered control and the submitted value, they cannot disagree. Before, they were two representations kept in sync by hand.
+
+## The regression guard that actually works
+
+A unit test cannot protect this, but an assertion against the rendered HTML can:
+
+```php
+expect(substr_count($html, 'name="permissions[]"'))->toBe(1)
+    ->and($html)->toContain('type="hidden" name="permissions[]"');
+```
+
+That says: exactly one thing in this document submits, and it is the hidden projection. If anybody ever adds the name attribute back onto the filtered checkbox, the count becomes two and the test fails.
+
+I verified it by mutation rather than by trusting it: put `name` back on the filtered checkbox and confirm the assertion actually goes red. **A guard you have not seen fail is a guard you are hoping about**, which is a lesson that generalises far past this bug.
+
+## What to actually do
+
+1. **For any form with both a filter and a multi-select, ask one question: what does the browser post when the filter is active?** Then go and check, in a browser, with the filter active. Do not reason about it.
+2. **Never put a `name` attribute on a control inside a conditionally rendered list.** Render the submission separately, from state, outside every filter, collapse, tab, and page boundary.
+3. **Know which of your directives unmount and which merely hide.** They are one character apart in most frameworks and they differ on exactly this.
+4. **Treat a test that constructs its own payload as saying nothing about the form.** It tests the endpoint. Something has to test the markup, and only a rendered assertion or a browser can.
+5. **Mutate your regression guards once.** Break the thing on purpose and confirm the guard fails. An assertion that has only ever passed has not been shown to discriminate.
+
+## The takeaway
+
+The rule fits in one sentence, and it is the thing I would tell anyone building an editor over a long list:
+
+> **The submitted set is a property of your state, never of your viewport.**
+
+The moment those two are the same object, filtering becomes a rendering concern and cannot destroy anything. The moment they are different, every feature that hides a row becomes a feature that deletes data, and nothing in your server-side test suite will ever tell you.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build data-integrity-critical business systems including the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system) and [Adam AI](https://ehnand.com/projects/adam-ai). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*
