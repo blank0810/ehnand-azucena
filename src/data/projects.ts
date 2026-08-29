@@ -29,22 +29,190 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "automation-no-op-rare-paths",
     "recovery-path-invariants",
     "rehearsability-production-writes",
+    "detecting-missing-records-census",
+    "read-criterion-not-label",
+    "pairing-vs-prompt-injection",
+    "removing-a-gate-is-a-first-execution",
+    "implementer-sandbox-verification-boundary",
+    "lookalike-instrument-correlated-error",
   ],
-  repsshield: ["llm-provider-failover"],
+  repsshield: [
+    "working-function-proves-only-paths-reached",
+    "nothing-re-reads-deploy-time-values",
+    "llm-provider-failover",
+    "config-pointing-outside-your-repo",
+    "pairing-vs-prompt-injection",
+  ],
   "initao-water-billing-system": [
     "offline-first-laravel",
     "utility-billing-ledger",
     "correct-ledger-wrong-billing-statement",
     "authorization-testing-least-privilege",
+    "controls-with-one-possible-answer",
+    "submission-set-not-viewport",
+    "implementer-sandbox-verification-boundary",
+    "lookalike-instrument-correlated-error",
   ],
-  "swiss-energy-platform-suite": ["document-matching-strategies"],
+  "swiss-energy-platform-suite": [
+    "document-matching-strategies",
+    "detecting-missing-records-census",
+    "read-criterion-not-label",
+  ],
   "personal-budget-finance-manager": [
     "authorization-testing-least-privilege",
     "reconcilers-not-single-source-of-truth",
+    "config-pointing-outside-your-repo",
+  ],
+  "niko-kuechenbau": ["fabrication-is-the-claim-not-the-technique"],
+  "niko-immobilienmakler": ["fabrication-is-the-claim-not-the-technique"],
+  "kai-assistant": [
+    "pairing-vs-prompt-injection",
+    "config-pointing-outside-your-repo",
   ],
 }
 
 export const PROJECTS: Project[] = [
+  {
+    slug: "niko-immobilienmakler",
+    title: "Niko Immobilienmakler (Swiss Real Estate Brokerage Site)",
+    description:
+      "German-language Astro static site for a Swiss real estate brokerage operating in the Ostschweiz, on the Côte d'Azur, and on the Costa del Sol. Eight office location pages and two commercial-property pages, built under a hard no-fabrication rule covering every trust signal on the site.",
+    longDescription: `
+      A German-language brochure and lead-generation site for a Swiss real estate brokerage, built as an Astro static export and deployed to the client's shared hosting.
+
+      **Structure:**
+
+      • **Eight office location pages** covering five Ostschweiz towns plus Nizza, Cannes, and Marbella, each with locally specific content rather than templated boilerplate
+      • **Two dedicated commercial-property pages** for Zürich and St. Gallen, separating the Gewerbeimmobilien offering from residential brokerage
+      • **Eleven indexed pages**, with the legal pages served but deliberately excluded from search
+
+      **Architecture:**
+
+      • **Static by default** — no SSR, no adapter, no database. The single dynamic file is a PHP contact endpoint carrying a honeypot, a submission timing check, and per-IP rate limiting
+      • **Docker-only builds** against a committed lockfile, so the host toolchain cannot affect output
+      • **rsync deployment over SSH** with the server-side form rate-limiter state explicitly preserved across releases
+
+      **Content integrity:**
+
+      The project runs under a hard no-fabrication constraint. No invented testimonials, review counts, years in business, or transaction figures. Where client-supplied data was missing it shipped as a visible placeholder rather than as plausible-looking filler, so nothing on the page asserts a fact nobody verified.
+    `,
+    image: {
+      src: "/images/projects/niko-immobilienmakler.webp",
+      width: 1440,
+      height: 900,
+      alt: "Niko Immobilienmakler real estate brokerage website home page",
+    },
+    technologies: [
+      "Astro 7",
+      "Tailwind CSS v4",
+      "TypeScript",
+      "PHP",
+      "Docker",
+      "JSON-LD",
+      "rsync / SSH",
+    ],
+    period: "Aug 2026",
+    role: "Solo Developer",
+    status: "Live Production",
+    category: "Marketing Site",
+    relatedArticleSlugs: RELATED_ARTICLES["niko-immobilienmakler"],
+    liveUrl: "https://niko-immobilienmakler.com",
+  },
+  {
+    slug: "niko-kuechenbau",
+    title: "Niko Küchenbau (Swiss Kitchen Studio Site)",
+    description:
+      "German-language Astro static site for a Swiss kitchen company covering design, production, and installation. 23 pages spanning ten service-area towns, six service pages, and four kitchen-type pages, with a hardened PHP contact endpoint and a Docker-only build deployed by rsync to shared hosting.",
+    longDescription: `
+      A German-language brochure and lead-generation site for a Swiss kitchen studio handling the full lifecycle: design, production, and installation. Built as a deliberate sibling of the brokerage site above, sharing its palette, layout language, and toolchain.
+
+      **Architecture:**
+
+      • **23 static pages** exported by Astro with no SSR, no adapter, and no database, covering ten service-area towns, six service pages, and four kitchen-type pages
+      • **Hardened contact endpoint** — a single PHP file carrying a honeypot field, a three-second submission timing check, and a per-IP hourly rate limit, verified end to end from a real browser submission through to inbox delivery
+      • **Docker-only toolchain**, with deployment by rsync over SSH and the server-side rate-limiter state excluded from deletion on every release
+
+      **Local search modelling:**
+
+      • **One organisation entity with an explicit service area**, rather than one local-business node per town. The business serves every one of those towns from a single address, and per-town business nodes would each require a street address that does not exist
+      • **Real municipality names and locally specific content** on every area page, with the map centred on the town rather than dropping a street-level pin where there is no premises
+      • **No invented address, review count, or testimonial** anywhere in the copy or the structured data
+
+      **Content integrity:**
+
+      Example imagery is licensed and worded as illustration rather than as the studio's own completed work, with authorship claims kept out of both the visible copy and the machine-readable markup. The distinction is enforced by a build flag named after the fact it describes rather than after the intent behind it.
+    `,
+    image: {
+      src: "/images/projects/niko-kuechenbau.webp",
+      width: 1440,
+      height: 900,
+      alt: "Niko Küchenbau kitchen studio website home page",
+    },
+    technologies: [
+      "Astro 7",
+      "Tailwind CSS v4",
+      "TypeScript",
+      "PHP",
+      "Docker",
+      "JSON-LD",
+      "rsync / SSH",
+    ],
+    period: "Aug 2026",
+    role: "Solo Developer",
+    status: "Live Production",
+    category: "Marketing Site",
+    relatedArticleSlugs: RELATED_ARTICLES["niko-kuechenbau"],
+    liveUrl: "https://niko-kuechenbau.ch",
+  },
+  {
+    slug: "kai-assistant",
+    title: "Kai (Self-Hosted AI Operations Assistant)",
+    description:
+      "A personal business-operations agent built on the Hermes Agent framework, self-hosted on a VPS with inference served by NVIDIA Build. Triages email, manages calendar, drafts outreach for review, and searches the web through a self-hosted metasearch instance, across 27 tools and 86 skills governed by a draft-by-default approval policy.",
+    longDescription: `
+      Kai is a self-hosted AI operations assistant, built to run business admin rather than to write code. It is a working demonstration of how I think an autonomous agent should be scoped when it holds real credentials and reads untrusted content.
+
+      **Capabilities:**
+
+      • **Email triage and calendar management** through an MCP tool router with managed authentication
+      • **Outreach drafting** for human review, never autonomous sending
+      • **Web search** grounded by a self-hosted, keyless metasearch instance running alongside the agent
+      • **Reachable over a messaging channel** bound to a single authorised identity, plus a web dashboard for session history
+
+      **Operational design:**
+
+      • **Reboot-proof deployment** on a VPS, supervised by systemd with lingering user services, so the agent and its search backend both survive a restart without intervention
+      • **Inference through NVIDIA Build**, with a primary model and two fallbacks, benchmarked from the deployment target rather than from a laptop. Availability differs by region, and a retired model identifier fails silently behind a working fallback chain, so the chain is re-verified from the VPS itself
+      • **Reverse proxy with automatic HTTPS** in front of the dashboard, with the host firewalled to the ports actually in use
+
+      **Capability boundary, which is the point of the project:**
+
+      The agent runs a broad toolset: 27 tools and 86 skills across 15 categories, including file access, code execution, browser and computer use, task delegation, scheduled jobs, and persistent memory. That breadth is what makes the boundary question real rather than theoretical.
+
+      The governing principle is that authenticating who may message an agent says nothing about what that agent is talked into doing by the untrusted content it reads, and reading untrusted content is the entire job. So the controls that carry weight are the ones on the action rather than on the channel: a draft-by-default persona that requires explicit approval before anything is sent, a messaging channel bound to a single authorised identity, and a standing rule that new capability arrives as a narrow purpose-built skill behind a review gate rather than as another general-purpose tool.
+    `,
+    image: {
+      src: "/images/projects/kai-assistant.webp",
+      width: 1606,
+      height: 854,
+      alt: "Kai running on the Hermes Agent terminal interface, listing available tools, skills, and connected MCP servers",
+    },
+    technologies: [
+      "Hermes Agent",
+      "NVIDIA Build",
+      "Python",
+      "MCP",
+      "SearXNG",
+      "Docker",
+      "systemd",
+      "Caddy",
+    ],
+    period: "Jul 2026 – Present",
+    role: "Solo Developer",
+    status: "Deployed",
+    category: "AI Agent",
+    relatedArticleSlugs: RELATED_ARTICLES["kai-assistant"],
+  },
   {
     slug: "adam-ai",
     title: "Adam AI (Multi-Tenant Document Intelligence SaaS)",
@@ -99,150 +267,6 @@ export const PROJECTS: Project[] = [
     category: "SaaS Platform",
     relatedArticleSlugs: RELATED_ARTICLES["adam-ai"],
     liveUrl: "https://adamai.ch",
-  },
-  {
-    slug: "repsshield",
-    title: "REPSShield (AI-Powered Real Estate Tax Compliance)",
-    description:
-      "Three AI modes protect real estate investors' IRS REP status: agentic time-tracking that auto-classifies activities, RAG advisory over 282 IRS documents, and a 14-check IRS examiner simulation. Multi-provider circuit-breaker failover, calendar sync, Stripe billing, and mobile apps via Capacitor.js round out the platform.",
-    longDescription: `
-      REPSShield is a purpose-built SaaS platform protecting real estate investors' IRS Real Estate Professional (REP) status under Section 469(c)(7). Qualifying professionals can save $50,000+ annually in taxes by deducting unlimited rental property losses -- but compliance requires 750+ hours of documented real estate activity, material participation, and meticulous recordkeeping.
-
-      **Three AI Modes:**
-
-      • **Agentic Time-Tracking** — AI auto-classifies real estate activities, validates entries against IRS requirements, and provides real-time logging with voice-to-text support
-      • **RAG Advisory** — Retrieval-augmented generation over 282 IRS documents, enabling natural-language queries about tax compliance with source citations
-      • **14-Check IRS Examiner Simulation** — Runs a comprehensive audit simulation mirroring actual IRS examination procedures to identify compliance gaps before they become problems
-
-      **Key Features & Capabilities:**
-
-      • **Multi-Provider Circuit-Breaker Failover** — Automatic failover across AI providers ensures zero downtime for compliance-critical operations
-      • **Calendar Sync** — Google Calendar integration for automatic activity capture and hour tracking
-      • **Stripe Billing** — Subscription management with usage-based pricing tiers
-      • **Mobile Apps** — Native iOS and Android apps via Capacitor.js for on-the-go time tracking
-      • **Audit-Ready Reporting** — Professional, IRS-formatted reports with real-time dashboards and goal tracking
-      • **CPA Collaboration** — Secure sharing, role-based team management, and export formats for accounting firms
-
-      **Technical Stack:**
-
-      React 18 frontend, Node.js/Express backend, TypeScript throughout, PostgreSQL 16 (Neon) with Drizzle ORM, Vercel AI SDK v4 for multi-provider AI integration, Stripe for payments, Capacitor.js for mobile, Astro 5 for the marketing site, Cloudflare Workers for edge functions, and Trigger.dev for background jobs.
-
-      **Impact:**
-
-      Protects millions in tax benefits for real estate professionals -- reducing audit anxiety, saving time, and delivering up to 130x ROI for individual users and major efficiency gains for accounting firms.
-    `,
-    image: {
-      src: "/images/projects/repsshield.webp",
-      width: 1825,
-      height: 816,
-      alt: "REPSShield real estate tax compliance platform screenshot",
-    },
-    technologies: [
-      "React 18",
-      "Node.js",
-      "Express",
-      "TypeScript",
-      "PostgreSQL 16",
-      "Drizzle ORM",
-      "Vercel AI SDK v4",
-      "Stripe",
-      "Capacitor.js",
-      "Astro 5",
-      "Cloudflare Workers",
-      "Trigger.dev",
-    ],
-    period: "Aug 2025 – Present",
-    role: "Backend Developer",
-    status: "Live Production",
-    category: "SaaS Platform",
-    relatedArticleSlugs: RELATED_ARTICLES.repsshield,
-    liveUrl: "https://repsshield.com",
-  },
-  {
-    slug: "memberpulse",
-    title: "MemberPulse (SaaS CPD Platform)",
-    description:
-      "Multi-tenant SaaS for professional associations, built from the ground up: CPD points tracking, courses, events, subscriptions, job boards, directories, and a sponsorship system. Supports both individual and organizational members on live, scalable infrastructure with cross-tenant payment and CRM integrations.",
-    longDescription: `
-      MemberPulse is a comprehensive multi-tenant SaaS platform designed for professional associations and organizations. The platform features a complete ecosystem including:
-
-      • **Course Management System** — Create, manage, and deliver professional development courses
-      • **Event Management** — Full-featured event planning, registration, and management
-      • **Subscription System** — Flexible membership tiers and billing management
-      • **Job Board** — Career opportunities and professional networking
-      • **Business Directory** — Member and organization listings
-      • **Sponsorship Management** — Corporate partnership and sponsorship tracking
-      • **CPD Points Tracking** — Continuing Professional Development credit system
-
-      Integrated Stripe, Xero, HubSpot, and PayPal for cross-tenant payment processing, CRM synchronization, and automated invoicing. Built with enterprise-grade security, scalability, and multi-tenancy in mind, supporting both individual professionals and large organizations.
-    `,
-    image: {
-      src: "/images/projects/memberpulse.webp",
-      width: 1891,
-      height: 589,
-      alt: "MemberPulse professional association platform screenshot",
-    },
-    technologies: ["Symfony", "Bootstrap", "Vultr", "PostgreSQL", "OAuth2"],
-    period: "Feb 2025 – Aug 2025",
-    role: "Lead Developer",
-    status: "Live Production",
-    category: "SaaS Platform",
-    relatedArticleSlugs: [],
-    liveUrl: "https://memberpulse.com.au",
-  },
-  {
-    slug: "initao-water-billing-system",
-    title: "Water Billing System",
-    description:
-      "Won via competitive government bidding for the Municipality of Initao. Full billing lifecycle from meter reading to payment collection, offline-first mobile API for field workers, WebSocket real-time notifications, and a double-entry ledger ensuring audit-grade financial integrity.",
-    longDescription: `
-      The Water Billing System is a government enterprise platform won via competitive bidding for the Municipality of Initao. It manages the full water billing lifecycle from meter reading to payment collection.
-
-      **Key Capabilities:**
-
-      • **Full Billing Lifecycle** — Meter reading capture, consumption calculation, bill generation, payment collection, and receipt issuance in a single integrated workflow
-      • **Offline-First Mobile API** — Field workers can record meter readings without connectivity, with automatic synchronization when back online via Laravel Sanctum-secured endpoints
-      • **WebSocket Notifications** — Real-time updates via Laravel Reverb for payment confirmations, overdue alerts, and system events
-      • **Double-Entry Ledger** — Audit-grade financial integrity with proper accounting entries for every transaction, ensuring full traceability for government audits
-
-      **Technical Stack:**
-
-      Laravel 12 with PHP 8.2+, MySQL 8 for relational data, Alpine.js 3 and Tailwind CSS 3 for the frontend, Laravel Reverb for WebSocket support, Pest PHP for testing, Docker for containerized deployment, and Laravel Sanctum for API authentication.
-
-      **Architecture Highlights:**
-
-      • **Multi-zone billing** — Supports different rate structures across municipal water zones
-      • **Penalty and discount engine** — Configurable late payment penalties and early payment discounts
-      • **Audit trail** — Every modification to billing records is logged with user attribution and timestamps
-      • **Report generation** — Monthly collection reports, outstanding balance summaries, and consumption analytics for municipal officials
-
-      **Impact:**
-
-      Digitized water billing operations for the municipality, replacing manual ledger-based processes with a system that ensures accurate billing, real-time payment tracking, and audit-ready financial records.
-    `,
-    image: {
-      src: "/images/projects/initao-water-bill.webp",
-      width: 1890,
-      height: 667,
-      alt: "Water Billing System dashboard screenshot",
-    },
-    technologies: [
-      "Laravel 12",
-      "PHP 8.2+",
-      "MySQL 8",
-      "Alpine.js 3",
-      "Tailwind CSS 3",
-      "Laravel Reverb",
-      "Pest PHP",
-      "Docker",
-      "Laravel Sanctum",
-    ],
-    period: "Feb 2026 – Present",
-    role: "Lead Developer",
-    status: "Deployed",
-    category: "Government / Enterprise",
-    relatedArticleSlugs: RELATED_ARTICLES["initao-water-billing-system"],
-    githubUrl: "https://github.com/blank0810/initao-water-billing",
   },
   {
     slug: "swiss-energy-platform-suite",
@@ -337,6 +361,150 @@ export const PROJECTS: Project[] = [
     category: "Finance",
     relatedArticleSlugs: RELATED_ARTICLES["personal-budget-finance-manager"],
     liveUrl: "https://budget.umbra.build",
+  },
+  {
+    slug: "initao-water-billing-system",
+    title: "Water Billing System",
+    description:
+      "Won via competitive government bidding for the Municipality of Initao. Full billing lifecycle from meter reading to payment collection, offline-first mobile API for field workers, WebSocket real-time notifications, and a double-entry ledger ensuring audit-grade financial integrity.",
+    longDescription: `
+      The Water Billing System is a government enterprise platform won via competitive bidding for the Municipality of Initao. It manages the full water billing lifecycle from meter reading to payment collection.
+
+      **Key Capabilities:**
+
+      • **Full Billing Lifecycle** — Meter reading capture, consumption calculation, bill generation, payment collection, and receipt issuance in a single integrated workflow
+      • **Offline-First Mobile API** — Field workers can record meter readings without connectivity, with automatic synchronization when back online via Laravel Sanctum-secured endpoints
+      • **WebSocket Notifications** — Real-time updates via Laravel Reverb for payment confirmations, overdue alerts, and system events
+      • **Double-Entry Ledger** — Audit-grade financial integrity with proper accounting entries for every transaction, ensuring full traceability for government audits
+
+      **Technical Stack:**
+
+      Laravel 12 with PHP 8.2+, MySQL 8 for relational data, Alpine.js 3 and Tailwind CSS 3 for the frontend, Laravel Reverb for WebSocket support, Pest PHP for testing, Docker for containerized deployment, and Laravel Sanctum for API authentication.
+
+      **Architecture Highlights:**
+
+      • **Multi-zone billing** — Supports different rate structures across municipal water zones
+      • **Penalty and discount engine** — Configurable late payment penalties and early payment discounts
+      • **Audit trail** — Every modification to billing records is logged with user attribution and timestamps
+      • **Report generation** — Monthly collection reports, outstanding balance summaries, and consumption analytics for municipal officials
+
+      **Impact:**
+
+      Digitized water billing operations for the municipality, replacing manual ledger-based processes with a system that ensures accurate billing, real-time payment tracking, and audit-ready financial records.
+    `,
+    image: {
+      src: "/images/projects/initao-water-bill.webp",
+      width: 1890,
+      height: 667,
+      alt: "Water Billing System dashboard screenshot",
+    },
+    technologies: [
+      "Laravel 12",
+      "PHP 8.2+",
+      "MySQL 8",
+      "Alpine.js 3",
+      "Tailwind CSS 3",
+      "Laravel Reverb",
+      "Pest PHP",
+      "Docker",
+      "Laravel Sanctum",
+    ],
+    period: "Feb 2026 – April 2026",
+    role: "Lead Developer",
+    status: "Deployed",
+    category: "Government / Enterprise",
+    relatedArticleSlugs: RELATED_ARTICLES["initao-water-billing-system"],
+    githubUrl: "https://github.com/blank0810/initao-water-billing",
+  },
+  {
+    slug: "repsshield",
+    title: "REPSShield (AI-Powered Real Estate Tax Compliance)",
+    description:
+      "Three AI modes protect real estate investors' IRS REP status: agentic time-tracking that auto-classifies activities, RAG advisory over 282 IRS documents, and a 14-check IRS examiner simulation. Multi-provider circuit-breaker failover, calendar sync, Stripe billing, and mobile apps via Capacitor.js round out the platform.",
+    longDescription: `
+      REPSShield is a purpose-built SaaS platform protecting real estate investors' IRS Real Estate Professional (REP) status under Section 469(c)(7). Qualifying professionals can save $50,000+ annually in taxes by deducting unlimited rental property losses -- but compliance requires 750+ hours of documented real estate activity, material participation, and meticulous recordkeeping.
+
+      **Three AI Modes:**
+
+      • **Agentic Time-Tracking** — AI auto-classifies real estate activities, validates entries against IRS requirements, and provides real-time logging with voice-to-text support
+      • **RAG Advisory** — Retrieval-augmented generation over 282 IRS documents, enabling natural-language queries about tax compliance with source citations
+      • **14-Check IRS Examiner Simulation** — Runs a comprehensive audit simulation mirroring actual IRS examination procedures to identify compliance gaps before they become problems
+
+      **Key Features & Capabilities:**
+
+      • **Multi-Provider Circuit-Breaker Failover** — Automatic failover across AI providers ensures zero downtime for compliance-critical operations
+      • **Calendar Sync** — Google Calendar integration for automatic activity capture and hour tracking
+      • **Stripe Billing** — Subscription management with usage-based pricing tiers
+      • **Mobile Apps** — Native iOS and Android apps via Capacitor.js for on-the-go time tracking
+      • **Audit-Ready Reporting** — Professional, IRS-formatted reports with real-time dashboards and goal tracking
+      • **CPA Collaboration** — Secure sharing, role-based team management, and export formats for accounting firms
+
+      **Technical Stack:**
+
+      React 18 frontend, Node.js/Express backend, TypeScript throughout, PostgreSQL 16 (Neon) with Drizzle ORM, Vercel AI SDK v4 for multi-provider AI integration, Stripe for payments, Capacitor.js for mobile, Astro 5 for the marketing site, Cloudflare Workers for edge functions, and Trigger.dev for background jobs.
+
+      **Impact:**
+
+      Protects millions in tax benefits for real estate professionals -- reducing audit anxiety, saving time, and delivering up to 130x ROI for individual users and major efficiency gains for accounting firms.
+    `,
+    image: {
+      src: "/images/projects/repsshield.webp",
+      width: 1825,
+      height: 816,
+      alt: "REPSShield real estate tax compliance platform screenshot",
+    },
+    technologies: [
+      "React 18",
+      "Node.js",
+      "Express",
+      "TypeScript",
+      "PostgreSQL 16",
+      "Drizzle ORM",
+      "Vercel AI SDK v4",
+      "Stripe",
+      "Capacitor.js",
+      "Astro 5",
+      "Cloudflare Workers",
+      "Trigger.dev",
+    ],
+    period: "Aug 2025 – Dec 2025",
+    role: "Backend Developer",
+    status: "Live Production",
+    category: "SaaS Platform",
+    relatedArticleSlugs: RELATED_ARTICLES.repsshield,
+    liveUrl: "https://repsshield.com",
+  },
+  {
+    slug: "memberpulse",
+    title: "MemberPulse (SaaS CPD Platform)",
+    description:
+      "Multi-tenant SaaS for professional associations, built from the ground up: CPD points tracking, courses, events, subscriptions, job boards, directories, and a sponsorship system. Supports both individual and organizational members on live, scalable infrastructure with cross-tenant payment and CRM integrations.",
+    longDescription: `
+      MemberPulse is a comprehensive multi-tenant SaaS platform designed for professional associations and organizations. The platform features a complete ecosystem including:
+
+      • **Course Management System** — Create, manage, and deliver professional development courses
+      • **Event Management** — Full-featured event planning, registration, and management
+      • **Subscription System** — Flexible membership tiers and billing management
+      • **Job Board** — Career opportunities and professional networking
+      • **Business Directory** — Member and organization listings
+      • **Sponsorship Management** — Corporate partnership and sponsorship tracking
+      • **CPD Points Tracking** — Continuing Professional Development credit system
+
+      Integrated Stripe, Xero, HubSpot, and PayPal for cross-tenant payment processing, CRM synchronization, and automated invoicing. Built with enterprise-grade security, scalability, and multi-tenancy in mind, supporting both individual professionals and large organizations.
+    `,
+    image: {
+      src: "/images/projects/memberpulse.webp",
+      width: 1891,
+      height: 589,
+      alt: "MemberPulse professional association platform screenshot",
+    },
+    technologies: ["Symfony", "Bootstrap", "Vultr", "PostgreSQL", "OAuth2"],
+    period: "Feb 2025 – Aug 2025",
+    role: "Lead Developer",
+    status: "Live Production",
+    category: "SaaS Platform",
+    relatedArticleSlugs: [],
+    liveUrl: "https://memberpulse.com.au",
   },
   {
     slug: "playnow",
