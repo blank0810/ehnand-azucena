@@ -1,6 +1,19 @@
 import assert from "node:assert/strict"
+import { readFile } from "node:fs/promises"
 import test from "node:test"
 import { extractJsonLd, readGenerated } from "../helpers/generated-site.mjs"
+
+// Read the source rather than importing it: featured-projects.ts resolves the
+// "@/" alias, which the test runner does not.
+const featuredSource = await readFile("src/data/featured-projects.ts", "utf8")
+const FEATURED_PROJECT_SLUGS = [
+  ...featuredSource
+    .slice(
+      featuredSource.indexOf("FEATURED_PROJECT_SLUGS = ["),
+      featuredSource.indexOf("] as const"),
+    )
+    .matchAll(/"([a-z0-9-]+)"/g),
+].map((match) => match[1])
 
 test("homepage presents the approved offer and responsibility trace", async () => {
   const html = await readGenerated("/")
@@ -51,17 +64,14 @@ test("homepage curates exactly the three approved systems", async () => {
   assert.match(html, /AI-assisted compliance/)
 })
 
-test("homepage hero exposes the five approved featured projects in order", async () => {
+test("homepage hero exposes the approved featured projects in order", async () => {
   const html = await readGenerated("/")
-  const slugs = [
-    "adam-ai",
-    "repsshield",
-    "initao-water-billing-system",
-    "memberpulse",
-    "swiss-energy-platform-suite",
-  ]
+  const slugs = FEATURED_PROJECT_SLUGS
 
-  assert.equal((html.match(/data-featured-project=/g) ?? []).length, 5)
+  assert.equal(
+    (html.match(/data-featured-project=/g) ?? []).length,
+    slugs.length,
+  )
   let previous = -1
   for (const slug of slugs) {
     const position = html.indexOf(`data-featured-project="${slug}"`)
