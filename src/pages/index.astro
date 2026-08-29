@@ -17,6 +17,7 @@ import {
   SITE_NAME,
 } from "@/config/site"
 import { assertContentIntegrity, getHomepageArticles } from "@/lib/content"
+import { latestEvidenceDate, toSchemaDateTime } from "@/lib/dates"
 
 const title = "Full Stack Systems Engineer | Ehnand Azucena"
 const description =
@@ -24,6 +25,13 @@ const description =
 
 await assertContentIntegrity()
 const articles = await getHomepageArticles()
+
+const profileModified = toSchemaDateTime(
+  [SITE_LAST_UPDATED, latestEvidenceDate(articles.map((article) => article.data))]
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1)!,
+)
 
 const websiteSchema = {
   "@context": "https://schema.org",
@@ -40,7 +48,7 @@ const profileSchema = {
   "@id": absoluteUrl("/#profile"),
   url: absoluteUrl("/"),
   name: title,
-  dateModified: SITE_LAST_UPDATED,
+  dateModified: profileModified,
   mainEntity: { "@id": PERSON_ID },
 }
 
