@@ -121,3 +121,96 @@ test("FAQ schema is sourced from the visible homepage questions", async () => {
     assert.ok(html.includes(item.acceptedAnswer.text))
   }
 })
+
+test("the contact section ships a form that posts to the Worker", async () => {
+  const html = await readGenerated("/")
+
+  assert.match(html, /<form[^>]*class="contact-form"[^>]*>/)
+  assert.match(html, /action="\/api\/contact"/)
+  assert.match(html, /method="post"/)
+})
+
+test("only email and message are required", async () => {
+  const html = await readGenerated("/")
+  const form = html.slice(html.indexOf("<form"), html.indexOf("</form>"))
+
+  for (const field of ["email", "message"]) {
+    const control = form.match(
+      new RegExp("<(?:input|textarea)[^>]*name=\"" + field + "\"[^>]*>"),
+    )
+    assert.ok(control, field + " should be present")
+    assert.match(control[0], /\brequired\b/, field + " should be required")
+  }
+
+  for (const field of ["name", "company"]) {
+    const control = form.match(
+      new RegExp("<input[^>]*name=\"" + field + "\"[^>]*>"),
+    )
+    assert.ok(control, field + " should be present")
+    assert.doesNotMatch(
+      control[0],
+      /\brequired\b/,
+      field + " should stay optional",
+    )
+  }
+})
+
+test("every contact field carries a label and an error region", async () => {
+  const html = await readGenerated("/")
+
+  for (const field of ["name", "company", "email", "message"]) {
+    assert.match(
+      html,
+      new RegExp('<label for="contact-' + field + '"'),
+      field + " should have a real label",
+    )
+    assert.match(
+      html,
+      new RegExp('data-field-error="' + field + '"'),
+      field + " should have an error region",
+    )
+    assert.match(
+      html,
+      new RegExp('aria-describedby="contact-' + field + '-error"'),
+      field + " should be described by its error region",
+    )
+  }
+
+  assert.match(html, /role="status"[^>]*aria-live="polite"|aria-live="polite"[^>]*role="status"/)
+})
+
+test("the honeypot is hidden by style, not by attribute", async () => {
+  const html = await readGenerated("/")
+  const trap = html.match(/<div class="contact-form__trap"[\s\S]*?<\/div>/)
+
+  assert.ok(trap, "the honeypot wrapper should be present")
+  assert.match(trap[0], /aria-hidden="true"/)
+  assert.match(trap[0], /name="website"/)
+  assert.match(trap[0], /tabindex="-1"/)
+  assert.doesNotMatch(
+    trap[0],
+    /\shidden(?=[\s>=])/,
+    "an attribute-hidden trap is trivial to skip",
+  )
+})
+
+test("the no-script path still reaches a real address", async () => {
+  const html = await readGenerated("/")
+  const noscript = html.match(/<noscript>[\s\S]*?<\/noscript>/)
+
+  assert.ok(noscript, "the contact section should carry a no-script fallback")
+  assert.match(noscript[0], /mailto:contact@ehnand\.com/)
+})
+
+test("the challenge widget is wired to a site key", async () => {
+  const html = await readGenerated("/")
+
+  assert.match(html, /class="cf-turnstile contact-form__challenge"/)
+  assert.match(html, /data-sitekey="[^"]+"/)
+  assert.match(html, /data-theme="dark"/)
+  assert.match(
+    html,
+    /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js/,
+    "the widget script should be loaded",
+  )
+})

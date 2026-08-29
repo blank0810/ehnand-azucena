@@ -1429,6 +1429,149 @@ html:not([data-theme="dark"]) .theme-toggle__icon--dark {
   color: var(--inverse-text);
 }
 
+/* Contact form */
+
+.contact {
+  /* The band is dark under both themes, so its accents are pinned to the
+     light-on-dark values instead of following the theme tokens, which would
+     put dark cobalt and dark amber on a near-black surface. */
+  --form-accent: #ffb45f;
+  --form-positive: #8ab4ff;
+}
+
+.contact-form {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 40rem;
+  margin-top: 2.5rem;
+}
+
+.contact-form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.25rem;
+}
+
+.contact-form__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.contact-form label {
+  color: var(--inverse-soft);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contact-form__optional {
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  opacity: 0.75;
+}
+
+.contact-form input,
+.contact-form textarea {
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--inverse-rule);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--inverse-text);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 160ms ease-out;
+}
+
+.contact-form textarea {
+  resize: vertical;
+}
+
+.contact-form input:hover,
+.contact-form textarea:hover {
+  border-color: var(--inverse-soft);
+}
+
+.contact-form [aria-invalid="true"] {
+  border-color: var(--form-accent);
+}
+
+.contact-form__error {
+  margin: 0;
+  color: var(--form-accent);
+  font-size: 0.9375rem;
+}
+
+/* Off-screen rather than [hidden]: an attribute-hidden trap is trivial to skip. */
+.contact-form__trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Stays collapsed until the widget renders, so no gap appears without script. */
+.contact-form__challenge:empty {
+  display: none;
+}
+
+.contact-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+.contact-form__submit[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.contact-form__submit[disabled]:hover {
+  transform: none;
+}
+
+.contact-form__alt {
+  margin: 0;
+  color: var(--inverse-soft);
+  font-size: 0.9375rem;
+}
+
+.contact-form__alt a {
+  color: var(--inverse-text);
+  text-underline-offset: 0.2em;
+}
+
+.contact-form__status {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-left: 2px solid var(--inverse-rule);
+  background: rgb(255 255 255 / 4%);
+  color: var(--inverse-text);
+}
+
+.contact-form__status[data-tone="sent"] {
+  border-left-color: var(--form-positive);
+}
+
+.contact-form__status[data-tone="unsent"] {
+  border-left-color: var(--form-accent);
+}
+
+.contact-form__noscript {
+  margin-top: 1.75rem;
+  color: var(--inverse-soft);
+}
+
 .projects-archive {
   padding-block: clamp(3.5rem, 8vw, 7rem);
 }

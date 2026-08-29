@@ -1,6 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "ehnand-azucena",
+	"main": "worker/index.ts",
 	"compatibility_date": "2026-08-16",
 	"workers_dev": false,
 	"observability": {
@@ -8,7 +9,31 @@
 	},
 	"assets": {
 		"directory": "./dist",
+		"binding": "ASSETS",
 		"html_handling": "drop-trailing-slash",
 		"not_found_handling": "404-page",
+	},
+	// Recipient is pinned at the binding: even if every other check were
+	// defeated, this Worker cannot address a third party.
+	"send_email": [
+		{
+			"name": "EMAIL",
+			"destination_address": "contact@ehnand.com",
+		},
+	],
+	"ratelimits": [
+		{
+			"name": "CONTACT_RATE_LIMIT",
+			"namespace_id": "1001",
+			"simple": {
+				"limit": 5,
+				"period": 60,
+			},
+		},
+	],
+	"vars": {
+		"CONTACT_TO": "contact@ehnand.com",
+		"CONTACT_FROM": "form@ehnand.com",
+		"CONTACT_DRY_RUN": "false",
 	},
 }

@@ -1,0 +1,28 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { PROFILE } from "@/config/site"
+---
+
+<BaseLayout
+  title="Message Received | Ehnand Azucena"
+  description="Your message reached Ehnand Azucena."
+  canonicalPath="/thank-you"
+  robots="noindex,nofollow"
+>
+  <main id="main-content" class="missing-record container">
+    <div class="missing-record__body">
+      <p class="mono-label">Contact · message received</p>
+      <h1>Your message reached me</h1>
+      <p>
+        I read every enquiry myself and reply from my own inbox, usually within one
+        working day. If it is urgent, {PROFILE.phoneDisplay} and WhatsApp both reach
+        me directly.
+      </p>
+      <nav aria-label="After sending a message">
+        <a class="button button--primary" href="/">Return home</a>
+        <a class="button button--secondary" href="/projects">Review projects</a>
+        <a class="button button--secondary" href="/articles">Read articles</a>
+      </nav>
+    </div>
+  </main>
+</BaseLayout>

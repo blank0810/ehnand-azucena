@@ -8,7 +8,7 @@
     "dev": "astro dev --host 0.0.0.0",
     "build": "astro build",
     "preview": "astro preview --host 0.0.0.0",
-    "preview:cloudflare": "wrangler dev --local --ip 0.0.0.0 --port 4321",
+    "preview:cloudflare": "wrangler dev --local --ip 0.0.0.0 --port 4321 --var CONTACT_DRY_RUN:true --var TURNSTILE_SECRET_KEY:1x0000000000000000000000000000000AA",
     "check": "astro check",
     "lint": "eslint .",
     "test": "node --test tests/unit/*.test.mjs tests/generated/*.test.mjs",

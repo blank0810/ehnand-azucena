@@ -14,3 +14,19 @@ export function absoluteUrl(path = "/"): string {
   if (path === "/") return SITE_URL + "/"
   return SITE_URL + "/" + path.replace(/^\/+|\/+$/g, "")
 }
+
+/**
+ * Turnstile's public site key. The default is Cloudflare's documented
+ * always-passes test key so local and containerised runs work untouched; a real
+ * key must be supplied at build time for production.
+ */
+const TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA"
+
+export const TURNSTILE_SITE_KEY =
+  import.meta.env.TURNSTILE_SITE_KEY ?? TURNSTILE_TEST_SITE_KEY
+
+if (import.meta.env.PROD && TURNSTILE_SITE_KEY === TURNSTILE_TEST_SITE_KEY) {
+  console.warn(
+    "[contact] Building with the Turnstile test site key. Set TURNSTILE_SITE_KEY before deploying or the contact form will reject every submission.",
+  )
+}

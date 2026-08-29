@@ -89,13 +89,39 @@ For the production handoff:
 3. Set `main` as the production branch.
 4. Set the build command to `pnpm build`.
 5. Let `wrangler.jsonc` deploy the generated `dist/` directory.
-6. Add `SITE_URL=https://ehnand.com` and optional `GOOGLE_SITE_VERIFICATION` build variables.
+6. Add `SITE_URL=https://ehnand.com`, `TURNSTILE_SITE_KEY`, and optional
+   `GOOGLE_SITE_VERIFICATION` build variables. `TURNSTILE_SITE_KEY` is required:
+   without it the build falls back to Cloudflare's test key, warns in the build
+   log, and the deployed contact form rejects every submission. A local `.env`
+   does not reach Workers Builds.
 7. Verify the generated `workers.dev` deployment before attaching the domain.
 8. Add `ehnand.com` as the apex custom domain and configure a permanent `www`-to-apex redirect that preserves paths and query strings.
 9. Verify TLS, email delivery, `/robots.txt`, `/sitemap.xml`, `/rss.xml`, and Search Console.
 10. Remove old Vercel routing only after the Cloudflare domain is verified.
 
-A local `pnpm deploy` script exists, but do not run it without explicit owner authorization and valid Cloudflare credentials. Local deploy commands must still run through Docker Compose.
+The contact form needs one runtime secret, which is not a build variable and is
+never committed: `TURNSTILE_SECRET_KEY`, set under the Worker's runtime Variables
+and Secrets or with `wrangler secret put`. Build variables and runtime secrets
+are separate scopes, and putting either key in the other place fails silently:
+the site key is read by Astro at build time, the secret by the Worker per
+request.
+
+The runtime secret cannot be set before the first deploy that carries
+`worker/index.ts`. Cloudflare rejects runtime variables on a Worker that only has
+static assets, so the panel stays locked until a script exists. The order is
+therefore: set `TURNSTILE_SITE_KEY` as a build variable, push, then add the
+runtime secret. Between the deploy and the secret the form fails closed, showing
+its generic message and the `mailto:` fallback.
+
+Cloudflare Email Service must also be onboarded for `ehnand.com` before a deploy
+carrying the `send_email` binding will work.
+
+Because `main` is the production branch under Workers Builds, pushing to `main`
+deploys.
+
+A local `pnpm deploy` script exists, but do not run it without explicit owner
+authorization and valid Cloudflare credentials. Local deploy commands must still
+run through Docker Compose.
 
 ## Public routes
 

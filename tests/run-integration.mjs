@@ -75,13 +75,23 @@ try {
       "127.0.0.1",
       "--port",
       "8787",
+      // Keep the contact endpoint exercisable without a live mail transport or
+      // a real Turnstile secret.
+      "--var",
+      "CONTACT_DRY_RUN:true",
+      "--var",
+      "TURNSTILE_SECRET_KEY:1x0000000000000000000000000000000AA",
     ],
     { shell: false, stdio: "inherit" },
   )
   await waitForServer()
   await run(
     process.execPath,
-    ["--test", "tests/integration/cloudflare-routes.test.mjs"],
+    [
+      "--test",
+      "tests/integration/cloudflare-routes.test.mjs",
+      "tests/integration/contact-endpoint.test.mjs",
+    ],
     {
       env: { ...process.env, TEST_BASE_URL: baseUrl },
     },
