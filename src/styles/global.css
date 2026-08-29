@@ -1466,11 +1466,20 @@ html:not([data-theme="dark"]) .theme-toggle__icon--dark {
   text-transform: uppercase;
 }
 
-.contact-form__optional {
+.contact-form__optional,
+.contact-form__required {
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: none;
+}
+
+.contact-form__optional {
   opacity: 0.75;
+}
+
+/* Emphasis, not alarm: amber is reserved for the error state below the field. */
+.contact-form__required {
+  color: var(--inverse-text);
 }
 
 .contact-form input,

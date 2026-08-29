@@ -214,3 +214,28 @@ test("the challenge widget is wired to a site key", async () => {
     "the widget script should be loaded",
   )
 })
+
+test("required and optional fields are both marked for sighted users", async () => {
+  const html = await readGenerated("/")
+
+  for (const field of ["name", "company"]) {
+    const label = html.match(
+      new RegExp('<label for="contact-' + field + '">[\\s\\S]*?</label>'),
+    )
+    assert.ok(label, field + " should have a label")
+    assert.match(label[0], /contact-form__optional/, field + " should read optional")
+  }
+
+  for (const field of ["email", "message"]) {
+    const label = html.match(
+      new RegExp('<label for="contact-' + field + '">[\\s\\S]*?</label>'),
+    )
+    assert.ok(label, field + " should have a label")
+    assert.match(label[0], /contact-form__required/, field + " should read required")
+    assert.match(
+      label[0],
+      /aria-hidden="true"/,
+      "the marker duplicates the required attribute, so it stays visual-only",
+    )
+  }
+})

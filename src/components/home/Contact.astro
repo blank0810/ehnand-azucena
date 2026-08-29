@@ -58,7 +58,9 @@ import { PROFILE, TURNSTILE_SITE_KEY } from "@/config/site"
         </div>
 
         <div class="contact-form__field">
-          <label for="contact-email">Email</label>
+          <label for="contact-email">
+            Email <span class="contact-form__required" aria-hidden="true">required</span>
+          </label>
           <input
             id="contact-email"
             name="email"
@@ -72,7 +74,9 @@ import { PROFILE, TURNSTILE_SITE_KEY } from "@/config/site"
         </div>
 
         <div class="contact-form__field">
-          <label for="contact-message">What needs to ship</label>
+          <label for="contact-message">
+            What needs to ship <span class="contact-form__required" aria-hidden="true">required</span>
+          </label>
           <textarea
             id="contact-message"
             name="message"
