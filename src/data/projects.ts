@@ -340,10 +340,10 @@ export const PROJECTS: Project[] = [
       Next.js 15, TypeScript, PostgreSQL with Prisma ORM, Tailwind CSS, shadcn/ui, NextAuth.js, and Recharts. A solo side project demonstrating modern full-stack patterns on exactly the stack clients hire for.
     `,
     image: {
-      src: "/images/projects/budget-app.png",
-      width: 1890,
-      height: 667,
-      alt: "Personal Budget and Finance Manager dashboard screenshot",
+      src: "/images/projects/budget-app.webp",
+      width: 1440,
+      height: 900,
+      alt: "Budget Planner landing page showing a sample financial health score of 68 out of 100 broken into five weighted pillars",
     },
     technologies: [
       "Next.js 15",
