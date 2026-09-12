@@ -1,0 +1,61 @@
+---
+title: "A False Success Writes a Receipt, and the Receipt Forecloses the Retry"
+seoTitle: "A False Success Leaves a Receipt"
+date: 2026-09-12
+category: "Business Systems & Data Integrity"
+tags: [audit-trail, migrations, verification, ci, data-integrity]
+summary: "A false green does not merely fail to raise the alarm. It writes a revision stamp, an audit row, a green run, a passing count, and that artifact is often the exact thing that prevents the work from being retried."
+---
+
+Nine permission grants did not happen. The tool that failed to make them stamped the database at the new revision, printed nine zero-row inserts, and committed cleanly.
+
+The stamp is not merely misleading. It is the mechanism that disables the retry. Nothing will run that migration again, because as far as every instrument is concerned, it already ran.
+
+**A false success does not merely fail to raise the alarm. It writes something down, and that artifact outlives the moment, gets read by somebody who was not there, and is believed.**
+
+Four instances landed in one 26-minute window across two projects that share no language, stack, layer or author. Read this *after* you have caught a false green, not before. The usual doctrine tells you how to spot one. This is about what to do in the hour afterwards, and the answer is always the same: **go and find what the receipt has already been spent on.**
+
+## The four instances
+
+| # | The work that did not happen | The receipt it wrote | What it costs whoever spends it |
+|---|---|---|---|
+| 1 | Nine permission-grant inserts. The offline SQL rendering mode cannot bind parameters, so every value rendered as null and `WHERE name = NULL` matched nothing | **The database stamped at the new revision**, nine zero-row inserts, a clean commit | **Hard foreclosure.** The stamp says the work is done and nothing will re-run it |
+| 2 | Nothing changed the owner name. It is a scalar subquery that the write path's returning clause cannot see | **An audit row asserting a real name changed to null, on every single update.** Both sides populated, well-typed, schema-valid | **Forensic foreclosure.** Anyone later reconciling who reassigned an account finds a fabricated culprit, and an audit row outranks a human's memory in any dispute |
+| 3 | A sync workflow opening a pull request. The repository setting allowing Actions to create pull requests is off, so it detects the drift, pushes the branch, cannot open the pull request, **and exits green because the push succeeded** | **A green run in the workflow's history, every time** | **Diagnostic foreclosure.** The green history read as intermittent rather than dead, so ten occurrences of a downstream deadlock were attributed to flakiness instead of to one unticked checkbox |
+| 4 | Any test exercising a new widget. A directory argument is a glob over test files, and the only tests under that path belong to a different component | **Five of five passing** | **Argumentative foreclosure.** The count was cited more than once as evidence the widget change was safe, and it reached production with zero coverage |
+
+The gradient is the useful part. Instance 1 forecloses mechanically, nothing can re-run. Instance 2 forecloses forensically, the record wins the argument. Instance 3 forecloses diagnostically, the wrong cause becomes the documented cause. Instance 4 forecloses rhetorically, the number gets quoted back at you.
+
+**They are the same defect at four different distances from the machine, and the further from the machine, the longer it survives.** Instance 4 lasted hours. Instance 3 lasted weeks.
+
+## Why the receipt is trusted
+
+- **It was written by the thing that did the work**, so there is no second store to disagree with it.
+- **It is well-formed.** The audit row was schema-valid. The SQL script parsed and ran. The test count was real. Nothing a validator checks was violated. The diff was wrong, not malformed.
+- **It is usually right.** A revision stamp, an audit trail and a passing suite are load-bearing precisely because they are normally trustworthy. The doctrine cannot be "distrust all receipts."
+- **Its consumer is a different person at a later time**, with none of the context that would let them notice. This is the whole hazard. The author of a false receipt often knows something is off. The reader never does.
+
+## The corroboration is usually a receipt too
+
+When the sync workflow was finally found never to have opened a pull request, the evidence cited in its defence was two pull requests that existed and looked right. Both were human-authored.
+
+That is what turned a workflow bug into a ten-occurrence retraction. **Before you accept a receipt as corroboration, check that it was produced by the mechanism under dispute**, not by a person who happened to do the same thing by hand.
+
+## What actually works
+
+1. **When you catch one, audit its consumers before you fix it.** Ask what has already been decided using this. That question is what converts a one-line fix into an accurate retraction of everything the receipt purchased.
+2. **Make the receipt state its subject, not its completion.** "Ran successfully" is worthless. "Granted nine permissions to three roles" is checkable. The migration's own fix was to re-assert the intended end state inside the transaction before committing, so a no-op rolls back instead of stamping.
+3. **Name the artifact a sceptic would demand.** For a test run, the test *file* and the branch it takes, not a directory and a count. For the sync workflow, a pull request authored by the bot account, not a green check.
+4. **Never build the "after" from a different path than the "before".** Instance 2 is exactly this. One side read through the getter, the other through the returning clause. Any comparison whose two sides come from different mechanisms will report differences that are properties of the mechanisms.
+5. **Treat a stamp, a ledger and a status flag as the least trustworthy evidence about their own subject**, because they are the evidence most likely to have been written by the failing step itself.
+6. **Check whether the corroborating artifact came from the mechanism or from a person.** A pull request that exists is not a pull request the automation opened.
+
+## The takeaway
+
+The standard advice about false greens stops at detection, and detection is the easy half. The expensive half is that a false success is durable. It persists, it travels, and it acquires a second reader who cannot see the conditions it was produced under.
+
+By the time you catch one, it has usually already been spent. Find out on what.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I work on data integrity and verification in production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system). For the moment of the signal rather than its afterlife, see [Automation That Usually No-Ops Has Not Proved It Can Act](https://ehnand.com/articles/automation-no-op-rare-paths). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

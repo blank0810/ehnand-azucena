@@ -1,0 +1,78 @@
+---
+title: "If Reaching the Subject Consumes the Condition, the Navigation Is the Test"
+seoTitle: "Your Approach Path Is Part of the Experiment"
+date: 2026-09-12
+category: "Engineering Practice & Reliability"
+tags: [verification, measurement, lazy-loading, caching, browser-testing]
+summary: "Some conditions are consumed by the act of reaching them: deferred, cold, uncached, first-visit, logged-out, empty. For those, the route you take to the subject is not setup. It is part of the experiment."
+---
+
+I checked whether a third-party script was correctly deferred until its widget approached the viewport. I navigated to the page fragment that addresses the form, watched the script load immediately, and concluded the deferral was broken.
+
+The deferral works. The fragment scrolls the browser to the form on arrival, so the element was in view before any observation, and the observer fired on landing. Re-run from the top of the page, the measurement was clean: script absent after four seconds, loaded after scrolling, token issued.
+
+**Some conditions are consumed by the act of reaching them.** Deferred, cold, uncached, first-visit, logged-out, empty. For those, the route you take to the subject is not setup. It is part of the experiment, and the fastest route is usually the one that destroys the state you came to measure.
+
+## Two instances, three days apart
+
+| | The deferral check | The cold-cache check |
+|---|---|---|
+| **The claim under test** | A script is deferred until its widget nears the viewport | An anchor-scroll correction fires on a cold, uncached font load |
+| **The approach path taken** | Navigated directly to the page fragment naming the form | Re-used an already-open, already-warm browser |
+| **How the path consumed the condition** | The fragment scrolls to the form on arrival, so the element is in view before any observation and the observer fires immediately | The first successful check warmed the cache, so every subsequent look is a warm-load experiment |
+| **What was reported** | *deferral not working* | *held at 64px for seven seconds, no regression* |
+| **What was actually true** | The deferral works. From the top: script absent after four seconds, loaded after scrolling, token issued | Unknown, and the session said so. No regression is not proof the correction fires |
+
+Note the two failure directions. The first produced a **false negative on working code** and would have sent someone to fix a thing that was fine. The second produced a **false positive on unverified code**. The defect is identical. Which way it lands is luck.
+
+## Why this deserves a name
+
+What makes the fragment case worth writing down rather than filing as carelessness: **the fragment is the correct, canonical, natural address of the thing being tested.** Nobody took a shortcut or cut a corner. The most obvious way to reach the subject was the one that destroyed the state, and the resulting reading looked like a finding rather than a mistake.
+
+It is worth separating this from the neighbouring failure modes, because the fix is different for each:
+
+- It is **not a check that did not run.** Both checks ran, on the real artifact, and returned a real observation.
+- It is **not too narrow a sample.** The sample was exactly right: the right page, the right element, the right property. The *state* was wrong, and widening the sample changes nothing.
+- It is **not a proxy standing in for the artifact.** This is the top rung of that ladder. Production, real browser, real script. The artifact was real and in the wrong state.
+- It is **not a target that refuses rehearsal.** The target offered a perfectly good rehearsal. The operator's own approach path spent it.
+
+The closest neighbour is the rule that inert code is unverified code, and this is its trap: **when the first exercise is the only valid one, you get a single attempt, and you can spend it on the setup without noticing.**
+
+## The rule, and the resets
+
+For any condition a visit consumes, record the approach path as part of the measurement, and treat every subsequent look as a new experiment needing an explicit reset.
+
+Write the path next to the result. It is as much part of the reading as the number:
+
+> script absent after four seconds, loaded the bare origin at the top of the page, no fragment, no scroll, fresh profile
+
+The resets are all cheap:
+
+| Condition | What consumes it | The reset |
+|---|---|---|
+| Lazy, deferred, near-viewport | Any navigation that lands you at the element: a fragment, a restored scroll position, a deep link | Load the bare origin, confirm you are at the top, then scroll deliberately |
+| Cold cache, first paint, font load | The first successful look | New private window or fresh profile, cache disabled, hard reload. A plain reload is not enough |
+| Logged out, unauthenticated | An existing session cookie | A new profile, not just a logout |
+| Empty, zero-row, first-run | The seed, the fixture, or your own previous run | A fresh database or tenant, never a cleaned one |
+| First-ever event, one-shot migration, idempotency-guarded write | The first run | There is no reset. Plan the single attempt |
+
+When there is no reset, say so in the same sentence as the result. *Warm browser, no regression, not proof the correction fires* is the honest form. **A result carrying its own limitation is worth more than a clean one that hides it.**
+
+## What to actually do
+
+1. **Before measuring, ask whether getting to the subject uses up the thing you came to see.** If yes, the navigation *is* the test. Design it before you run anything.
+2. **Count your attempts.** Some conditions reset for free, some cost a fresh profile, and some give you exactly one. Knowing which before you start is what stops you spending the only one on setup.
+3. **Record the approach path beside every reading.** Bare origin or fragment. Fresh profile or existing session. Cold or warm. A number without its path is not reproducible and cannot be argued with.
+4. **Treat the words lazy, deferred, cold, first, uncached, initial and empty as triggers.** Any claim described with one of them needs its approach path designed, not improvised.
+5. **When there is no reset available, state the limitation in the same sentence as the result.** Not in a follow-up, not in a caveats section. The same sentence, so it cannot be quoted without it.
+6. **When two measurements of the same thing disagree, suspect the approach before the code.** A false negative on working code and a false positive on broken code are the same defect wearing different outcomes.
+
+## The takeaway
+
+Every verification has an operator, and the operator has to get to the subject somehow. For most checks that journey is irrelevant. For this class it is the whole experiment, and it happens before anyone thinks the measurement has started.
+
+Ask what the navigation costs you. Then decide how many attempts you have, and spend them deliberately.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build measurement and verification practice into production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite). For the related case where the instrument itself is the problem, see [A Lookalike Instrument Fails Hardest Exactly Where You Need It](https://ehnand.com/articles/lookalike-instrument-correlated-error). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

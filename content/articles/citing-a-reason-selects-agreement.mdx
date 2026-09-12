@@ -1,0 +1,79 @@
+---
+title: "A Rule Satisfied by Citing a Reason Selects the Reason That Agrees"
+seoTitle: "Name the Laws a Choice Costs, Not the One It Serves"
+date: 2026-09-12
+category: "Engineering Practice & Reliability"
+tags: [governance, code-review, ui-ux, design-rationale, fallback-defaults]
+summary: "A rule of the form you must supply a justification is satisfied by supplying one, and the supplier picks the justification that agrees with the decision already made. What it cannot report is the reasons nobody consulted."
+---
+
+I have a standing rule for interface work: name the cognitive law a visual choice serves, or it is pixel-pushing. It is a good rule and this article does not argue against it.
+
+A weekly history list was placed at the bottom of an existing tab, and the decision was recorded as deliberate and defensible under that rule, argued from Hick's Law: a rare action should not compete with the primary one, one primary action per view. That reasoning is correct. Hick's Law does support that placement. The rule was satisfied honestly, by someone who had read it.
+
+Fifty-eight minutes later, after watching it deploy, I asked where the weekly history had gone.
+
+**A rule of the form "you must supply a justification" is satisfied by supplying one, and the supplier picks the justification that agrees with the decision they have already made.** The rule then reports compliance, because a justification is present and it is genuinely valid. What it cannot report is the justifications that were never consulted, and that is where the defect lives every time.
+
+## The human form: one law named, three broken
+
+Re-audited against all eight standing laws, the placement broke three:
+
+| Law | How it broke |
+|---|---|
+| **Jakob** | Run history is a peer navigation item in every comparable tool: the CI provider, the hosting dashboard, the job platform. **All three of which that same session had open an hour earlier** |
+| **Gestalt, common region** | A distinct entity buried inside another view's region |
+| **Miller** | Appended to a tab already carrying its own load |
+
+Nothing was cheated. Hick's Law was correctly named, correctly applied, and pointed the wrong way. **The rule asked for one law and got one law.** The three laws that would have caught it were never consulted, and nothing in the process could report that, because an unconsulted principle leaves no artefact.
+
+The refutation cost is the number worth remembering: one person, one question, fifty-eight minutes. Cheaper than all the reasoning that preceded it, and cheaper than the eight-law audit that followed.
+
+## The machine form: a classifier that must answer, answering wrongly
+
+The same shape with no human in it.
+
+A developer tool classifies how a command-line binary was installed, choosing between several package managers, from the resolved binary path. **Its contract requires it to return a classification.** Its terminal fallback returns the most common package manager when no path separator is found.
+
+One provider declared no native update path, so no branch could ever match its real install, a standalone binary three symlinks deep. Every route landed on the fallback. The requirement to produce a classification was met, and it was met by producing the one that was cheapest to reach. The interface then rendered that classification as a working Update button, running a global package install against something that was never a package.
+
+The alternative existed, in the same file, unused. A helper that sets the update capability to false and says nothing untrue. **Declining was available and was not the default.**
+
+A second wrong answer was reachable in the same detector. The check for one package manager returns true for *any* path under a common system prefix, so a slightly different path resolution would have offered a package-manager upgrade command on a machine with that manager not installed at all. Two independent wrong answers, both presented as actions.
+
+## The third form: a rule that documents its own failure
+
+A routing table in my own operating notes requires a new project to be registered in it. Nine projects have registered everywhere else and missed that table. The paragraph naming the diagnosis, the countermeasure and the fix sits four lines above the table it protects, and it did not prevent instances seven, eight or nine.
+
+Its own verdict, already written down: a correct diagnosis written down eight times is not a control.
+
+The upstream half of that finding is the point of this article. It is not merely that prose is weak. It is that **a requirement phrased as "supply a justification" or "supply an entry" is discharged by the cheapest conforming act, and reports green.**
+
+## Why the failure is invisible from inside
+
+The artefact a citation requirement produces is a citation, and a citation is evidence about the citer's reasoning, not about the decision's quality. Three properties make it fail quietly:
+
+1. **The cited reason is genuinely true.** Nothing is fabricated, so no reviewer catches a lie. Hick's Law really did support that placement.
+2. **The uncited reasons leave no trace.** There is no record of a principle that was not considered, so an audit of the rationale is an audit of the winning argument only.
+3. **The requirement selects for agreement by construction.** You reach for the principle that supports what you were going to do, because that is the one that comes to mind while doing it. The rule rewards the search stopping early.
+
+And the compliance signal is perfect throughout. The rationale exists, names a real law, applies it correctly, and passes review.
+
+## What to actually do
+
+1. **Make the requirement enumerate, not select.** "Name the law it serves" is satisfiable by one. The cheap upgrade is to **name the laws the choice costs.** The serving law is always findable. The costing ones are exactly what gets missed, and a rationale that lists no costs is the tell.
+2. **Prefer one cheap exercise over more reasoning.** The eight-law audit was correct and arrived second. One person's search arrived first, in 58 minutes, and settled it. Ask someone to find the thing before arguing about where it goes.
+3. **In code, never let "must return a value" resolve to a plausible value.** If a classifier cannot classify, it must say so. The declining branch usually already exists, and it did here, in the same file.
+4. **Check whether a second wrong answer is reachable in the same component.** The install detector had two. Once a function is built to always answer, the cheap answers accumulate.
+5. **Treat the presence of a rationale as evidence that a decision was made, never that it was tested.** Both are worth having. Only one of them is what the rule collects.
+6. **When a citation rule fails, resist widening it.** My response that day was to add the same law in two more places. A rule that is gameable in one domain is gameable in three.
+
+## The takeaway
+
+The test is simple. **Can the requirement be met by naming exactly one thing?** If so, it selects for agreement rather than for scrutiny, and it will pass on the day it matters most.
+
+That is not an argument for abandoning rules that demand a rationale. It is an argument for asking them to enumerate what a choice costs, and for treating one cheap exercise as worth more than any amount of correct reasoning that arrives second.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I lead design and engineering decisions on production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system). For the related case where a label is believed instead of the test behind it, see [A Word That Sounds Like a Criterion Gets Read as One](https://ehnand.com/articles/read-criterion-not-label). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

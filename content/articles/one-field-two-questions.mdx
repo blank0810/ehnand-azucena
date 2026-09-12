@@ -1,0 +1,99 @@
+---
+title: "One Field Cannot Answer Two Questions, and the Newer One Loses"
+seoTitle: "One Field, Two Questions, One Wrong Answer"
+date: 2026-09-12
+category: "Business Systems & Data Integrity"
+tags: [data-modelling, design-tokens, parsing, silent-failure, accessibility]
+summary: "When one field is read by two consumers whose requirements differ, it satisfies one and betrays the other, and both readings look correct in isolation. Five instances in 48 hours across two projects that share nothing."
+---
+
+An accent colour that renders beautifully and fails its contrast floor as body type. A category on a transaction that moves every report correctly and never touches the budget it names. Two defects, two unrelated codebases, nothing in common except the shape.
+
+**When one field is read by two consumers whose requirements differ, it silently satisfies one of them and betrays the other.** There is no error, no exception and no failing test, because each consumer receives a well-formed value. It is just the wrong one for its question.
+
+Five instances landed inside 48 hours across two projects that share no stack and no domain: a budgeting app and a tariff-parsing engine. The technical territory was CSS design tokens, a financial data model, and spreadsheet parsing. The shape was identical every time.
+
+## The three questions that find it
+
+1. **How many distinct questions is this field being asked?** Not how many call sites. How many *questions*. An accent token is asked "what colour fills this bar?" and "what colour is this word?" Those are two questions carrying two different contrast thresholds.
+2. **Do the consumers' requirements differ anywhere?** If they can ever disagree, the field cannot represent the disagreement, so the disagreement gets resolved silently by whichever consumer runs.
+3. **Which consumer was the value chosen for?** That one wins. The other gets a plausible wrong answer.
+
+The answer to the third question is almost always *the older consumer*, and that is the entire reason this is hard to see. Nobody overloads a field on purpose. The field was correct, for one reader, and then a second reader arrived and quietly adopted it.
+
+**Overloading is created by the new reader, not by the field's author.** So the code that looks wrong is fine, and the code that looks fine is wrong.
+
+## The five instances
+
+| # | The field | Question A, the incumbent | Question B, betrayed | What the silence looked like |
+|---|---|---|---|---|
+| 1 | An accent colour token | what fills this bar? needs 3:1 | what colour is this word? needs 4.5:1 | Renders beautifully. **3.0:1 as type** on the light canvas, legible-looking and failing |
+| 2 | An ink token inside a fixed-colour band | what is the ink for this theme? | what is the ink on a band that ignores the theme? | Background and label computed the same value. **1:1.** A solid rectangle with no label |
+| 3 | A category on a transaction | how is this reported? | which envelope does this consume? | Both behaviours individually correct. An adjustment moves the reports and leaves the envelope untouched |
+| 4 | A human-readable account label | what do people call this account? | which product tier gates its rules? | The rule was gated on one tier, the engine derived another from the same string, the lookup never matched, **a live rule silently never fired** |
+| 5 | A spreadsheet tab name | how is this workbook organised? | which product is this block? | Two variants on one tab collapse into one client, and the importer refuses one of them, **deleting a file the client ships** |
+
+## The fix is two moves, not one
+
+**Split by role, meaning the question being asked, never by value.** Splitting an accent into "a light orange and a dark orange" solves nothing. Splitting it into *fill* and *type* solves it, because a threshold attaches to a role.
+
+The accent became four tokens, every pairing computed in OKLCH:
+
+| Token | Role | Bar it is held to |
+|---|---|---|
+| accent fill | fills, 2px bars | 3:1, a control boundary |
+| accent text | anywhere the accent is type | 4.5:1 |
+| interactive rule | interactive borders | 3:1 |
+| decorative rule | decorative hairlines | **deliberately none** |
+
+The last row is the instructive one. The split is not only about meeting a stricter bar. It is what makes it *safe* to hold one role to a looser one. While the token was single, every use inherited the strictest reader's obligation, and nobody could tell which uses actually needed it.
+
+Measuring that fix turned up two more failures nobody had reported: a 2.75:1 button and 4.38:1 body copy on the same band. **When one consumer of an overloaded field is wrong, check the others before you close it.**
+
+**Then state the precedence explicitly, in code, as an ordered expression.** A split without a stated order just relocates the ambiguity.
+
+```text
+deriveEntry(rawLabel, rows, tabProduct)
+  productFromLabel(rawLabel) ?? tabProduct ?? null
+```
+
+That single line is the whole design for instance 5.
+
+## The data-model case, where the model had already split and the UI had not
+
+This one is the cleanest of the five, because the split existed and only half the system knew.
+
+The budget service counts a budget's spend from expenses linked by budget id only. Same-category rows with a null budget link are fetched separately and shown as unlinked, never counted. The code calls this envelope isolation and means it.
+
+So when balance adjustments learned to take a category, "categorise this as groceries" and "consume the groceries envelope" became two questions wearing one control. The answer was an opt-in budget picker rather than silent auto-linking, because a reconciliation should not quietly eat a budget.
+
+The precedence then went into code rather than being left to the caller: **the budget's own category overrides whatever category the client sent**, which makes "a groceries adjustment against the rent envelope" structurally unrepresentable.
+
+The same module records the cost of *not* stating a precedence. One reader sums a budget's expenses with no date filter while another filters by the budget's own month. Two readers, one link, no stated rule about cross-month, so a cross-month link inflates one total and is invisible in the other.
+
+## The enabling move that is easy to miss
+
+For the spreadsheet case, the fallback expression alone would not have worked. The block key had to be made sheet-scoped first, from the label alone to the sheet name plus the label.
+
+Until that change, the label alone identified a block, so the same label on two tabs was one block and the two tab products had nowhere to live. **A key that conflates two dimensions cannot express a disagreement between them, which means the fallback has nothing to fall back to.** Splitting the key is what made the precedence rule mean anything.
+
+The handoff note for that work carries a line worth stealing: *do not simplify it back to tab-only.* **The overloaded version is always the tidier one, and that is exactly why it keeps coming back.**
+
+## What to actually do
+
+1. **Name the questions, not the call sites.** "Seventeen files read this field" tells you nothing. "This field answers reporting and envelope membership" changes the design in one sentence.
+2. **Look for a threshold, a derivation, or a filter attached to only one reader.** 4.5:1 against 3:1. A product derived from a display string. One query filtering by month where its sibling does not. A requirement that applies to some readers and not others is the tell.
+3. **Ask who arrived second.** The newest consumer is the betrayed one, and it is the one whose behaviour you have never watched fail.
+4. **Write the precedence as an expression, not a convention.** A fallback chain in one function is checkable. "The label wins" in a document is not.
+5. **Make the collapse unrepresentable.** Overriding the client-supplied category, and scoping the block key by sheet, both remove the bad state from the set of things that can exist rather than testing for it afterwards.
+6. **Re-check every other consumer before closing the ticket.** The first instance shipped two additional contrast failures that one measurement found and nobody had reported.
+
+## The takeaway
+
+Count the questions, not the readers. If a field answers two, the older one owns it and the newer one is already wrong.
+
+The reason this class survives review is that nothing about it looks like a defect. Each reader is correct on its own terms, every value is well-formed, and the type system is satisfied. The only artefact of the conflict is the one behaviour you have never seen.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These examples come from the [Personal Budget & Finance Manager](https://ehnand.com/projects/personal-budget-finance-manager) and [Adam AI](https://ehnand.com/projects/adam-ai). For the closely related case where a control keys on the wrong dimension entirely, see [A Control With One Possible Answer Is Not Failing, It Is Not Running](https://ehnand.com/articles/controls-with-one-possible-answer). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

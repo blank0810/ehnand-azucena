@@ -1,0 +1,73 @@
+---
+title: "A Well-Built Mechanism Implies a Caller It Does Not Have"
+seoTitle: "A Well-Built Mechanism Implies a Caller"
+date: 2026-09-12
+category: "Engineering Practice & Reliability"
+tags: [code-review, dead-code, verification, typescript, operations]
+summary: "How well something is built tells you about the mechanism. It tells you nothing about whether anything calls it. Those two facts are independent, and a reader's confidence tracks only the first."
+---
+
+A service function was tenant-scoped, validated its identifier as a UUID, gated on the right module, and covered by tests. It was the one capability that had been explicitly asked for. It had zero callers. The dashboard button still routed to the older function.
+
+The thing that hid it is the sharpest detail in the whole story: the interface defined its own local function with the same name. So grepping for that name returned seven hits spanning route, controller, service and tests. It read as fully wired at exactly the level of inspection anyone would apply.
+
+**How well something is built tells you about the mechanism. It tells you nothing about whether anything calls it, and those two facts are independent while a reader's confidence tracks only the first.**
+
+The better-made a component is, the more strongly it *implies* a caller, because careful validation, rollback paths, tenant scoping and error handling all read as evidence that someone thought about the real invocation. They are evidence that someone thought about the mechanism. Nobody checked the caller.
+
+## The case that cost thirteen days
+
+A self-hosted service launcher is genuinely sophisticated: 601 lines, candidate versions, rollback, snapshots, and a database snapshot taken before a candidate starts so that a bad update rolls back the schema along with the binary. That is careful engineering by people who took updates seriously.
+
+It has no poller. No interval timer, no cron, no update check, no auto-update. Its only three delayed calls are a termination grace period, a trial timeout and a handoff delay, and all three execute an update *already underway*. The update entry point requires a caller-supplied exact target version and explicitly rejects moving tags like `latest`. **Something with a screen has to call it, and has to already know which version it wants.**
+
+I had previously written down that this service self-updates, and justified it by citing the machinery: candidate handling, rollback, snapshots, therefore the rollback-capable launcher is installed. Every word of that is true. The conclusion does not follow. **The launcher is the transmission, not the engine.**
+
+The cost, measured: zero restarts, one process up twelve days and eighteen hours, pinned at one version while the published latest had moved six releases ahead. And the staleness and a separate broken Update button were one incident rather than two, because the pinned version is exactly the one whose driver carries the defect.
+
+## The same shape three more times in one evening
+
+- **A count shipped to the browser and never read.** Queried, tenant-scoped, serialised, delivered, unused. The third produce-never-consume of that day in the same module. Three separate work sessions, three layers, one shape, and the type checker was green on all three.
+- **The mirror image, six hours later.** Wiring the new path *orphaned* two older functions. The same grep output that meant "broken" six hours earlier now means "finished", and nothing in it distinguishes the two.
+- **The product-level instance, which is the same fault one layer up.** The rerun affordance was designed, reviewed against named interface principles, redesigned into its own tab, promoted to production in six minutes and thirty-four seconds, and pressed zero times. The week it was built to reprocess had still not been reprocessed. **A feature is a mechanism too, and shipping it is not invoking it.**
+
+## Why the inference is so reliable and so wrong
+
+Quality and invocation are produced by different acts, at different times, by people holding different questions.
+
+Building the mechanism asks *what must be true when this runs?* That question rewards validation, rollback, scoping and error paths, and all of it is visible in the file.
+
+Wiring the caller asks *what event should reach this?* That question leaves almost no trace in the mechanism itself. **A perfectly wired function and a perfectly orphaned one are byte-identical.**
+
+So the reviewer reads the only evidence present, which is entirely about the first question, and concludes something about the second. This is why the failure survives good review rather than being caught by it: the more competent the reviewer, the more they appreciate the craftsmanship, and the craftsmanship is the misleading signal.
+
+Every automatic check agrees with the wrong reading. The type checker passes, because an exported function with no callers is legal. Tests pass, because the test *is* a caller. Grep returns hits, from the definition, from the tests, and from anything sharing the name. **Nothing in the toolchain is asking the question.**
+
+## What done right looks like
+
+The counter-case from the same week is an idle guard, and it is the one thing that was verified at its invocation rather than at its construction.
+
+Three name-based approaches were tried, and all three fail silently in opposite directions. An exact-name process match can never match, giving a false idle that kills live work. A full-command-line match matches the checking process itself, giving a false busy so the timer never acts. Matching any child of the parent process deadlocks forever on a twelve-day-old shell.
+
+It was then exercised in both directions before being trusted. Idle reported idle. A live process spawned in the relevant tree reported busy and named it. Back to idle reported idle.
+
+**That is the whole discipline. Not a better reading of the mechanism, but one cheap execution of the path.**
+
+## What to actually do
+
+1. **Name the caller and the event.** "The cron fires it." "The button at this line calls it." "The deploy workflow runs it at step 58." If the sentence cannot be completed, write *no caller* rather than nothing. A blank looks like an unasked question. `no caller` is a finding.
+2. **Never accept a grep count as wiring.** Subtract the definition, the tests, and anything sharing the name. A count of seven collapsed to zero.
+3. **Treat sophistication as a reason for more suspicion, not less.** Rollback machinery, tenant scoping and validation are evidence that the mechanism is good. They are the sales pitch, not the receipt.
+4. **When something is described as automatic, find the scheduler.** A file, a line number, a timer unit. "It has an update path" is not "it updates."
+5. **When you wire something, check what you just orphaned.** One evening did both within six hours, and the second half had no owner.
+6. **Press the button yourself before calling the feature delivered.** Design review, deploy time and a green build say nothing about invocation. A single use does.
+
+## The takeaway
+
+Name the caller and the event that reaches it. Not the export, not the test, not the grep hit. The caller.
+
+If you cannot name it, you have found a mechanism, not a capability. Everything else on the page, the validation, the scoping, the rollback, the careful error handling, is evidence about a question you were not asking.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I work on delivery and operational correctness in production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite). For the closely related case where removing a suppressor runs everything behind it for the first time, see [Removing a Gate Is the First Execution of Everything Behind It](https://ehnand.com/articles/removing-a-gate-is-a-first-execution). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

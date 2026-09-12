@@ -1,0 +1,85 @@
+---
+title: "A System Can Be Correct at Every Node and Broken at Every Edge"
+seoTitle: "Node Coverage Is Not Edge Coverage"
+date: 2026-09-12
+category: "Engineering Practice & Reliability"
+tags: [testing, integration, end-to-end, verification, test-strategy]
+summary: "A green suite can prove every component works and prove nothing about the joins between them, because the tester supplies the handoff value the system was supposed to produce. Three production defects found by a human doing the ordinary thing."
+---
+
+A listing page returned 200 with correct HTML. The download endpoint returned 200 with correct bytes and the right content disposition. An authenticated request returned real CSV rows. A 154-test suite was green, and the work had been manually verified more than once.
+
+Then the owner clicked a filename on the live page and got `Not Found`. Every one of the ten links was dead.
+
+**A system can be correct at every node and broken on every edge, and node-level tests cannot see it, because the tester supplies the handoff value the system was supposed to produce.**
+
+Two projects hit this on the same day, sharing no stack, no language, no domain and no author: a Python CSV export behind a serverless gateway, and an email-driven tariff engine in TypeScript. In both cases the defect was found by a human doing the ordinary thing. Clicking a link. Sending real mail.
+
+## Three defects, all past a green suite
+
+| # | Every node passed | The edge nobody owned | How it was actually found |
+|---|---|---|---|
+| 1 | Listing 200 with correct HTML, download 200 with correct bytes, authenticated request returning real rows | The **href the page emitted**. The gateway strips the stage prefix, so a link built from the request path lost it. **All ten links dead** | Someone clicked a filename |
+| 2 | Unit suite green, and a pure-logic corpus harness agreed on the same inputs | Three joins at once: parsing ran *outside* per-client isolation so one bad notice failed all 241 files, real files arrive with a spreadsheet program's default sheet name that tab matching could never see, and a re-sent mail doubled every price list, 3,403 rows against a normal 1,700 | A dress rehearsal: 19 real mails through the production intake |
+| 3 | An authenticated command-line request returned 200 with the right bytes | The **challenge header**. The gateway renames it, so no browser ever prompts | Someone tried to open it in a browser |
+
+Instances 1 and 3 are the same blind spot one week apart in one project. Two instances is a pattern, not luck. Instance 2 is the same shape in a codebase that shares nothing with either.
+
+## Why every check passed anyway
+
+The mechanism is identical in all three, and it is not a coverage gap. **In each case the tester, not the system, produced the value that the failing edge carries.**
+
+- **Typed it.** Every check on the export typed the URL, and typing it meant including the stage prefix without thinking, because that is what the address bar shows. The suite exercised a URL constructed by the tester and never the href the page actually printed.
+- **Stored it.** The corpus harness replays saved files and bypasses the intake entirely. A fixture is a handoff value frozen by whoever captured it, so it encodes the sheet names, the ordering and the arrival pattern that person assumed. Never the default sheet name. Never a re-send.
+- **Chose it.** A command-line client is a caller the tester selected, and it is precisely the one caller structurally incapable of observing a missing browser prompt.
+
+**If the test knows the value before the system says it, the test is not checking the system.** Typing, fixturing and tool choice look like three different activities. They are one act: substituting your belief about the handoff for the system's actual output.
+
+## Node coverage cannot grow into edge coverage
+
+Adding tests to either endpoint would not have caught any of these. That is structural, not a scheduling complaint.
+
+- Instance 1's defect is in **neither** the listing, which rendered correctly, **nor** the download, which served correctly. It is in the string one passes to the other, and no single-component test holds both halves.
+- Instance 2's three defects live in a boundary between components, in what real files are named, and in the sequence of two arrivals. None of those is a property of any one component. The third is not even a defect *in* a run. It is a defect *between two runs*.
+- **A component test's fixtures are authored by the same person who authored the component**, so both inherit one model of the interface. When that model is wrong, the test agrees with the code and both are wrong together, cleanly, greenly, with no error anywhere.
+
+The honest limit: edge coverage costs more than node coverage, and that is real. The argument is not that everything must be tested end to end. It is that **the join is a distinct thing requiring its own evidence**, and a suite's green is not that evidence and should never be reported as though it were.
+
+## What actually catches it
+
+Make the system emit the value, then feed that exact value back in, verbatim, unread, unmodified.
+
+```python
+html = client.get("/files/").text
+href = re.search(r'href="([^"]+)"', html).group(1)
+assert client.get(href).status_code == 200      # never construct the URL
+```
+
+That test is mutation-proven: reverting the fix fails four of its seven cases.
+
+The equivalent for the mail-driven engine is not a unit test at all. It is a dress rehearsal through the real mailbox, and it earned its cost three times in a single run. **Budget the rehearsal. It is not ceremony.** Both projects ran one, and both found live defects that everything cheaper had certified as absent.
+
+## Where this applies
+
+Anywhere one part of a system generates an address, name, token or ordering that another part consumes:
+
+pagination links, redirect targets, `Location` headers, webhook callback URLs, emailed reset links, signed download URLs, OpenAPI server blocks, sitemap entries, uploaded filenames, queue message keys, retry and re-send paths, and anything whose correctness depends on two events rather than one.
+
+## What to actually do
+
+1. **Ask who produced the value under test.** If the answer is "I did", you are testing your belief, not the system. This one question sorts most suites faster than reading them.
+2. **Extract the handoff from the real output and feed it back unmodified.** Parse the href out of the HTML. Read the filename off the message. Never retype it, and never clean it up on the way through.
+3. **Treat a fixture as a frozen assumption with an author and a date.** It encodes naming, ordering and arrival pattern as of the day it was captured, and it will keep agreeing with you long after reality has moved.
+4. **Rehearse through the real intake before you call a feature done.** One pass of real inputs through the production path, at whatever it costs, is the cheapest edge coverage that exists.
+5. **Vary the caller, not just the input.** A command-line client, a browser and a webhook consumer observe different things, and the one you picked is the one that cannot see your defect.
+6. **Never report a green suite as evidence that a feature works.** It is evidence that the parts work. Say which, because the difference is exactly where these defects live.
+
+## The takeaway
+
+A defect on an edge produces no error, because both nodes are behaving correctly. Nothing alarms, nothing logs, and every instrument you own agrees that the system is healthy.
+
+The only reliable way in is to stop supplying the connection yourself. Make the system say the value out loud, then hand that back to it, and find out whether it recognises what it just said.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These examples come from production work including [Adam AI](https://ehnand.com/projects/adam-ai) and a Terraform-managed serverless backend described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). For the adjacent failure where the instrument itself re-implements the system, see [A Lookalike Instrument Fails Hardest Exactly Where You Need It](https://ehnand.com/articles/lookalike-instrument-correlated-error). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

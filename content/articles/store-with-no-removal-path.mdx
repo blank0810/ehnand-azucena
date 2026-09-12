@@ -1,0 +1,84 @@
+---
+title: "A Store With No Removal Path Is Not a Cache, It Is an Authority"
+seoTitle: "A Store With No Removal Path Becomes Authority"
+date: 2026-09-12
+category: "Business Systems & Data Integrity"
+tags: [data-ownership, denormalisation, caching, drift, postgresql]
+summary: "A store that has an insert path and no removal path stops being a cache and becomes a source of truth, and nobody ever decides that it should. The write side is obvious. The forget side is invisible."
+---
+
+A registry table accumulated a row for every client label any incoming workbook had ever named. Nothing anywhere set those rows inactive. One run built 107 of its 235 output files for clients that nothing had arrived about that week.
+
+The owner described the system correctly and in plain language: we do not have a master list, we only process what we receive. The second clause was false in the code while being true in intent.
+
+**A store that has an insert path and no removal path stops being a cache and becomes an authority, and nobody ever decides that it should.** The write side is obvious and gets built. The forget side is invisible, because nothing ever asks for it and its absence produces no error. What it produces instead is a slowly widening set of rows the real source does not have, and every consumer downstream reads that set as fact.
+
+**The one-line test is a question about the future, not the present: what deletes a row here, and who calls it?** If the honest answer is "nothing" or "we would notice", you do not have a derived store. You have a second source of truth that agrees with the first one today by coincidence.
+
+## Two instances on one day, two unrelated stacks
+
+| | The copy that was never made | The copy that had been growing for weeks |
+|---|---|---|
+| **The store** | A proposed profile table in a tenant database, seeded by a migration | A live registry of client products |
+| **What fills it** | A migration, once, from the control database | A helper that inserts a row for any client label a workbook has ever named |
+| **What empties it** | Nothing | **Nothing.** No code path anywhere marks a row inactive |
+| **Who owns the real value** | An operator, typing into the control database, and they will edit it again | The client, by sending files, from a roster this system never receives |
+| **What it cost** | Nothing, because it was killed before it shipped | **107 of 235 generated files**, built for clients nothing had arrived about |
+| **The fix** | Delete the copy, open a second connection, read live | Delete every baseline, build only from what arrived this run, let unstated entries expire on their own |
+
+## The design case, where a real precedent was applied one category too far
+
+The tempting argument was strong and nearly right. **Permissions already work as a copy.** The catalogue lives in the control database, the request path reads a local table, and nothing joins across databases at request time. So copy the tenant profile down the same way.
+
+The precedent does not transfer, and the discriminator is **direction of ownership**.
+
+Permission metadata originates in the repository. A constant holding 89 entries is pushed *into* the control database by a seeder. That database is downstream of version control, so a copy in the tenant database is the same code-owned constant deployed twice, and it cannot drift, because nobody edits it anywhere else.
+
+The company profile runs the other way. It originates in the database, an operator typed it, and it is mutable.
+
+**The tell was a question with no answer.** For the permission copy, "what happens when the canonical row changes?" is meaningless, because the codes are immutable identifiers. For the profile copy it has no good answer, and **a design that cannot answer that question has already told you which kind of data it is holding.**
+
+## The output case, where the same defect was found from the symptom
+
+Nobody proposed the registry as a master list. It accumulated into one.
+
+What made it invisible for weeks is that **a never-forgetting store produces no error, ever.** Every row in it was real once. Every file it generated was well-formed, published and delivered. The only symptom was a count that was too high, and a count is easy to attribute to almost anything, which is exactly what happened. The gap was blamed on parser scope, then on a filter gate, before anyone read the line that iterates the registry.
+
+The sentence that resolved it is worth keeping: **an accumulated registry that never forgets is a master list, whether or not anyone decided to keep one.**
+
+Once that was said out loud, two things that had been held simultaneously stopped being compatible. "Only what arrived this week" can never reach the client's expected total, because a large share of that total comes from a roster nobody sends us. Naming the incompatibility is what forced a third option instead of tuning the second.
+
+## Why both fixes were removal rather than invalidation
+
+Neither project fixed this by adding a cleanup. Both removed the store and re-derived from the source each time.
+
+One deleted the table and the migration and paid for a second database connection: a credential, a grant, one extra round trip, rather than owning a copy nothing keeps in sync.
+
+The other deleted six mechanisms in one push, the previous-run load, a fingerprint and widening pass, a circuit breaker, an empty-baseline guard, a full-scope fallback, and a scoping module, replacing 88 lines with 25.
+
+**A cleanup path is itself a store with no removal path one level up.** Somebody must remember to call it, its predicate must stay correct as the data shape moves, and when it silently stops matching, the symptom is identical to not having it.
+
+And **expiry is not the same as a cleanup.** A cleanup removes stale rows on some schedule. Expiry means staleness is not representable: the scope predicate compares a row's last-stated week against the run's week, so a row that was not stated this run is simply not in scope. No code has to notice it or act on it. The row can sit there forever and cost nothing.
+
+## The counter-case, so this is not read as "never denormalise"
+
+Copying down is correct when the copy cannot drift. Repository-owned, immutable identifiers, pushed outward by a seeder that runs on every deploy. **That is not a cache, it is a deployment.**
+
+Classify by origin and mutability, never by the shape of the plumbing. The two designs above have identical plumbing, a table in the tenant database filled by a migration, and opposite correctness.
+
+## What to actually do
+
+1. **Ask what deletes a row and who calls it, before the store exists.** If nothing does, you are designing an authority. Decide whether you meant to.
+2. **Classify the data by origin and mutability, not by plumbing.** Repository-owned and immutable can be copied freely. Operator-owned and mutable cannot, however convenient the copy is.
+3. **Prefer removal to invalidation.** Deleting the store and re-deriving is fewer moving parts than a cleanup job that must be remembered, kept correct, and proven to still fire.
+4. **Prefer expiry to cleanup where you must keep the store.** Make staleness unrepresentable by scoping reads to the current run, rather than sweeping stale rows on a schedule.
+5. **When a count is too high, read the loop before tuning the filters.** Three explanations were tried on a registry defect before anyone read the line that iterates it.
+6. **Say the uncomfortable sentence out loud.** "An accumulated registry that never forgets is a master list" ended weeks of tuning. Naming the incompatibility between two beliefs is what forces the real option.
+
+## The takeaway
+
+A cache is defined by its removal path, not by its intent. Take that path away and what remains is an authority that nobody appointed, growing quietly, agreeing with reality less every week, and producing perfectly well-formed output the entire time.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build data-integrity-critical business systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system). For the adjacent case where two copies disagree and neither can read the other, see [When One Copy Isn't Yours, You Need a Reconciler, Not a Single Source of Truth](https://ehnand.com/articles/reconcilers-not-single-source-of-truth). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

@@ -1,0 +1,61 @@
+---
+title: "An Approval Records the Object and Loses the World It Was Granted In"
+seoTitle: "An Approval Expires With Its Premise"
+date: 2026-09-12
+category: "Engineering Practice & Reliability"
+tags: [approvals, release-management, deployment, concurrency, client-work]
+summary: "An approval is granted against a state of the world and recorded as a decision about a thing. The thing persists, the state moves, and nothing in the record notices. Three instances on one day across three projects."
+---
+
+The owner said not to ship the deposits work. It was unfinished and uncommitted in a shared checkout at the time, and that was the whole basis of the answer.
+
+Minutes later a concurrent session committed it to the main branch, which on that repository means reviewed and shippable. **The sentence he had said was still true and no longer meant what it meant.**
+
+**An approval is granted against a state of the world and recorded as a decision about a thing. The thing persists, the state moves, and nothing in the record notices.**
+
+Three instances landed on one day across three projects sharing no stack, language, client or domain: a serverless ERP backend in Python, a municipal billing system in Laravel, and a document-reconciliation platform in TypeScript.
+
+## Every approval has two parts and only one gets saved
+
+| | The object, always recorded | The premise, almost never recorded |
+|---|---|---|
+| Serverless ERP | *do not ship the deposits work* | **while it is unfinished and uncommitted** |
+| Municipal billing | *for now let's just merge to staging* | **for this merge, at this tier, with these 99 failures known** |
+| Reconciliation platform | *build the fix using the results of the investigation* | **for the 21 targets investigated, and no others** |
+
+**The premise expired in minutes**, which is the fastest instance I have on record. The session re-asked rather than resolving it privately, and that was the right call: the alternative was either shipping against his answer or quietly withholding work he would have shipped. Re-asking cost one question.
+
+**The second premise was stated aloud and then stored nowhere the artifact can reach.** "For now" and "to staging" are both scope, and the session record preserves them exactly. The pull request does not. Ninety-nine failing tests are now on staging under an acceptance that lives in one prose sentence in one note, and two follow-up tasks are the only things standing between that sentence and a future promotion that reads the merge as precedent.
+
+**The third is the counter-instance, and it is here because it shows the discipline working and what holding the line costs.** Authority was granted for 21 investigated items. Fourteen were recovered and deployed. Five automated-report targets sat one inference away from inclusion and were not included. The notes say so twice, in different sessions: *receipt is established, authority and recoverability are not*, and *no new authority was inferred for them*.
+
+**Receipt of evidence was deliberately separated from authority to act on it.** That is the distinction the other two instances lacked a word for.
+
+## Why nothing catches it
+
+An approval that has gone stale produces no error, and it produces the *opposite* of a warning. It produces confidence. Every downstream reader sees a real decision, correctly attributed, from the right person, about exactly the object in front of them.
+
+- **The premise is usually ambient rather than spoken.** "While it is uncommitted" was never said by anyone. It was the situation both parties were looking at.
+- **The premise decays on a different clock from the object.** A build directory, a branch, a tier, a test inventory and a week's input corpus all move without anyone editing the approval.
+- **Re-asking looks like not having listened**, which is precisely why it gets skipped. It is also why the first instance is worth quoting. One question.
+
+## What to actually do
+
+1. **Record the premise beside the object, in the same sentence.** "Approved: merge to staging, with the 99 known failures, for this merge only" survives being read six weeks later by someone who was not there. "Approved the merge" does not.
+2. **Before acting on an approval, re-read the state it was granted against, not the words.** If the tree, the branch, the tier or the input set has moved, the approval has not been revoked. It has stopped addressing your situation, which is different and worse, because nothing will tell you.
+3. **Separate receipt of evidence from authority to act, explicitly, in the record.** *Receipt is established, authority and recoverability are not* is the reusable form, and it costs one line.
+4. **Never extend an authorization by analogy, however strong the neighbouring case.** Fourteen recovered targets are not an argument about the fifteenth. They are an argument that asking about the fifteenth is cheap.
+5. **On a shared substrate, assume the premise is moving while you work.** A concurrent session is enough. Nobody has to do anything wrong for your basis to evaporate.
+6. **An approval scoped to an environment must be written into something the next environment will read.** A note is a record. It is not a gate, and a promotion will not consult it.
+
+## The takeaway
+
+This is not the familiar failure where a declaration drifts from an enforcement, two stores that were never wired together. Here there is only one store, it is accurate, and it is complete about the wrong thing. It faithfully records *what* was permitted and silently omits *the conditions under which permitting it made sense*.
+
+Nor is it someone declining to decide. These were decisions, made properly, by the right person, on good information. They simply had a shelf life that nothing recorded, and one of them reached its expiry in the time it took to switch branches.
+
+Write the premise down next to the object. If you cannot state it in one clause, you have not understood what you were actually granted.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These decisions come from client delivery on systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system). For the related case where a change's rationale evaporates on its way to production, see [Nothing in Your Pipeline Takes the Reason as an Argument](https://ehnand.com/articles/pipeline-never-checks-the-premise). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

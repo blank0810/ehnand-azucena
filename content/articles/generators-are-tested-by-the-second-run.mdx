@@ -1,0 +1,79 @@
+---
+title: "A Generator Is Only Tested by Its Second Run"
+seoTitle: "A Generator Is Tested by Its Second Run"
+date: 2026-09-12
+category: "Engineering Practice & Reliability"
+tags: [idempotence, code-generation, determinism, migrations, accessibility]
+summary: "A generator's first run produces output where there was none, so any output at all looks like success. Whether running it again over the same input yields the same artifact is a relation between two runs, and no single run can express it."
+---
+
+A documentation generator inserted its stylesheet by replacing the closing style tag with its new rules plus that closing tag. Every regeneration therefore appended, leaving the previous version's rules in the document, and the older copy kept winning on source order.
+
+Two collisions shipped together, both against a 4.5:1 contrast floor:
+
+| Collision | What happened | Ratio |
+|---|---|---|
+| Half-override | The page already styled preformatted blocks as light text on dark. The new rule set only the **background** to near-white and inherited the light foreground | **1.20:1** |
+| Name reuse | One class already meant a grey pill **background**. The new block redefined the same class as pale grey **text**, and both applied, across 732 rows | **1.15:1** |
+
+The owner reported it as "somewhat grey." It was closer to invisible.
+
+The decisive detail is not the defect. It is the repair attempt. **After the fix, regenerating appeared to change nothing**, because the stale block was still there and still winning.
+
+**A generator's first run produces output where there was none, so any output at all looks like success.** Whether the generator is a *function of its input*, whether running it again over the same input yields the same artifact, is a relation between two runs, and no single run can express it. So the first run is not a test of the thing that matters. The second run is.
+
+And the trap is in the failure signal. When a non-idempotent generator is run the second time, what you observe is **"nothing changed."** That is also exactly what you observe when the generator is correct and the fix is already applied. **The defect and the success produce the same reading**, which is why this class survives a careful author, a review, and a re-run by the person who just fixed it.
+
+## What the control looks like when it is standing discipline
+
+A money pipeline on a different project runs over a client's price lists and has been asserting the second-run property all week without calling it that:
+
+- Two complete local replays of all 102 inputs and 218 verified objects agree on all 130 output economic hashes: 128 clean, two held, zero skipped.
+- Only one file changes against the prior replay. The other 129 files' rates and rows are unchanged.
+- A full week replay run twice: 130 drafts, 127 clean, three held, exactly ten files changed and the other 120 unchanged.
+
+**Note what is being asserted every time: the set that did *not* change.** A diff of what moved is a statement about the intended change. A diff of what stayed is a statement about the generator.
+
+## The second run against a target that already holds state
+
+Pushing a configuration environment to a remote service is a generator whose output already exists and is owned by somebody else. A naive second push overwrites the remote with the local file, and transmits credentials on the way.
+
+The shipped design reads the **remote** first and carries 14 of 54 secret-shaped variables across unchanged, so a push adds and updates every ordinary variable while the secrets stay exactly as whoever set them left them. A test pins the behaviour.
+
+Secret-shaped is matched on the variable **name**, never on its value. A name is stable and reviewable. Sniffing values would miss a blank secret and flag a harmless random-looking identifier.
+
+**A push to an empty remote leaves those variables blank, which is why testing this against a fresh target proves nothing.** The second run has to be against a target that already holds state.
+
+## The same control run forwards, as a proof
+
+Porting 286 local API requests into a production collection could have been hand-written. Instead, 128 requests existed in both files, so each was re-derived from its local counterpart and diffed against the real production copy. **One hundred reproduced byte for byte.**
+
+That is the idempotence check used as a proof rather than as a check, and it paid twice. The 28 that differed turned out to be one family, added later under a sloppier convention. **The idempotence check found an inconsistency nobody was looking for.**
+
+## Why generators are written this way
+
+1. **Creation and update are different operations, and most generators are written as creation.** The author holds an empty or absent target in mind. The code that runs on run two is code nobody pictured.
+2. **Composition is the default in every layered substrate.** Stylesheets cascade, config files merge, ledgers append, remotes hold prior state. Writing into one of them composes. It does not replace.
+3. **The artifact is not compared to anything.** Run one has nothing to be compared against. Run two has run one, and nobody keeps it.
+4. **So the failure reports itself as a no-op**, the single observation that a correct system also produces.
+
+## What to actually do
+
+1. **Run it twice over identical input and diff the two outputs. Equality is the assertion.** This is one line in most test suites and it is the only statement of the property.
+2. **If the generator writes into an existing file, give it a sentinel-delimited region it owns.** Strip that region before writing, and assert that exactly one region survives.
+3. **Assert on what did not change, not only on what did.** Hashes over the whole output set, and an explicit count of untouched files.
+4. **Exercise the second run against a target that already holds state.** An empty remote, a fresh database or a missing file tests the easy half and proves nothing about the half that bites.
+5. **Validate a transform by running it over inputs whose outputs already exist**, asserting byte equality, before trusting it on the inputs where no answer exists yet.
+6. **Never accept "regenerating changed nothing" as evidence on its own.** Ask what you would have seen if it were broken. If the answer is the same thing, you have not observed anything.
+
+## The takeaway
+
+This is not a check that failed to run. The generator ran, twice, and produced output both times. What was missing was the comparison *between* the runs, and that comparison is the only place the property lives.
+
+It is also not the first-execution problem, where code has never been exercised at all. This starts where that one ends: the code has run, it worked, and the property still is not tested.
+
+Run it again. Then diff it against itself, and make the equality the assertion rather than the assumption.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These patterns come from generator and pipeline work on [Adam AI](https://ehnand.com/projects/adam-ai) and the Terraform-managed serverless backend described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). For the mirror case where a no-op says nothing about a control's ability to fire, see [Automation That Usually No-Ops Has Not Proved It Can Act](https://ehnand.com/articles/automation-no-op-rare-paths). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

@@ -1,0 +1,71 @@
+---
+title: "Every Result Is Scoped to Whoever Asked, and Almost Nothing Tells You Who"
+seoTitle: "A Scoped Result Never Names Its Own Scope"
+date: 2026-09-12
+category: "SaaS, Cloud & Security"
+tags: [postgresql, terraform, aws, permissions, debugging]
+summary: "The output says what was found. It does not say what was visible to the identity that looked. Read the first as the second and you get a confident, specific, wrong answer, with no error anywhere."
+---
+
+A migration failed with a message that a table did not exist. The follow-up query returned zero rows for four different tables, while the function reporting the current database correctly named the right one.
+
+The obvious reading, that the tenant database is empty, would have been an emergency. Five live functions point at that database and were serving traffic normally.
+
+The system catalogue view being queried lists only what the current user owns or holds a privilege on, and the connection had been made as a provisioning role with no grants on those tables. A different catalogue view, one that is not privilege-filtered, returned every table immediately. The panic ended.
+
+**Every result you get back is scoped to whoever asked for it, and almost no tool tells you who that was.** The output says *what was found*. It does not say *what was visible to the identity that looked*. Read the first as the second and you get a confident, specific, wrong answer, with no error.
+
+## Three instances, two unrelated projects, two days
+
+### The empty database that was full
+
+The cruel part is the timing. The privilege-filtered catalogue answers *what may I use*, not *what exists*, and those two answers diverge exactly when you are debugging a permissions problem, which is exactly when you are most likely to ask.
+
+The unfiltered catalogue returned the table, its schema and its owner in one query. The tables had been there the whole time, created by a different role than the one doing the looking.
+
+### The run that succeeded as somebody else
+
+Testing whether a restricted role could deploy: a direct API probe said one permission was **denied** to it. A plan run with that role's profile in the environment then refreshed every gateway resource **successfully**.
+
+The apparent contradiction would have retracted a correct finding. Querying the caller identity from inside the tool named a **different identity entirely**. The provider's profile comes from a variable pinned in a variables file, so the environment variable reached the state backend and nothing else.
+
+**Two credential-resolution chains per command, and only one of them reads your environment.**
+
+This is the sharpest of the three, because the operator did not merely fail to specify the principal. They specified it explicitly and were silently overridden, and the successful run was the evidence that concealed it.
+
+### The overflow that belonged to the session, not the widget
+
+After shipping a two-file correction to a form widget, a check at 320 pixels in an existing authenticated browser context showed navigation overflow. A fresh anonymous context at the same width showed none, with both form widgets inside the viewport.
+
+Same viewport, same page, same measurement, two answers, discriminated only by who was logged in. The session recorded the difference as a property of the context, explicitly declined to attribute it to the change just made, and left it for later navigation work.
+
+**This is the instance that shows the shape is not a database quirk.** No permissions system is involved at all. A signed-in session simply renders different markup. The principle is about scope. Authentication is only its most common source.
+
+## Why nothing catches it
+
+A scoped result is well-formed. Zero rows is a valid result set. A successful plan is a successful plan. A rendered page is a rendered page.
+
+**There is no exception, no warning, and no field in the output that says "filtered" or "as identity X".** The tool has answered your question correctly. You asked a narrower question than you thought you were asking.
+
+The failure mode of a scoped check is a clean pass, which is why it keeps recurring in different clothes.
+
+## What to actually do
+
+1. **Read the result and the principal in the same breath.** Never ask which database you are on without asking which user you are. Never accept an infrastructure plan outcome without querying the caller identity from inside the tool. Never record a browser measurement without naming the context: anonymous, authenticated, or which profile.
+2. **Before believing an absence, query an unfiltered source.** The raw system catalogue over the privilege-filtered view. The raw API over the SDK's convenience list. The filesystem over the tool's index. Prove the catalogue is empty before believing the database is.
+3. **Never infer an identity's permissions from whether a command succeeded.** Success proves *something* had the rights, not that *your named identity* did. Probe the permission directly, as that identity, against the real API.
+4. **When a config file and an environment variable set the same thing, assume the file wins and verify which did.** The environment variable may still reach *part* of the system, and that partial reach is what makes the run look honest.
+5. **When two measurements of the same thing disagree, look for a principal before looking for a bug.** One session did this correctly and saved itself from fixing a widget that was fine.
+6. **Write the principal into the record, not just the result.** Six weeks later, "zero rows" is unusable and "zero rows as the provisioning role" is a finding.
+
+## The takeaway
+
+There are two ways this bites. One is the case where you deliberately vary the principal and forget to, which is a discipline problem with a known fix: fetch it as the stranger, rehearse as the least-privileged user.
+
+This is the other one, and it is worse. **The principal was never chosen.** It was inherited from a shell, substituted by a config file, or supplied by a cookie you forgot you had. The tool then reported the result as though it were a property of the world.
+
+Zero rows did not mean the database was empty. It meant the question had been asked by somebody who was not allowed to see.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build and operate cloud backends including the Terraform-managed serverless backend described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda) and [Adam AI](https://ehnand.com/projects/adam-ai). For the too-much-privilege version of this problem, see [Every Authorization Defect Is Invisible to an Identity That Outranks It](https://ehnand.com/articles/authorization-testing-least-privilege). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

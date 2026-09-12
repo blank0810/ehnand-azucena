@@ -1,0 +1,89 @@
+---
+title: "Nothing in Your Pipeline Takes the Reason as an Argument"
+seoTitle: "Your Pipeline Never Checks Why a Change Was Made"
+date: 2026-09-12
+category: "AI & Automation"
+tags: [ai-assisted-development, code-review, decision-records, ci, delegation]
+summary: "Every gate downstream of a decision is a function of the artifact. The reasoning that selected the artifact is not an input to any of them, so a premise can die between decision and delivery and nothing raises its hand."
+---
+
+A form label was rewritten for three stated reasons. The change shipped to production in 22 seconds and is still right. Two of the three reasons were false, disproved by a line 98 lines up in the same file, outside the conditional and therefore always on screen.
+
+Nothing anywhere noticed.
+
+**Every gate downstream of a decision is a function of the artifact. The reasoning that selected the artifact is not an input to any of them.** The diff shows what changed. The type checker checks what is there. The tests exercise what is there. Review reads what is there. CI builds what is there. The deploy ships what is there. Not one of them takes the *premise* as an argument.
+
+So when the reason a change was chosen turns out to be false, or dies between the recommendation and the implementation, or was never actually asked, the change is still well-formed, the suite is still green, and nothing raises its hand.
+
+This matters more in an AI-assisted workflow than it used to, because the distance between the reasoning and the writing has grown. A recommendation is produced in one context, a design in another, an implementation in a third. Every one of those handoffs is a place a premise can quietly stop applying.
+
+## Four instances in one day
+
+### A correct change reached through two false premises
+
+Three reasons were given for the label rewrite:
+
+| # | Stated reason | Verdict |
+|---|---|---|
+| 1 | It breaks the pattern set by the field above it | **True, and it justifies the change on its own** |
+| 2 | It never said email, nothing on the page did before submission | **False** |
+| 3 | It hid the wait until after the commitment | **False, disproved by the same line** |
+
+The section's own lede, 98 lines up in the same file and outside the conditional that swaps the form for a confirmation, reads: *send a PDF or photo through chat, or upload it here, and the structured result is emailed in about a minute.* It is the first thing a visitor reads.
+
+The change was right. It shipped in 22 seconds. **A correct change reached through two false premises emits no signal in the diff, the type checker, the tests, the review or the deploy.** All three instruments used were scoped to the *element*. The unit a reader experiences is the *screen*.
+
+### The property that won the argument is not the property that shipped
+
+A shared rendering framework beat a bespoke email template on one argument, stated twice and clinched with evidence: one function returns subject, HTML and plain text from a single document, so an HTML redesign cannot silently degrade the messaging copy, because both stay generated from the same source.
+
+Neither half of that was used. The input type gained a structured content field **without losing** the plain body string. The send path still routes the string to messaging and the structured content to email. The success call site passes the same four values twice, in one object literal, ten lines apart.
+
+Before: one string, degenerate but drift-proof by construction. After: two sources of truth for one message, kept in sync by hand, with no test comparing them.
+
+**The implementation did exactly what the design said.** The failure is one layer up. The reason evaporated between the recommendation and the design, and nothing records that the argument no longer applies. A future reader will reasonably infer the messaging copy comes from the same document. It does not.
+
+### An open security question closed by a scheduling instruction
+
+Two questions went up from an audit. A public contact endpoint **fails open** on its CAPTCHA check, because the verification is wrapped in a conditional on whether the CAPTCHA is configured, and there is no rate limit anywhere. Separately, a structured-data block names text inside a wrapper that is hidden at small breakpoints.
+
+The answer was *let's proceed on deploying it*.
+
+That answers *whether* to ship, not *which option*, and the code took the do-nothing branch on both. There was no live exposure, because the production environment has the CAPTCHA configured. The shape is the finding: an ambiguous instruction resolves silently, and the artifact is well-formed under either reading, so nothing downstream can tell which was meant.
+
+### A task's ordering inverted and its scope silently doubled
+
+A deployment task states its own ordering: deploy first, then the pull request chain. The chain ran first, in 2 minutes 32 seconds, and the task does not mention the second release at all, although both releases reached the main branch in the same 31 commits.
+
+**The deploy the task names has doubled in scope without the task changing by one character.** Nothing compared the task's premise against the day's chain, because nothing is built to.
+
+## The counter-evidence, which is the actionable half
+
+Twice on the same day a reason *did* survive, and both times because someone had converted it into an artifact the pipeline already carries.
+
+**A reason expressed as a command with a truth value.** One design's acceptance criterion was literally a shell command: `git diff --name-only` must list nothing under three named directories. It was re-measured independently and passed, eight files changed and zero in those directories, so "the neighbouring email paths are byte-identical" is a measurement rather than a hope.
+
+Note what it did and did not protect. The criterion covered the *blast radius* and shipped intact. The *rationale for reuse* had no such expression and evaporated. In one design, the reason that was mechanised survived and the reason that stayed prose did not. That is about as close to a controlled experiment as a working week gets.
+
+**A reason committed as a file.** An audit's 192 lines went into the commit, carrying the two unresolved questions as ranked open items with the recommended fix spelled out. That document is the only thing that stopped both questions evaporating when the instruction to proceed shipped them.
+
+So the countermeasure is not "write the reason down." **Both of the day's failures had their reasons written down**, one in a design document and one in a conversation. The countermeasure is to write the reason down in a form something already reads.
+
+## What to actually do
+
+1. **When a decision turns on a property, name the artifact that will prove the property still holds at merge time.** If you cannot name one, expect the property to be gone and the decision to survive anyway.
+2. **Phrase an acceptance criterion as a command with a truth value.** A directory list from a diff, a named test, a byte comparison. Prose criteria are the ones that evaporate.
+3. **Commit the rationale in the same commit as the change.** A document in the diff is read by review. A document in a chat is read by nobody after the day it was written.
+4. **When you answer an ambiguous instruction, record which reading you took, in the diff.** The artifact is well-formed under both readings, so the record is the only discriminator that will ever exist.
+5. **When a change is right for the wrong reason, say so where the change lives.** It costs one sentence and nothing in the toolchain will ever produce one for you.
+6. **Treat a rationale as having its own expiry, and re-read it at implementation time.** Ask whether it still applies to what you are about to write. The gap between recommendation and implementation is where all four of these opened.
+
+## The takeaway
+
+If a reason has to outlive the decision, give it an artifact the pipeline already reads. Otherwise the pipeline will validate the object and silently discard the argument for it.
+
+That is not a criticism of the pipeline. Every one of those gates is doing exactly its job, correctly, on exactly the input it was given. The premise was never one of its inputs, and it never will be unless you make it one.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I direct AI-augmented delivery on production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system). For the related question of which checks an AI implementer could actually execute, see [An AI Implementer's Sandbox Is Your Verification Boundary](https://ehnand.com/articles/implementer-sandbox-verification-boundary). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

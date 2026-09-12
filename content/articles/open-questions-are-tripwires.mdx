@@ -1,0 +1,59 @@
+---
+title: "An Open Question Is a Tripwire, Not a To-Do"
+seoTitle: "Write Open Questions in Collidable Nouns"
+date: 2026-09-12
+category: "AI & Automation"
+tags: [ai-memory, knowledge-management, documentation, research, workflow]
+summary: "The open questions in a knowledge base do not get answered by anyone going and asking them. They get answered when unrelated work happens to walk past the answer, which changes how you should write them down."
+---
+
+I record open questions in a project knowledge base that an AI assistant reads at the start of every session. The questions I cannot currently settle get written down with the evidence I have and the evidence I would need.
+
+Three times now, a question recorded against one project was resolved, or handed its first real candidate, by a session working on a different project for a different reason, which had no idea the question existed.
+
+**That changes what a recorded question is for. It is not a to-do. It is a tripwire.**
+
+## Three collisions
+
+**An identity question, resolved in one day, by a git remote.** The knowledge base recorded that a client on one site shared a full name with an integrator on a completely unrelated project, and that nothing tied them together. Nobody asked. The next day the owner supplied a repository remote for a deployment question, and the account that owned it was the same account that owned the other project's repository, plus a note about collaborator access. He was answering a deployment question. The identity resolved as a side effect, at high confidence.
+
+**A person note produced by a spreadsheet bug.** A name had sat in the knowledge base for eighteen days with no note attached. What produced one was a file-attribution fix on an unrelated system: a weekly price list is created and saved twenty seconds apart and regenerated every week, so nobody ever renames its sheet and the tab arrives with the spreadsheet program's default name. Reading that file's metadata to fix attribution is what surfaced who makes it. Nobody set out to identify anyone, and the contrast case, an older workbook that *does* have a named tab, arrived in the same pass for the same reason.
+
+**A marketing page as the primary source.** *Who is the stakeholder referred to only by first name?* was recorded against a reconciliation project and explicitly marked unanswerable: a named person, no note, and deliberately not stubbed, because the naming convention requires a full name and none was known. Eleven days later, an unrelated product shipped a company page. A public origin story has to name a real person and a real place to be publishable, so the owner supplied one. **A marketing deliverable extracted, in one session, a fact that eleven days of open questioning had not.**
+
+## The interpretation
+
+**A publishing obligation is a stronger extraction instrument than a question.** The first and third instances share this exactly. The owner had to commit to a concrete artefact, a repository remote and a public page, and an artefact cannot be vague where a conversation can. *Who is this person?* can be deferred indefinitely. *Whose photograph goes on the About page and what is his story?* cannot.
+
+The corollary is what makes this actionable. **Whether a question ever gets tripped depends on how concrete its terms are.** The third question was catchable because it had been recorded with nouns that unrelated work could collide with: an industry, a country, a company name. Recorded as "stakeholder identity unclear", the new note created eleven days later would have matched nothing.
+
+And the honest limit, which has to be stated or this becomes an excuse: **this is not a strategy for getting answers.** Two of the three sat open for eleven and eighteen days, and would have sat open indefinitely if the collision had not happened. A question that can be settled by asking should be asked. What this governs is the other kind, the ones nobody will get around to asking.
+
+Every one of the three was noticed by a human-run comparison, not by anything automatic. The third surfaced only because a two-way census of person notes against a routing table, thirteen against twelve, put a brand-new note in front of a reader who then recognised a name from an unrelated project. Nothing in the system matches new entities against open questions.
+
+## What to actually do
+
+1. **Record the question in concrete, collidable nouns.** Names, domains, account handles, company names, place names, file names. Abstractions do not trip. "Is the person on this reconciliation the same person in that origin story?" trips. "Stakeholder identity unclear" does not.
+2. **Write the question where both sides will be read, not only in the project that noticed it.** The question lived in one project. The collision happened in another. Linking both ends is the cheap half of the fix, and it is the half that gets skipped.
+3. **Re-read the open questions whenever a new entity is created.** This is the one habit that converts a lucky collision into a reliable one, and it costs a single pass over the notes that name unresolved items.
+4. **Treat a collision as producing a candidate, not a resolution.** The first instance reached high confidence only because account ownership plus a collaborator relationship is hard evidence. The third stayed at medium and stayed flagged, with an explicit instruction not to resolve other references to the same first name to that identity.
+5. **When a fact is stuck, find the deliverable that cannot ship without it.** A public page, a contract, an invoice, a schema field marked required. The obligation extracts what the question could not.
+6. **Keep a census, and run it by hand until something automates it.** Notes against routing entries, entities against open questions. The mismatch is where the collisions become visible.
+
+## Why this matters more with an AI assistant
+
+A context window is working state, not memory. Anything an assistant should still know next week has to live in a durable store it reads at the start of a session, and that store is only as useful as the retrievability of what is in it.
+
+An open question written in abstractions is retrievable by nobody, including the assistant, because it shares no terms with the work that would answer it. An open question written in proper nouns is retrievable by exactly the sessions most likely to be standing next to the answer.
+
+**That is the whole mechanism, and it costs nothing at the time of writing.** Write the nouns down. The collision will find them or it will not, but it cannot find an abstraction.
+
+## The takeaway
+
+Stop treating a recorded open question as a task you intend to perform. Most of them you will not perform, and the honest ones say so.
+
+Treat it instead as a trap you are setting, and set it with the specific words that unrelated work will one day walk into.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I use this knowledge workflow across production systems including [Adam AI](https://ehnand.com/projects/adam-ai) and the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite). For the memory system these questions live in, see [Building Durable AI Memory with Obsidian, Atomic Notes, and MOCs](https://ehnand.com/articles/durable-ai-memory-obsidian-mocs). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*
