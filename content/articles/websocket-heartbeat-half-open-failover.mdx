@@ -1,0 +1,136 @@
+---
+title: "A WebSocket That Never Closes: Half-Open Connections After a 4G Failover, and the Heartbeat That Fixed Them"
+seoTitle: "WebSocket Half-Open After Failover: Add a Heartbeat"
+date: 2026-10-10
+category: "Engineering Practice & Reliability"
+tags: [websockets, nodejs, reliability, debugging, operations]
+summary: "A station agent's WebSocket died silently every time its router failed over to 4G backup, and its reconnect loop never ran because nothing ever closed. How the trigger was found in proxy logs, why a 30-second ping fixed it, and how a staggered rollout proved the fix on production."
+---
+
+At two of six petrol stations, the "Set prices" button was greyed out. One of them had been without its live connection to the control panel for 19 days. Nobody had noticed, because the station's card in the dashboard stayed green the whole time.
+
+It was the second time. A month earlier, four of the six stations had lost the same connection for up to five days, and restarting the agent on each station PC had fixed it. The diagnosis then was right, and the fix recommended then was never built: the agent's WebSocket client had no heartbeat.
+
+**A reconnect loop runs when a socket closes, and a connection killed somewhere in the network never closes. Unless you send something and wait for the answer, you do not know the connection is alive.**
+
+## How the stations talk to the control panel
+
+Each station has a small Node agent on a Windows PC beside the price signs. It keeps two channels to the cloud control panel:
+
+| Channel | Direction | Used for |
+|---|---|---|
+| A persistent WebSocket, dialled outbound | both ways | the panel requests fresh probes over it, and the "Set prices" action requires it |
+| An HTTPS snapshot POST, every 30 seconds | agent to panel | the latest state of every price sign at the station |
+
+The "Set prices" button is enabled only while the station's WebSocket is connected. The card's green status dot reads the latest snapshot. So when the WebSocket died and the snapshots kept arriving, the card said healthy and the button said no.
+
+## Why the reconnect loop never ran
+
+The agent reconnects with exponential backoff and jitter, from 1 second up to 30, whenever its socket emits `close`. That logic was correct. It simply never fired.
+
+When a network path dies underneath a TCP connection, neither end is told. No FIN, no RST, nothing. The socket stays open on both sides, waiting for data that will never arrive, and an idle WebSocket sends no data. It is **half-open**: alive in every data structure, dead on the wire. With no keepalive of its own, the client could stay in that state indefinitely, and did, for 19 days.
+
+## Finding the trigger in the access logs
+
+The first incident had been blamed on a guess: a router reboot or a NAT flush. This time I lined up the panel's WebSocket drops against its reverse-proxy access logs, and every silent drop had the same signature.
+
+For about a minute before each drop, that station's snapshot POSTs arrived from an unfamiliar IP address. A registry lookup put those addresses in a mobile carrier's network, while the stations' normal addresses are fixed-line. **The station routers were briefly failing over to their 4G backup link and back.** Each failover moved the station to a different public address and killed every TCP flow on the old path.
+
+That explained the green card exactly. A snapshot POST is a new HTTPS request every 30 seconds, so it just works over whichever link is up. The WebSocket is one long-lived TCP flow, and it died with the path it was born on. The same signature was in the logs from the first incident too.
+
+One more lesson came out of this search: the first incident's diagnosis had never been written down anywhere durable. I recovered it from a raw session transcript. The root cause was known for a month, and the system had no memory of it.
+
+## The heartbeat: ping, wait, terminate
+
+The fix is small. Every 30 seconds the agent sends a WebSocket ping. If no pong arrives within 10 seconds, it calls `terminate()`, which destroys the socket immediately, and the existing `close` handler and backoff do the rest.
+
+```ts
+const PING_INTERVAL_MS = 30_000;
+const PONG_TIMEOUT_MS = 10_000;
+
+// Each connection owns its timers so an old socket cannot terminate its replacement.
+let pingTimer: ReturnType<typeof setInterval> | undefined;
+let pongTimer: ReturnType<typeof setTimeout> | undefined;
+
+ws.on('open', () => {
+  pingTimer = setInterval(() => {
+    if (ws.readyState !== WebSocket.OPEN) return;
+    ws.ping();
+    if (pongTimer === undefined) {
+      pongTimer = setTimeout(() => ws.terminate(), PONG_TIMEOUT_MS);
+    }
+  }, PING_INTERVAL_MS);
+});
+
+ws.on('pong', () => {
+  clearTimeout(pongTimer);
+  pongTimer = undefined;
+});
+
+ws.on('close', () => {
+  clearInterval(pingTimer);
+  clearTimeout(pongTimer);
+  // ...existing backoff and reconnect
+});
+```
+
+That is the shipped logic with logging trimmed. Two details matter more than the numbers:
+
+- **`terminate()`, not `close()`.** A graceful close sends a close frame and waits for the other side to answer, which on a dead path it never will. `terminate()` destroys the socket at once and emits `close` locally, which is the event the reconnect loop is waiting for.
+- **Timers belong to the connection, not the module.** After a reconnect, a timer left over from the dead socket must not be able to terminate its healthy replacement.
+
+## A fix on a laptop is not a fix
+
+The heartbeat was written and committed the day after the second incident. It then sat unpushed on the local main branch, while the shared repository's main branch was still at a commit from June. **No station could have received it.** Checking what had actually been pushed, not what had been written, was the first step of the rollout.
+
+## Rolling it out one station at a time
+
+The deploy restarted the control panel, and all six agents reconnected within three seconds. That proved nothing about the fix. A process exit closes its sockets cleanly, which is the one case the old code had always handled. **A restart test exercises the graceful path; the bug lived in the path where nothing closes.**
+
+Each station then got the new agent separately, and the next station waited until the previous one was verified from the server: a reconnect in the journal, exactly one established socket sampled several times, the price signs answering, and ping frames on the wire. The order was chosen: the station with the easiest remote access went first as a canary, the most failover-prone station second, and the station with an unrelated, already-known fault in its price-sign link last, so its noise could not be confused with the update.
+
+## The rollout proved the fix by accident
+
+Four stations were updated on 18 September and the last two on the 21st. In between, on the 19th, the network did the test for me:
+
+| Station | Agent | Dropped | Recovered |
+|---|---|---|---|
+| A | with heartbeat | 10:01:55 | 10:02:08, 13 seconds later, untouched |
+| B | with heartbeat | 01:30:34 | 01:31:37, 1 minute 3 seconds later |
+| C | with heartbeat | 01:27:30 | 01:29:29, 1 minute 59 seconds later |
+| D | **old agent** | 10:02:16 | **never**, for two days, while still posting snapshots every 30 seconds |
+
+Same fleet, same week, same networks. The only difference was the heartbeat. Station D was restarted with the new agent on the 21st.
+
+## How do you verify a heartbeat without touching the station?
+
+On the server, the reverse proxy talks to the Node process over loopback, unencrypted. A packet capture on that hop, filtered to WebSocket frames whose first byte is `0x89` (a final frame carrying the ping opcode), showed one pinging connection per updated station, every 30.000 seconds. No station PC had to be touched to prove each one was running the new code.
+
+Three smaller traps showed up along the way:
+
+- **The reverse proxy logs a WebSocket only when it ends,** so an open connection never appears in its access log. Sample the socket table instead, several times.
+- **Socket counts are phase-sensitive.** Sampled within about four seconds of a snapshot POST, a station shows two connections; the second is the HTTP keep-alive, not a second WebSocket.
+- **Station PC clocks drift**, one by about 14 seconds. Line events up on the server's clock, not the agents'.
+
+## What the heartbeat does not fix
+
+The heartbeat makes a dead channel recover by itself. It does not make a dead channel visible. The station card's dot still reads the snapshot status, not the live connection, and that is why a station could sit broken for 19 days with a green light. Showing the WebSocket state on the card is the next change, and until it ships, a failure the heartbeat cannot recover from would still be silent.
+
+## What to actually do
+
+1. **Give every long-lived client connection an application-level heartbeat:** ping on an interval, terminate on a missed pong. Do not rely on the network to tell you a path died.
+2. **Use `terminate()`, not a graceful close, on a connection you believe is dead.** A graceful close waits for an answer that cannot come.
+3. **Scope heartbeat timers to the connection object,** so a stale timer cannot kill a healthy replacement.
+4. **When a long-lived channel and a request-per-interval channel disagree, suspect the path, not the code.** Short-lived requests survive address changes; long flows do not.
+5. **Never use a server restart as the test of a reconnect fix.** It exercises the clean-close path. Wait for, or induce, a silent drop.
+6. **Show the health of the channel the feature depends on,** not the health of a neighbouring channel that happens to be easier to read.
+
+## The takeaway
+
+A WebSocket client with a perfect reconnect loop and no heartbeat is waiting for an event the network will not send. Here, that wait lasted 19 days and was repeated at every router failover, while the dashboard showed green.
+
+> **If you have not heard from the other side recently, you do not have a connection. Ping, and hang up on silence.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build and run systems for a Swiss petrol station group, including the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite). For another failure that only real production conditions exposed, see [Automation That Usually No-Ops Has Not Proved It Can Act](https://ehnand.com/articles/automation-no-op-rare-paths). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

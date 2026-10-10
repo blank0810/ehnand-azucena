@@ -1,0 +1,72 @@
+---
+title: "A Permanently Red Test Suite Is Camouflage, Not Noise"
+seoTitle: "A Permanently Red Test Suite Hides Real Bugs"
+date: 2026-10-10
+category: "Engineering Practice & Reliability"
+tags: [testing, ci, laravel, reliability, code-review]
+summary: "A Laravel suite stayed red for five months under a rule that the failures were pre-existing. The first full triage turned 105 failures into 14 root causes, and three of them were live production defects the suite had been reporting the whole time. Why the cost of a red suite compounds."
+---
+
+In April, the test suite of a municipal billing system went red with 73 failures, and a working rule was adopted: *these are pre-existing, don't block shipping.* In September, a release merged to staging with 99 failures, none of them classified.
+
+Two days later I ran the first full triage in five months. The 105 failures in that run collapsed into 14 root causes, and the suite was green the same day. Three of those root causes were live production defects. **The suite had been reporting all three, continuously, for as long as they had existed.**
+
+**A permanently red suite does not merely fail to protect you. It hides the failures that matter, because every new real defect arrives dressed as more of the existing noise, and the cost of that compounds instead of staying flat.**
+
+## What was hiding in the noise
+
+| Defect | How long | Impact in production |
+|---|---|---|
+| A model relation mapped to a column a migration had dropped | about 8 months | Deleting an area record, and opening its detail view, both returned 500 |
+| A user-creation path for meter readers wrote `NULL` into a `NOT NULL` column | unknown | Creating a user with meter-reader areas always returned 500 |
+| An N+1 query on the bill generation picker | unknown | Up to 200 avoidable queries per load, and **its own regression test was already in the suite, already failing** |
+
+There was a fourth finding: the public registration route could never create a usable account.
+
+The N+1 is the sharpest of them. Someone had written a test for exactly that defect. The defect then shipped and stayed, while the test written to stop it failed in plain sight, every run, alongside a hundred others. A guard nobody has to satisfy is not a guard.
+
+## The dismissal was mostly right, which is why it lasted
+
+The other failures really were noise, and saying so is what makes the rule credible instead of moralistic:
+
+| Cause | Failures |
+|---|---|
+| A user factory hard-coding a user type against an empty lookup table under a fresh database | about 30 |
+| Services that gained constructor dependencies while unit tests still built them with `new` | 13 |
+| A stale local front-end build manifest | 8 |
+| Amounts that became numbers instead of preformatted currency strings | 7 |
+| Display names that switched to "Last, First" | 2 |
+
+Only 11 of the 105 failures, from 3 of the 14 root causes, were application defects. **The rule "these are pre-existing" was right about roughly nine failures in ten,** and a heuristic that is right nine times in ten is not abandoned. It is trusted a little more every time it holds.
+
+That makes this a base-rate problem, not a discipline problem. When 90 of 100 alerts carry no action, ignoring each alert is the rational response, and the only rational policy is to stop generating the 90. No amount of care makes the remaining 11 visible while they are buried. **You cannot out-diligence a bad signal-to-noise ratio.**
+
+## Why the cost compounds
+
+- **At one failure, a new failure is obvious.** The count goes to two and someone looks.
+- **At 99, a new failure is invisible.** The count goes to 100, and the number already meant "broken". A suite that always says red carries exactly as much information as one that always says green.
+- **The dismissal also erases the evidence.** Each ignored failure carries a message. Here, an exception naming a dropped column was on screen for eight months. In this codebase, an exception naming a missing column or table has repeatedly meant the application still references schema a migration removed, which is worth knowing before anyone files it under noise.
+- **The rule outlives its reason.** "Pre-existing, don't block shipping" was written when the failures were known and few. Nothing re-tested the rule as the population behind it changed.
+
+## Counts depend on the environment
+
+One detail made the numbers themselves harder to trust. The September runs that reported 99 failures used a 512 MB PHP memory limit; the triage on the same commit used 1 GB and reported 105. Both were true for the run that measured them. **Never quote a full-suite failure count without the commit and the environment beside it.** A number that moves when the machine changes cannot tell you whether the code did.
+
+## What to actually do
+
+1. **Treat a rising failure count as an incident, not weather.** The threshold to act is the first unexplained failure, not the hundredth.
+2. **Classify, because classification is the whole intervention.** Here, 105 failures became 14 root causes in one pass. The expensive part was the five months of not doing it.
+3. **Never ship past an unclassified failure.** "Pre-existing" is a claim about a cause. Until a cause is named, it is a guess.
+4. **Fix an environmental failure or guard it explicitly.** Leaving it red spends the signal for every real failure that follows.
+5. **Read the failure message before filing it.** An error that names a missing column is very rarely noise.
+6. **Add the gate on the day the suite turns green.** At the time of this triage, nothing ran the suite automatically on this repository, so the same drift could start again the next day. Green is a perishable state, and the cheapest moment to protect it is the moment you reach it.
+
+## The takeaway
+
+The red suite was right. It reported three production defects for months, including one with its own dedicated test. What failed was the signal around it: a rule that was correct nine times in ten, applied to a pile that nobody sorted, until a real failure had nowhere to stand out.
+
+> **A failure you have decided not to read is a test you have decided not to run.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system), whose suite this was. For the mirror image, a suite that stays green while coverage is gone, see [A Control With One Possible Answer Is Not Failing, It Is Not Running](https://ehnand.com/articles/controls-with-one-possible-answer). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

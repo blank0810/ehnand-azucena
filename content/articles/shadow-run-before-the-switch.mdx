@@ -1,0 +1,132 @@
+---
+title: "Cutting a Matching Job's Cost in Four Phases: The Cheap Fix Saved the Most, the Shadow Run Found the Bugs"
+seoTitle: "Shadow Mode Caught 4 Bugs Before the Switch"
+date: 2026-10-10
+category: "SaaS, Cloud & Security"
+tags: [cost-optimization, background-jobs, shadow-testing, measurement, postgresql]
+summary: "A background matching job re-checked about 5,000 results for every small change. A 30-minute batching window cut its daily runs from 282 to under 25. The incremental rewrite that followed ran in shadow against the full job, and that shadow caught four bugs, one of them in the production code it was replacing."
+---
+
+On 1 October, a month-start day, one tenant's automatic matching job ran 282 times and cost $3.06. Between two back-to-back runs, the number of matched pairs moved from 3,197 to 3,199. Every run re-checked around 5,000 match results from scratch, for a change of two.
+
+The job lives in [Adam AI](https://ehnand.com/projects/adam-ai), a multi-tenant document platform, where it pairs a telecom tenant's supplier invoices with the estimates in that tenant's billing system and paints the result into a spreadsheet the tenant works in. Over the week to 2 October it was 30 percent of the production background-job bill, 518 runs for $6.13, and a billing alert had just hit 75 percent.
+
+The fix took four phases over four days. The first, a batching window that shipped the day it was designed, saved the most. The third, an incremental rewrite, saved less than planned, and ran in shadow against the full job before it decided anything. That shadow found four bugs nobody's fixtures could have, one of them in the production matcher it was meant to replace.
+
+**Measure first, take the cheap structural fix first, and run any clever replacement in shadow against the real thing before it writes a single row. The shadow's job is not to confirm your design; it is to find what your test data was too simple to contain.**
+
+## Phase one: make every change ride the same bus
+
+Five automatic routes started a full matching run: new invoices and row edits, staff edits in the spreadsheet and their 15-minute backstop, an unmatch saved during a repaint, and matching's own follow-ups. Each one started its own run, back to back.
+
+The first change touched none of the matching logic. Every trigger now books a departure instead of starting a run:
+
+| Situation when a change arrives | What happens |
+|---|---|
+| No departure booked | Leave now |
+| A departure booked in the future | Ride it |
+| The last departure has left | Book the next one, at least 30 minutes after it |
+
+The booking happens under `SELECT ... FOR UPDATE` on the tenant's sync-state row, so simultaneous requests book the same departure. The trigger's idempotency key contains the departure time, so a failed run can block only its own departure, and the next change books a new one with a new key. The trade-off was accepted explicitly: a new match can take up to 30 minutes to reach the spreadsheet, while a staff member's own edits still repaint at once.
+
+Building it surfaced an older defect. The previous backstop and follow-up triggers did carry idempotency keys, but as plain strings set inside a task, which the job platform scopes to the calling run. **Those keys had never deduplicated anything across runs.** The bus replaced them.
+
+The result, on the first days afterwards:
+
+| Day | Runs | Cost |
+|---|---|---|
+| 1 Oct (month start, before) | 282 | $3.06 |
+| Last Monday before the bus | 83 | $0.94 |
+| First Saturday after | 15 | $0.48 |
+| First Sunday after | 21 | $0.67 |
+
+Weekend days are not month-start days, so the comparison is not perfect, but the order of magnitude is not in doubt. A pure departure rule, one nullable column and a row lock did most of the work the next three phases were designed to do.
+
+## Phase two: the hotspot was not where the logs said
+
+Before optimising the matcher itself, I measured where a run spent its time. The first measurement was wrong.
+
+Reading timestamps between log lines on two production runs said two grouping checks took 133 to 142 seconds, 39 percent of each run. A speed fix for them gave byte-identical output on a production-sized synthetic benchmark, 18.0 seconds down to 1.9. Then the real per-step timers shipped, and the same two checks took **1.7 seconds** on production. The log lines that marked them were printed at the end of a different step.
+
+| Step, first run with real timers | Time |
+|---|---|
+| Load | 8.3 s |
+| Pairing and early passes | 57.7 s |
+| Grouping checks (the suspected hotspot) | 1.7 s |
+| **Supplier identity guards** | **126.4 s** |
+| Save | 2.3 s |
+| **Spreadsheet repaint** | **134.3 s** |
+
+The speed fix stayed, because it was free and provably output-identical. But the lesson is the one I keep re-learning: **a log line's timestamp says when it was printed, not which work the time before it belongs to.** Instrument the steps themselves before you believe a hotspot.
+
+## Phase three: re-match only the open pool, in shadow
+
+A census of production's 5,251 results showed 60 percent were settled: matched by invoice number or by hand, or accepted by the tenant's billing system. Re-pairing those on every run was most of the remaining matching work.
+
+The design keeps settled pairs on a shelf and re-matches only the open pool:
+
+- **Each result row stores an input fingerprint**, a SHA-256 over everything the matcher sees for that pair: the bills and their copies, the estimate, any manual links, the newest send state, the tenant's tolerance settings and a matcher version constant. It is recomputed from loaded data on every run, so no trigger can be missed, and changing a tolerance or the matcher re-opens everything with no extra code.
+- **What gets frozen is the grouping, never the verdict.** Every verdict is still recomputed, because tolerances and exchange rates move daily.
+- **The quick run must produce exactly the same rows as a full run**, because many services read the results table.
+
+And it shipped as a dry run only. On every automatic run, the quick path ran first without saving, the full run then ran and saved as before, and the two result sets were compared. Any difference sent an alert. Nothing a customer saw could change.
+
+## What the shadow run caught
+
+| # | What the shadow showed | The cause | Why local tests missed it |
+|---|---|---|---|
+| 1 | 0 differences, and 0 pairs kept on the shelf | A re-open rule chained: one re-opened pair re-opened its neighbours, until all 3,089 candidates were back in the pool | The fixture had no chain of overlapping months across suppliers to run through |
+| 2 | After that fix, still 0 kept, with 89 "new" bills on a quiet half-hour | "Not in the previous result set" was used to mean "new", but 743 live rows are loaded and never written as results, so they looked new forever | The test helper made an invoice "new" by leaving it out of the previous set, the same assumption as the bug |
+| 3 | One difference that was nobody's bug | An invoice arrived between the quick run's load and the full run's load | Only a real system has arrivals mid-run; fixed by replaying the full run's captured inputs |
+| 4 | A real difference, and **the quick path was the right one** | The production matcher let a supplier's 0.10 USD invoice weigh another supplier's estimate, because their legal names shared only the word "Incorporated" | It was not new code. It was the code being replaced |
+
+The first row deserves a second look. **Zero differences with zero pairs kept is not a pass.** With nothing on the shelf, the quick path did the whole job, so it had to equal the full run. An equality check passes trivially when the thing it guards did nothing, which is the failure I wrote about in [A Control With One Possible Answer Is Not Failing, It Is Not Running](https://ehnand.com/articles/controls-with-one-possible-answer).
+
+The fourth row is the reason to run a shadow at all. A shadow compare cannot tell you which side is wrong, only that they disagree, and here the disagreement exposed a false bridge in production matching. The fix made "incorporated" a stop word, as "inc", "corp" and "corporation" already were. Before shipping, I measured it against every current matched or disputed supplier pair on production: **0 of 1,110 changed.** A second rule now keeps a settled pair on the shelf only if no re-checked invoice could reach its estimate, which keeps the quick path equal to the full run when a reach is legitimate.
+
+That rule costs savings, deliberately. Before it, the quick pass kept 3,084 pairs and took 77 seconds against 207 for the full match. After it, the first clean run kept 2,275 pairs and took 122 seconds against 199.
+
+There was a fifth finding, about the gate rather than the code. **The shadow had compared 9 of the 20 saved columns.** Forty-one clean runs said nothing about the other eleven, which included the documents sent to the tenant's billing system and the fingerprint the next run reads. The comparison was widened to every saved column, and the clean-run count restarted.
+
+## Phase four: the switch was worth $3 to $7 a month
+
+By then the arithmetic had changed. Under the bus, a full automatic run took about 345 seconds; with the open pool deciding, about 270. At 20 to 40 automatic runs a day, switching would save roughly $0.10 to $0.25 a day. The design had a stated rule: above about 30 automatic runs a day the switch pays back its complexity within weeks, below that, spend the effort elsewhere. Weekend days had run 15 to 21.
+
+I switched it on anyway, on 5 October, three days before the planned decision and on less evidence than the gate asked for: 3 clean full-row comparisons and 41 clean narrower ones, with no busy day and no staff edits inside the window. The safety nets named before the switch were:
+
+- **a reversed check for the first week**: the open pool saves, and the full matcher replays the same captured inputs dry and is compared after every run;
+- **two scheduled full runs a day** that overwrite any wrong save within 17 hours at most;
+- **a revert that takes about ten minutes**, with no data migration, because the saved shape never changed.
+
+By the next afternoon it stood at 47 of 47 clean runs, with no fallback, no retry and no inconclusive check.
+
+## Where the cost actually is now
+
+The per-step timers kept paying off after the switch. The spreadsheet repaint, untouched by any phase, now takes about half of every run, and its own first breakdown showed why:
+
+| Repaint step | Time |
+|---|---|
+| Building about 5,300 rows in memory | **121.0 s** |
+| All spreadsheet API calls together | about 31 s |
+| Everything else | about 10 s |
+
+**The repaint is slow because of our own code, not the external API.** The likely cause, found by reading the code and not yet timed, is a per-bill lookup that re-walks every sent estimate's history for each late bill. That is the next phase, and it will be measured before it is fixed.
+
+## What to actually do
+
+1. **Count runs and cost per trigger before touching the algorithm.** Here, 282 full runs for a two-pair change was the problem, and a batching window fixed most of it.
+2. **Put the departure time in the idempotency key, and check what scope your keys really have.** A key that only deduplicates within its own run deduplicates nothing.
+3. **Time the steps themselves.** Log-gap arithmetic named the wrong hotspot by a factor of almost 80.
+4. **Ship the incremental path as a dry run compared against the full one,** on production, before it saves anything. Your fixtures do not have production's chains, never-written rows or mid-run arrivals.
+5. **Treat "no differences" as meaningless until you have checked how much the new path actually did,** and compare every column the switch will save, not the ones you thought of first.
+6. **Re-run the economics before the switch.** Once the cheap fix has landed, the expensive one may no longer be the best use of the week.
+
+## The takeaway
+
+The batching window took a day and cut daily runs by an order of magnitude. The incremental rewrite took three days, saved a few dollars a month, and was still worth building, because running it in shadow found a false match in production matching that had been quietly misplacing an invoice.
+
+> **Fix the cheap structure first. Then make the clever part prove itself against the real thing before it decides anything.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I lead development of [Adam AI](https://ehnand.com/projects/adam-ai), the multi-tenant document platform this matching job runs in. For the matching techniques underneath it, see [Document Reconciliation: The Matching Strategies That Actually Work](https://ehnand.com/articles/document-matching-strategies). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

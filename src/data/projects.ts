@@ -26,6 +26,8 @@ export interface Project {
 const RELATED_ARTICLES: Record<string, string[]> = {
   "adam-ai": [
     "document-matching-strategies",
+    "shadow-run-before-the-switch",
+    "idempotency-key-scope",
     "automation-no-op-rare-paths",
     "recovery-path-invariants",
     "rehearsability-production-writes",
@@ -45,7 +47,12 @@ const RELATED_ARTICLES: Record<string, string[]> = {
   ],
   "initao-water-billing-system": [
     "offline-first-laravel",
+    "flutter-on-device-sms-outbox",
+    "laravel-scheduler-catch-up-office-hours",
     "utility-billing-ledger",
+    "permanently-red-suite-is-camouflage",
+    "parallel-ai-agents-locks-not-agreements",
+    "person-gates-hang-unattended-jobs",
     "correct-ledger-wrong-billing-statement",
     "authorization-testing-least-privilege",
     "controls-with-one-possible-answer",
@@ -55,6 +62,8 @@ const RELATED_ARTICLES: Record<string, string[]> = {
   ],
   "swiss-energy-platform-suite": [
     "document-matching-strategies",
+    "missing-settlement-is-not-unpaid",
+    "websocket-heartbeat-half-open-failover",
     "detecting-missing-records-census",
     "read-criterion-not-label",
   ],

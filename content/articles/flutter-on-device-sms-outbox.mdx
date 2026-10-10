@@ -1,0 +1,156 @@
+---
+title: "Texting From the Meter Reader's Own Phone: Automatic SMS in Flutter Is an Outbox Problem"
+seoTitle: "Auto-Send SMS From Flutter: The Outbox Is the Feature"
+date: 2026-10-10
+category: "Engineering Practice & Reliability"
+tags: [flutter, android, sms, offline-first, laravel]
+summary: "How a Flutter app sends SMS automatically from the phone's own SIM through a small Kotlin bridge to Android's SmsManager, and why the outbox around that call, not the call itself, decides whether a text goes out on time, hours late, or twice."
+---
+
+At 21:07:38 on 18 September 2026, a meter reader's phone sent a text from its own SIM card, right after the reader pressed Lock & Calculate. The web server logged it as delivered at 21:07:41.
+
+Until then, customers of this municipal water utility were texted only when an office user processed the uploaded readings on the web, often hours or days after the meter was read. The new design sends the bill notice at the meter, from the phone in the reader's hand, with no SMS gateway and no cloud service in the path.
+
+Sending an SMS automatically from a Flutter app on Android is one platform call. Getting that call to fire once, at the right moment, and never hours later for a reading nobody remembers, took three days from design to merge, and a phone test that rewrote three of the design's rules.
+
+**The send call is the easy 10 percent. The feature is the outbox around it: what a queued text is allowed to wait for, what ends it for good, and how its result gets back to the server.**
+
+## Why not a Flutter SMS plugin?
+
+The obvious move is a package. I looked, and none fit:
+
+| Option | Why it was rejected |
+|---|---|
+| `flutter_sms` | Opens the Messages app with the text filled in. The reader would have to tap Send for every customer. |
+| `another_telephony` | The only plugin that sends without a tap. It is a one-maintainer fork of the discontinued `telephony` package, last released April 2025. |
+| httpSMS | Its relay exists for triggering texts remotely and needs Firebase. The goal was the opposite: everything on the municipality's own network. |
+| **A small Kotlin bridge** | Android's `SmsManager` API is stable, it needs one permission, and dual-SIM control stays possible later. |
+
+The bridge is one Kotlin file of 220 lines, registered in `MainActivity` and reached from Dart over a `MethodChannel` named `initao/sms`. It exposes two methods, `status()` and `send()`, and calls back into Dart with each result.
+
+## What the Kotlin bridge actually does
+
+`status()` answers the questions the outbox needs before it tries anything, and none of them require an extra permission:
+
+```kotlin
+private fun status(): Map<String, Boolean> {
+    val hasTelephony = context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+    val telephony = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+    return mapOf(
+        "hasTelephony" to hasTelephony,
+        "simReady" to (hasTelephony && telephony?.simState == TelephonyManager.SIM_STATE_READY),
+        // No card in the slot at all (not just "not ready yet").
+        "simAbsent" to (hasTelephony && telephony?.simState == TelephonyManager.SIM_STATE_ABSENT),
+        "permissionGranted" to hasSendPermission(),
+    )
+}
+```
+
+`send()` hands the text to `SmsManager` with two `PendingIntent`s, one for the "sent" report and one for the "delivered" report. Two details in that handoff cost the most reading:
+
+- **The delivered intent must be mutable on API 31 and later.** Android writes the carrier's status report into the intent's `pdu` and `format` extras. An immutable intent drops them, and every report then looks the same. The sent intent stays immutable and one-shot; the delivered one is explicit (`setPackage`) and `FLAG_MUTABLE`.
+- **A delivery report is not a yes or no.** It carries a TP-Status byte, and the middle range means the carrier is still trying:
+
+| TP-Status | Meaning | What the bridge does |
+|---|---|---|
+| below `0x20` | delivered | reports `delivered` |
+| `0x20` to `0x3F` | still pending at the carrier | reports nothing, waits for the final report |
+| `0x40` and above | failed | reports `failed` with reason `delivery_failed` |
+| no report at all | the carrier sent none | the row stays `sent`, which is not a failure |
+
+Counting every report as delivered was the first draft. Plan review caught it before any code ran.
+
+## The outbox is the feature
+
+Every text starts life as a row in a local SQLite table, `sms_outbox`, written before the bridge is called. The row carries the schedule, the connection, the recipient, the template, the rendered body, its segment count, a status, a reason and an attempt count.
+
+One constraint carries most of the safety: **the outbox is unique on schedule, connection, recipient and template.** A reprinted receipt, a re-saved reading, or a reader tapping a button twice cannot queue a second text, because the row already exists.
+
+The statuses are `queued`, `held`, `sending`, `sent`, `delivered`, `failed` and `skipped`. Two of them exist only because of something specific that can go wrong:
+
+- **`held`** is for a reading the app flagged as an anomaly. The text waits until the reader confirms the reading, and is reported as skipped if they never do.
+- **`sending`** is local-only and marks the moment between handing the text to Android and hearing back. If the app is killed in that window, nobody knows whether the text left the phone. After two minutes the row becomes `failed` with reason `app_closed_before_result`, and it is **never re-sent automatically.** The reader sees a Retry button. A possible double text to a customer is worse than a missing one the reader can see.
+
+Failures Android reports, such as no signal, count as attempts. After three, the row is `failed` and waits for a Retry.
+
+## Not ready versus not allowed
+
+The first design had one rule for every condition that blocks a send: no SIM, airplane mode and a missing SMS permission all left the text `queued`, retried when the app resumed or the dashboard loaded, without using up an attempt.
+
+The phone test broke that rule in an evening. With SMS permission not yet granted, every reading showed a Queued badge. The question that followed was the right one: *if I allow it now, does it send all of those?* It would have. Every text parked since the start of the shift would go out at once, hours after the readings they described, the moment someone granted a permission.
+
+**A send queue has to tell "not ready" apart from "not allowed."** A SIM that is booting or waiting for its PIN comes back within minutes, so waiting is correct. A missing permission, a phone with no SIM card in it, or an office that switched the feature off needs a person to change something, and nothing guarantees when. Waiting on those turns the queue into a backlog that releases all at once.
+
+| Condition | First design | After the phone test |
+|---|---|---|
+| SIM present, not ready yet | wait | wait, no attempt used |
+| No SIM card in the phone | wait | **skipped for good** |
+| SMS permission not granted | wait | **skipped for good** |
+| Office switched phone SMS off | stopped new texts only | **every waiting text skipped** |
+| Reader turned this phone's own switch off | did not exist | waiting texts skipped |
+
+The switch-off row hides a second version of the same bug. The switch was checked when a text was *planned*, not when it was *sent*, so texts planned before a switch-off would still go out after it. The flush now loads the settings first and skips everything still queued or held when phone SMS is off. Its code comment says it plainly: once the switch is off, nothing still waiting may go out later, even if it is switched back on.
+
+The cost of the new rule is real, and it is written into the reader's manual in English, Tagalog and Bisaya: **allow SMS before your first reading, because a reading taken while SMS is not allowed is never texted later.** The office sees exactly why on the web, and the reader sees a grey Skipped badge instead of a Queued badge that was quietly promising a send.
+
+## Getting the result back to the server
+
+The phone is offline for much of a route, so results cannot be posted as they happen. They ride on the reading upload the app already makes, the same sync I described in [Offline-First Field Data Collection in Laravel](https://ehnand.com/articles/offline-first-laravel). Each reading carries a `device_sms` array with every text's status, reason, attempts and phone timestamps.
+
+The Laravel side writes them to the same `sms_messages` table as the office texts, labelled "Reader's phone", and makes two promises: re-uploading never duplicates a row, and a status only ever moves forward.
+
+```php
+public const STATUS_RANK = ['skipped' => 0, 'failed' => 1, 'sent' => 2, 'delivered' => 3];
+
+// ...inside record(), for a row that already exists:
+if (self::STATUS_RANK[$status] <= (self::STATUS_RANK[$row->status] ?? -1)) {
+    continue; // same or older result: never downgrade
+}
+```
+
+That matters because a phone can upload a reading while its text is still `sent`, receive the delivery report later, and upload again. The row is keyed on the reading, the recipient and the template, so the second upload upgrades it to `delivered` instead of adding a row.
+
+Version skew was designed in rather than discovered. An old app talking to the new server simply sends no `device_sms` array, which is accepted. A new app talking to an old server receives no `device_sms` settings block, and treats that as off. Either side can ship first, which is why the rollout plan puts the web release first, with the feature switched off.
+
+## The limits that live outside your code
+
+Some of the ceilings on this feature belong to Android, the carrier and the distribution channel. None of them show up in a unit test.
+
+- **One SMS per text.** A template must fit 160 GSM-7 characters, or 70 once any character forces UCS-2. A single accented letter in a customer's name can flip the limit. A text that does not fit is skipped as too long, never split. The arrears template's worst case is 148 characters, 155 with the `[TEST] ` prefix.
+- **Android's sending guard.** By platform default, Android asks for confirmation after an app sends around 30 texts in 30 minutes, and some phone brands change that. A reader working a dense block could hit it. That figure is a default, not a measurement: the 30-texts-in-a-row device test was planned and **has not been run yet**.
+- **No Play Store, no iPhone.** Google Play does not allow this SMS permission for an app like this, so it ships as an APK installed directly. On Android 15 a sideloaded app needs a one-time "Allow restricted settings" step before the SMS permission can be granted. iPhones cannot send texts automatically at all.
+- **Signing keys decide whether an update installs.** Three different keys had signed builds of this app. Android refuses to update an app signed with a different key, and the only way past "App not installed" is an uninstall, which deletes any readings not yet synced. One office-owned release key is the fix.
+
+## What the phone test found that 147 tests did not
+
+The mobile side was built from a 17-task plan and the web side from a 14-task plan, with AI agents implementing tasks and each task reviewed before it was committed. 147 mobile tests passed before the first APK was built. The first real phone still found four problems in one evening, and not one of them was in the code the tests covered:
+
+1. **Every customer showed "Contact No.: N/A".** The feature added a new `contactNumbers` list; the old screens still read the legacy single field, which the download never fills. The data was there and nothing failed. The screens just showed nothing.
+2. **The receipt's Save button did nothing useful.** The text went out before the reader tapped Save, which exposed that Lock & Calculate already saved the reading. The button was removed, giving one fewer decision per customer and bigger targets for Sync and Print.
+3. **Switching branches in the shared web checkout switched off SMS on the phone.** The dev server stopped serving the feature, and the phone's next download replaced its customer list with one that had no numbers. In a checkout that phones download from, a branch switch is a deploy.
+4. **A failed text on an already-scanned reading had no reachable Retry.** The Retry panel lived on a screen the app only opens for unread meters.
+
+None of these is exotic. They are what happens when a feature crosses a Kotlin bridge, a SQLite migration, a sync payload, a Laravel service and a real SIM. Tests verify each layer against its own contract. Only the device verifies the contracts against each other. The agents that implemented the tasks could run every test; none of them could hold the phone, which is the boundary I wrote about in [An AI Implementer's Sandbox Is Your Verification Boundary](https://ehnand.com/articles/implementer-sandbox-verification-boundary).
+
+## What this does not prove yet
+
+The first send was in Test Mode, to a test number, on one phone model. Both halves were merged on 19 September, and the web side shipped in the 3.0.0 release on 25 September with the feature's switch defaulting to off, which is where the rollout plan starts. The plan's next step is a pilot: one reader, one small area, Test Mode on, then off. The rapid-send test and dual-SIM behaviour are still open. I will not claim field results this build has not produced yet.
+
+## What to actually do
+
+1. **Write the outbox row before you call the platform.** The row, not the send call, is your source of truth, and its unique key is what stops a reprint or a double tap from texting a customer twice.
+2. **Sort every blocking condition into "not ready" or "not allowed".** Let the queue wait on the first. End the item on the second, with a visible reason, so granting a permission later cannot release a backlog.
+3. **Check a kill switch when you send, not only when you plan.** Work planned before the switch-off is still waiting, and it will go out after it unless the sender looks again.
+4. **Never auto-resend a text whose outcome you did not observe.** Mark it failed with a reason and give a person a Retry. A missing text can be fixed; a duplicate cannot be unsent.
+5. **Make the delivery-report intent mutable on API 31+ and read the TP-Status.** Otherwise "delivered" just means a report arrived.
+6. **Budget a real-phone test as a task, not a formality.** It found four defects that 147 passing tests could not see, in one evening.
+
+## The takeaway
+
+`SmsManager.sendTextMessage` is one line, and every tutorial stops there. What decides whether the feature is safe to put in a reader's pocket is everything the line does not know: whether the moment it describes has passed, whether a person still has to say yes, and whether the server has already heard about it.
+
+> **Sending is the easy part. The outbox decides when a text is still worth sending.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system) for a Philippine municipality: Laravel 12, MySQL 8, Sanctum, Laravel Reverb, and a Flutter meter-reading app that now carries a Kotlin SMS bridge. For the ledger behind the bills those texts announce, see [Designing a Double-Entry Ledger for Utility Billing](https://ehnand.com/articles/utility-billing-ledger). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

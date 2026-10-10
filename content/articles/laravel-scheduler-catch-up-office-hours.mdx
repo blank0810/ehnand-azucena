@@ -1,0 +1,155 @@
+---
+title: "Scheduling Jobs on a Machine That Is Off at Night: Poll and Catch Up, Never Fire on the Minute"
+seoTitle: "Laravel Scheduler: Catch Up Jobs Missed While Off"
+date: 2026-10-10
+category: "Engineering Practice & Reliability"
+tags: [laravel, scheduling, reliability, configuration, testing]
+summary: "Laravel's dailyAt() fires on one exact minute, so a machine that boots late skips the whole day and logs nothing. How a municipal billing system moved twelve jobs to a five-minute poll that catches up, and the silent failure modes that came with making schedules editable."
+---
+
+Five of the twelve automated jobs in a municipal water billing system were scheduled for 00:00. The server they run on is an office machine, documented as switched on from about 08:00 to 17:00. They had most likely never run at all.
+
+Nothing said so. A job that never fires produces no error, no failed run and no log line, because from the scheduler's point of view nothing went wrong: the minute it was waiting for simply never arrived while the machine was on. One of those five disconnects customers. Another hard-deletes old records.
+
+I found them while making the twelve jobs' schedules editable from the app's settings, which is a feature request that sounds like a form and a table. It turned into a change to how every job decides to run.
+
+**On a machine that is not always on, a job should not ask "is it exactly 08:00?" It should ask, every few minutes, "is it past 08:00, and have I not run yet today?"**
+
+## Why does dailyAt() skip a whole day?
+
+Laravel's scheduler is driven by `schedule:run`, which runs every minute and starts each job whose cron expression matches that minute. `dailyAt('08:00')` matches exactly one minute a day. If the machine boots at 08:12, the 08:00 job does not run late. It does not run.
+
+That failure has three properties that make it worse than a crash:
+
+- **It is silent.** No exception, nothing in the failed-jobs table, nothing in the log.
+- **It is total.** One late boot costs the whole day, not a few minutes.
+- **Editable schedules would hand it to the operator.** Let someone set a run time of 02:00 on a machine that is off at 02:00, and the job silently never runs again.
+
+The last point is why I did not take the smaller change. Making `dailyAt()` read its time from the database would have shipped exactly the requested feature and made the existing flaw reachable from a settings page.
+
+## Poll every five minutes, run when due and not yet run
+
+Every daily and monthly job now registers as a five-minute poll, gated by one check. This is the core of it, from the shipped `DueChecker`:
+
+```php
+public function isDue(AutomationJob $job): bool
+{
+    try {
+        if (! $this->isSwitchedOn($job)) {
+            return false;
+        }
+
+        $now = CarbonImmutable::now();
+
+        if (! OfficeHours::current()->contains($now->format('H:i'))) {
+            return false;
+        }
+
+        $cadence = $this->resolver->cadenceFor($job);
+
+        if (! $cadence->isDueAt($now)) {
+            return false;
+        }
+
+        return ! $this->alreadyRan($job, $cadence);
+    } catch (Throwable $e) {
+        Log::warning('Automation due-check failed; skipping this tick.', [
+            'job' => $job->key, 'error' => $e->getMessage(),
+        ]);
+
+        return false;
+    }
+}
+```
+
+A successful run stamps `last_run_on`. A daily job may then run once per calendar day, a monthly job once per calendar month. A machine booted at 08:12 runs the 08:00 job on its first tick.
+
+The pattern was not invented for this. One of the twelve jobs, a reminder for ageing billing anomalies, already worked this way and was already the only job with an editable time. The change generalised the one design that was proven in production to the other eleven.
+
+One limit is accepted on purpose: **there is no catch-up across months.** If the machine never comes up on a monthly job's day, that job does not run that month. A lookback would need a notion of "which month was this run for" that the table does not carry, and it would let a missed month-end close fire weeks late without anyone asking for it.
+
+## The details that make polling safe
+
+Polling changes the failure modes, and each of these is a comment in the code because each one was found the hard way:
+
+| Detail | Why it matters |
+|---|---|
+| `last_run_on` is stamped only on success | While a slow job is still running, the check still says "due". The overlap lock is the only thing preventing a second copy, on a list that includes auto-disconnection. |
+| The overlap lock expires after 60 minutes, not Laravel's default of 1,440 | The cache store is the database, so a lock held by a run killed at the 17:00 power-off survives the reboot. `withoutOverlapping()` then skips silently. At the default, that is a job dead for a full day with nothing logged. |
+| The due check never throws | `schedule:run` evaluates every job in one process. An exception in one job's check takes the whole scheduler down with it. A failed check skips this tick; the next is five minutes away. |
+| The stamp writes through the resolver's cached row | The resolver memoises rows for the process. A stamp the memo never sees leaves the check reading "not run today", and the job fires again five minutes later. |
+| Registration issues zero database queries | `routes/console.php` loads on every artisan command, including `migrate` on a fresh install, before the tables exist. One query there and the app cannot be installed. |
+
+## Five jobs that had never run ship switched off
+
+The five midnight jobs were retimed into office hours: the two disconnection reminders at 08:00 and 08:10, automatic disconnection at 08:20, the monthly billing-period creation at 08:30, and the notification cleanup at 16:45.
+
+Then all five were **switched off** by the migration.
+
+Moving them into a morning slot would have made each one fire for the first time ever on the first morning after the deploy, including the one that disconnects customers and the one that deletes records, against whatever backlog had built up while they sat dormant. Shipping them off turns that first run into a decision a person makes, instead of a side effect of a release.
+
+## Making schedules editable without making them dangerous
+
+The editable part follows a few rules that each remove a way for a setting to break a job:
+
+- **The database is primary, and the old hard-coded schedules are the fallback.** Every previous cadence is reproduced exactly in a code registry, so an empty schedules table behaves exactly like the system before the change. A corrupt or missing row can never stop a job.
+- **Office hours are enforced three times:** in request validation, again in the resolver for rows edited directly in the database, and again at execution. A row outside the window does not throw; it falls back to the shipped schedule, so a bad edit degrades to the old behaviour.
+- **Three jobs are deliberately not editable.** They are machinery intervals, not "when it runs". One polls the SMS provider for delivery status at a pace set by its rate limit. Another is the five-minute loop that *is* the catch-up guarantee; making it editable would break the property the design rests on.
+- **Every job is declared once, in a registry,** and a parity test fails the build if anyone adds a hand-written `Schedule::command()` again. That is how four jobs had ended up with no switch at all, and how the cleanup came to hard-delete records nightly from an inline closure nothing in the app could stop.
+- **Each job's time sits under that job's own switch,** in the existing Automation settings tab, not on a new schedules page. A separate page would make the operator hold the mapping between two screens in their head. An earlier attempt that week built a dedicated menu, and I reverted it before this version.
+
+## Two values the scheduler accepts and silently misreads
+
+Making times editable exposed two inputs that look valid, are stored without complaint, and quietly mean something else:
+
+| Input | What it looks like | What actually happens |
+|---|---|---|
+| Run time `9:00` | Nine o'clock | Never due. Times are compared as strings against a zero-padded clock, and `'14:00' < '9:00'` is true, so no real time ever reaches it. |
+| Interval `*/90` | Every 90 minutes | Hourly at :30. The cron step restarts inside each hour. `*/120` runs hourly at :00, and `*/59` hourly at :59. |
+
+Neither produces an error at any layer. The fixes are a strict `HH:MM` pattern that rejects the unpadded time outright, and a whitelist of the twelve divisors of 60 (1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60) guarded by a test asserting that each one divides 60, so the list cannot drift.
+
+The two validators are deliberately inconsistent. The office-hours *window* is normalised leniently, because a rejected window would stop every job. A *run time* is rejected strictly, because a bad one costs a single job its stored schedule and the fallback still runs it. Making them "consistent" breaks whichever one you change.
+
+## A missing switch fails safe for destructive jobs only
+
+What should a job do when its on/off row does not exist? Not the same thing for every job:
+
+- **Non-destructive jobs read a missing row as on.** They ran unconditionally before this release, so a missing row means "nobody has switched this off yet". Defaulting to off would silently stop working jobs wherever settings are unseeded, including every test.
+- **Destructive jobs read a missing row as off.** The cost of an unintended disconnection is not symmetric with the cost of a missed one.
+
+That asymmetry created a seam. One job's command checks its own switch with the destructive default, while the scheduler checks the same key with the non-destructive one. With the row missing, the scheduler calls the job due, the command declines, returns success, and the success stamps `last_run_on`: **a run that did nothing is recorded as a run**, suppressing the job for the rest of the period. It cannot happen in production today, only because a migration guarantees the row exists. At the end of a 14-task branch, I pinned that seam with a test and a block comment rather than change either guard's real behaviour to make things look tidier.
+
+The test was its own lesson. As first specified, it deleted the row and asserted that the command declines, but the migration ships that row switched off, so the test would have passed whether or not the delete did anything. The shipped version asserts that the row exists, deletes it, asserts that it is gone, and then checks the two readings directly:
+
+```php
+expect(SystemSetting::isEnabled(SystemSetting::AUTO_CREATE_PERIOD))->toBeFalse()
+    ->and(SystemSetting::isEnabledUnlessSwitchedOff(SystemSetting::AUTO_CREATE_PERIOD))->toBeTrue();
+```
+
+With the row present and off, the second assertion fails. The pair can only pass when the row is genuinely absent, so the test cannot quietly degrade into testing nothing.
+
+## What this does not prove yet
+
+The change was 32 commits across 44 files. Every piece is tested in isolation (2,954 tests passed at the branch's final commit, with one older, unrelated assertion still failing), and the registration is verified structurally. It shipped to production in release 3.0.0 on 25 September.
+
+What has not been done is watching the whole path end to end: the scheduler selecting a job through the due check, running it, and stamping `last_run_on`. That verification is still an open task, and until it runs, the catch-up mechanism that is the point of the change rests on its tests and its reasoning, not on an observation. I would rather say that here than imply otherwise.
+
+## What to actually do
+
+1. **If your scheduler runs on a machine that is ever off, stop scheduling on exact minutes.** Poll every few minutes and run when the time has passed and the job has not run this period.
+2. **Stamp only on success, and bound the overlap lock on both sides:** longer than any real run, shorter than the machine's longest power-off.
+3. **Never let one job's due check throw.** Catch everything, log it, skip the tick.
+4. **Ship never-run jobs switched off when you move them somewhere they will finally fire.** The first run of a destructive job should be somebody's decision.
+5. **Validate times and intervals for what the scheduler will do with them, not for what fits the column.** Zero-pad or reject times; allow only interval steps that divide 60.
+6. **Make every test of an absent value assert the absence first.** A test that passes in both worlds is evidence about neither.
+
+## The takeaway
+
+`dailyAt()` encodes an assumption that is invisible on a server that never sleeps: that the machine will be there for the minute. On a machine that is off for most of every day, that assumption turns into jobs that silently never run, and nothing in the stack will ever tell you.
+
+> **Don't ask whether it is time. Ask whether it is past time and still not done.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system) for a Philippine municipality, where these twelve jobs run. For the general version of the never-run problem, see [Automation That Usually No-Ops Has Not Proved It Can Act](https://ehnand.com/articles/automation-no-op-rare-paths), and for why a missing setting is never neutral, [Unspecified Is Not Neutral](https://ehnand.com/articles/unspecified-is-not-neutral). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

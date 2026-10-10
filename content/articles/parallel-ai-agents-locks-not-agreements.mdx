@@ -1,0 +1,78 @@
+---
+title: "Several AI Coding Agents, One Checkout: Every Agreement Failed and the Lock Did Not"
+seoTitle: "Parallel AI Coding Agents: Use Locks, Not Agreements"
+date: 2026-10-10
+category: "AI & Automation"
+tags: [ai-assisted-development, git, concurrency, claude-code, workflow]
+summary: "Four AI coding sessions shared one git checkout for a day. Four negotiated coordination rules each failed at least once, for four different reasons. One OS-enforced file lock failed zero times. Why agreements between agents leak, and what to use instead."
+---
+
+On 20 September, four AI coding sessions worked in the same checkout of one repository at the same time, each on a different change, each directed by me. They could message each other, and they agreed on rules for sharing the working tree.
+
+By the end of the day the score was clear. **Four negotiated coordination rules had each failed at least once. One file lock had failed zero times.** Nobody was more careful with the lock than with the rules. Every session read the rules, agreed with them, and tried to follow them.
+
+**When several agents share one resource, any mechanism that depends on each participant remembering to honour it has a window between reading the agreement and acting on it, and concurrency lives in exactly that window. A lock has no such window, because the operating system enforces it, not the participant.**
+
+## The scoreboard
+
+| Mechanism | Kind | Outcome |
+|---|---|---|
+| File claims ("I'm taking this file") | agreement | Failed: two sessions claimed the same section, each announcing it to a *third* session, so neither knew about the other |
+| A token for the changelog and deployment guide | agreement | Failed: its release step, "commit the two files", was impossible for two of the four sessions, which may only commit when asked |
+| "Never run the production build" | agreement | Failed: three of four obeyed it exactly, and each broke the shared dev server with a different command that clears compiled views |
+| Announce before staging | agreement | Failed: a session staged 11 explicit paths, verified the index, and a peer's file rename landed between the check and the commit |
+| `flock` on a lock file around git index writes | lock | Held every time it was used |
+
+Each agreement failed for a *different* reason: routing, permissions, wording, timing. There is no single defect to fix. **The common factor is not the content of any rule. It is that a participant had to carry the rule across a gap in time.**
+
+## Three shapes the window takes
+
+### Check, then act
+
+`git add`, then `git diff --cached --stat`, then `git commit` is a check-then-act sequence with no mutual exclusion under it. The verification in the fourth row was *correct*; it stopped being true seconds later. The commit then shipped a peer's pure rename, visible in the diffstat only as a file with a zero-line change. Care cannot close that window. Only exclusion can.
+
+### Messages that cross in flight
+
+Messages between sessions are queued and delivered on the recipient's next turn. Two sessions can each send "this is final" and read the other's only after sending their own. On another project earlier that week, a symmetric negotiation over something as small as a name went through four full reversals, each message declaring itself final. It ended when I said "just go ahead and choose". **A symmetric protocol over a queued channel does not converge. Someone has to rule.**
+
+### A step somebody cannot take
+
+The changelog token assumed every holder could commit. Two sessions could edit and announce but never reach the release step, so for them "token free" came to mean "I have stopped editing", while for everyone else it meant "this is at a commit boundary". Nothing errored. The two readings coexisted for hours.
+
+## The safeguard that guarded the wrong thing
+
+Three of the sessions adopted a clever technique for shared files: rebuild the file as the last commit plus only your own lines, write that as a git object, and stage it without ever touching the working tree. Two of them recommended it to the others.
+
+The technique really does never write the working tree. That was true, and it protected a resource nobody was at risk on. The contended resource was the shared git index, and staging writes the index exactly the way `git add` does.
+
+**A safeguard is only as good as the resource it actually guards, and a true statement about a safeguard is not a statement about your exposure.** Name the contended resource first, then ask what the mechanism excludes access to. If those are different things, you have a habit, not a defence.
+
+## Declining to act is not declining to ship
+
+Two sessions correctly refused a relayed approval to push, each waiting for its own instruction. All 26 commits on the shared branch shipped anyway, 15 of them from a single peer, because pushing a shared branch pushes everyone on it.
+
+**A peer can decline to act; it cannot decline to be included.** If a piece of work must not ship, it must not be on the shared branch.
+
+## What to actually do
+
+1. **Name the contended resource:** the git index, a compiled-views cache, a branch, a running dev server. Then check what your coordination mechanism actually excludes.
+2. **Prefer an OS-enforced lock over any announcement, and wrap the whole check-and-act sequence,** never just the act:
+
+   ```bash
+   flock /tmp/<repo>-git-index.lock -c '<stage> && <verify> && <commit>'
+   ```
+
+3. **Where no lock exists, make the protocol asymmetric on purpose.** One party rules and announces once; the others adopt it without counter-proposing.
+4. **Check every protocol step against the least-permitted participant.** If one agent cannot commit, a rule that ends in "commit" is a precondition nobody checked.
+5. **Send a claim to every live peer, not to whoever you are talking to.** A claim is a broadcast, not a conversation turn.
+6. **Keep work that must not ship off the shared branch,** and verify after a peer says it preserved your change, by looking for your actual lines.
+
+## The takeaway
+
+Running several AI agents in parallel turns a single developer's repository into a concurrent system, with the same failure modes as any other: races, lost updates and protocols that do not converge. Agents do not make those go away by being polite. The same primitives that solve them for processes solve them for agents.
+
+> **Announcements coordinate intent. Only locks coordinate access.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I direct AI coding agents on production systems including the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system), the repository these four sessions shared. For where an agent's own checks stop and yours begin, see [An AI Implementer's Sandbox Is Your Verification Boundary](https://ehnand.com/articles/implementer-sandbox-verification-boundary). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

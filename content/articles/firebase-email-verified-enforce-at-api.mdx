@@ -1,0 +1,98 @@
+---
+title: "Firebase Sign-In Never Checks email_verified, So Your API Has To"
+seoTitle: "Firebase email_verified: Enforce It in Your API"
+date: 2026-10-10
+category: "SaaS, Cloud & Security"
+tags: [security, authentication, firebase, aws-lambda, api-gateway]
+summary: "An ERP's design required a verified email for every caller, but its API Gateway authorizer decoded the email_verified claim and threw it away. How the gate was moved into the API itself, why the refusal is a named 401 instead of the gateway's deny, and how a mid-deploy control run proved which layer refused."
+---
+
+The design documents for a client's ERP had one rule about identity from the start: a caller must have a verified email. In production, that rule existed only on paper for 66 days.
+
+The API Gateway authorizer in front of the ERP verified each Firebase ID token properly: signature, audience, expiry, issuer. It decoded the `email_verified` claim too. Then it built the context it passes to the backend from three fields, the user id, the uid and the email, and dropped the rest. No code downstream could enforce a claim it never received.
+
+I found it while answering a different question, "what part does the authorizer play in login?", by reading the code instead of the design. The answer to that question was "none", and the answer to the next one was this gap.
+
+**Firebase sign-in does not refuse an unverified email. If your rules require one, the only place that can enforce it is the API that receives the token, on every request.**
+
+## What the authorizer does and does not do
+
+Login never touches AWS. The client signs in directly with Firebase and receives an ID token. The authorizer runs afterwards, on every API request, with its cache TTL at zero so it re-verifies each call instead of trusting a cached policy. In the order the code runs them, it checks:
+
+1. a warm-up short-circuit;
+2. the `Bearer ` prefix, which API Gateway also pre-filters with a header pattern;
+3. the token's Google signature, audience and timestamps;
+4. the issuer, **re-checked explicitly**, because the verification helper it calls does not check the issuer itself;
+5. that a uid is present.
+
+None of that says anything about whether the email was verified. Firebase will happily issue a valid, correctly signed token for an account whose email was never confirmed.
+
+## The risk had been scored on an assumption
+
+The gap was not unknown. A task to forward the claim had been open since July, owned by the authorizer's original developer, and it called the exposure hypothetical because "sign-in is Google-only, and Google accounts arrive verified".
+
+I measured that instead of trusting it. **All six role accounts signed in with the password provider.** Sign-in had never been Google-only, so the window the task called hypothetical had been open the whole time.
+
+The correction runs the other way too. My first write-up of the gap said it had stood for fourteen months. It had stood since 17 July: 66 days. A smaller number, and the one that is true.
+
+## Four decisions
+
+| Decision | Why |
+|---|---|
+| Enforce now, in this repo, instead of waiting for the original author | The deployed authorizer was already built and packaged from this repository |
+| Forward `sign_in_provider`, but do not gate on it | A Google-only rule would lock out the password accounts every role test runs on. One gate, not two |
+| Refuse in the API's own code, not with an authorizer Deny | A Deny becomes the gateway's opaque 403, indistinguishable from an expired token. Our envelope can name the reason |
+| Ship even though the admin account turned out unverified | An unverified admin is exactly the case the rule exists for |
+
+## The gate, in four small pieces
+
+- **The authorizer forwards the claim.** API Gateway REST authorizer context values must be flat scalars, so the provider is flattened rather than passed as the nested object it arrives as.
+- **The context reads it with strict string equality.** Claims arrive as strings, so `email_verified` is `"true"`, never a boolean. Only the exact string `"true"` counts. Absent, empty, `"false"`, `"TRUE"` and anything unrecognised all mean unverified. A stricter parser that raises on unknown values was rejected on purpose: it would turn a refusal into a 500.
+- **A named error.** `EMAIL_NOT_VERIFIED`, status 401, in the API's standard error envelope.
+- **The check runs before any database access,** so an unverified caller costs no query.
+
+Forty-nine test files changed, mostly because every hand-built identity and every fake authorizer context in the suite now had to carry the claim. Both test suites passed, 1,221 unit and 923 integration tests, and the refusal was exercised end to end through the local API Gateway emulator before anything reached AWS.
+
+## Deploy order mattered
+
+The authorizer went first, then the seven API modules. Extra context fields that nothing reads are harmless, so the new authorizer could run safely in front of the old modules. The reverse order would have made every module demand a claim the old authorizer never sent, and every role would have received a 401 until the authorizer caught up.
+
+## How do you prove which layer refused?
+
+Mid-deploy, with the authorizer and some modules updated and others not, the same unverified admin token produced three different, distinguishable answers:
+
+| Request | Response | What it proves |
+|---|---|---|
+| Admin token to a module **with** the gate | 401 `EMAIL_NOT_VERIFIED` in our envelope | The refusal comes from our code |
+| The same token to a module **not yet** updated | 200 with real data | The authorizer allowed the token, so it was not the authorizer refusing |
+| No token at all | The gateway's own `{"message":"Unauthorized"}` | The gateway's refusal has a different shape |
+
+**A refusal's envelope says which gate refused it.** That control run turned "it returns 401" into "our gate returns 401 and nothing else does", which is the claim that actually matters. After the deploy, the five verified role accounts got 200 with their correct permission counts, and the admin got the named 401 everywhere.
+
+## What it cost, stated plainly
+
+Enforcing the rule had immediate consequences, and both were accepted on purpose:
+
+- **The production admin account was locked out** until its email was verified in the Firebase console. A token issued before that keeps the old claim, so the fix also needs a fresh sign-in.
+- **163 of the 437 requests in the production API test collection began failing,** because they authenticate as that admin. The 264 that use role-specific accounts were unaffected.
+
+Because the check runs per request, it took effect on the very next call for every existing token, not when tokens next expired. That is what a per-request gate is for.
+
+## What to actually do
+
+1. **Read your authorizer's output, not its input.** A claim it decodes and does not forward cannot be enforced anywhere downstream.
+2. **Measure the assumption your risk score rests on.** "Sign-in is Google-only" took one query to disprove.
+3. **Enforce identity rules in the API, per request,** and refuse with a named error rather than a gateway deny.
+4. **Parse claims strictly and fail closed.** Only the exact expected value means yes, and an unknown value is a refusal, not a crash.
+5. **Deploy the producer of a new field before its consumers.**
+6. **Prove which layer refused** with a control: the same token against a gated and an ungated path.
+
+## The takeaway
+
+The rule was written down correctly from the first design document. It did nothing for 66 days, because the one piece of code that could see the claim did not pass it on, and a task tracking it had scored the risk on an assumption nobody measured.
+
+> **A security rule is enforced where the claim arrives, on every request, or it is not enforced.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This gate sits in front of the Python ERP backend I described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). For the testing side of authorization, see [Every Authorization Defect Is Invisible to an Identity That Outranks It](https://ehnand.com/articles/authorization-testing-least-privilege). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

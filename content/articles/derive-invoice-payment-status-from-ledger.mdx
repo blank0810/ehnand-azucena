@@ -1,0 +1,104 @@
+---
+title: "Never Let a Button Mark an Invoice Paid: Derive Payment Status From the Ledger"
+seoTitle: "Derive Invoice Payment Status From the Ledger"
+date: 2026-10-10
+category: "Business Systems & Data Integrity"
+tags: [accounting, billing, data-integrity, postgresql, api-design]
+summary: "In an ERP's payments API, the first payment of any size marked an invoice paid while its balance still showed money owed. How the fix derives Delivered, Partial and Paid from the ledger after every payment, reversal and discount, and why legacy data stopped it from being one clean rule."
+---
+
+While writing a plain-language explainer of how an invoice gets paid in a client's ERP, I traced the payments code and found that it never wrote `Partial` or `Paid`. The first payment of any size stamped a paid date. The invoice's badge then read "paid" while its balance, computed from the same ledger, still showed money owed, and its status field stayed `Delivered`.
+
+It was easy to miss, because every screen was internally consistent. The badge read the date, the balance read the ledger, and each was right about the thing it read.
+
+**An invoice's payment status is a function of the money recorded against it. It should be recomputed from the ledger after every change to that money, and never set by an endpoint, a button or a migration.**
+
+## Why "mark paid" is the wrong API
+
+The tempting fix is an endpoint: `POST /invoices/{id}/mark-paid`. It is wrong for the same reason the original bug existed. A status that someone sets is a second record of a fact the ledger already holds, and the two will drift the first time a payment is reversed, an amount is corrected, or a discount changes the total.
+
+So there is no mark-paid API. The status is derived:
+
+| Money collected against the invoice | Status | Paid date |
+|---|---|---|
+| Nothing | `Delivered` | empty |
+| Less than the total | `Partial` | empty |
+| The total or more | `Paid` | the date it became fully paid |
+
+Three details carry the design:
+
+- **"Paid in full" compares against the invoice total,** goods minus discount, the same figure the balance already used. Two different notions of "the amount owed" would be a new drift waiting to happen.
+- **The paid date is cleared when a reversal drops the sum below the total.** Before, it was stamped on the first payment and never cleared. Now it means what accounting reads it as: the day the invoice was settled.
+- **One audit row per real change of status,** written in the same transaction, so the history of an invoice reads Delivered, Partial, Paid, and back, with who caused each step.
+
+## The status became a foreign key
+
+The status had been a free-text column. There was already a statuses table in the schema, a read-only catalogue nothing referenced, and it already held `Paid` and `Partial`. The column was converted in place to an integer foreign key into that table, and the code looks statuses up **by name, never by id**, so an id that differs between environments cannot silently mean a different state.
+
+That migration drops the text column the deployed code reads. It could not run ahead of the code, and the code could not run ahead of it, so the migration was applied and the three affected Lambdas were deployed straight after it, all three within two seconds of each other.
+
+## Legacy data would not fit one clean rule
+
+The obvious next step was to re-derive every existing invoice from the ledger. The data said no.
+
+The ERP was migrated from an older low-code system, where recording a payment stamped the paid date, long before a payment ledger existed. Counting the migrated data:
+
+| What the data showed | Invoices |
+|---|---|
+| Marked paid, with no ledger entry at all | **197** |
+| Ledger entries against an invoice not marked paid | 0 |
+| Paid in the ledger for less than the invoice total, but marked paid | 6 |
+
+Re-deriving from the ledger would have relabelled 197 settled invoices as unpaid and broken every accounting filter that relies on them. Trusting the old stamp would assert that six short-paid balances are zero. **Neither source was authoritative, so neither got to overwrite the other.** Legacy invoices keep their recorded paid date and report their ledger balance alongside it, and the contradiction stays visible as data instead of being resolved silently in someone's favour. Derivation applies from the first payment or reversal recorded through the new API onward.
+
+## Banking cash does not change an invoice
+
+A deposit, banking cash that was already collected, stamps a deposit code on the payment lines and changes nothing about the invoice. The money was collected at payment time; banking it adds no amount, so there is nothing to re-derive.
+
+The two axes are independent, and it is worth saying so explicitly, because they are easy to conflate in a report:
+
+- **A partly paid invoice's payment can be banked.** A banked payment does not imply a settled invoice.
+- **A fully paid invoice can still be reversed,** unless the payment being reversed has been banked. A reversal re-derives the status, back to `Partial` or `Delivered`, and clears the paid date.
+
+## A discount is a second writer of the total
+
+Later that month, the app team asked for discounts to be editable after an order was placed, not only on drafts. A discount changes the invoice total, and the total is what "paid in full" compares against. So the discount endpoint became the second thing that can change an invoice's status.
+
+The first version of the rule was conservative: a discount is editable until any money is collected, because a new total would leave the derived status stale. That afternoon it was relaxed to a better rule. The derivation was moved, unchanged, out of the payments module into shared code, and the discount endpoint now calls it too:
+
+| Sale | Discount change |
+|---|---|
+| Draft or order | allowed |
+| Invoice, `Delivered` or `Partial` | allowed, then status and paid date re-derived |
+| Invoice, fully `Paid` | refused with 409 |
+
+Both writers, payments and discounts, take the invoice row lock before deriving, so a payment and a discount arriving together cannot each compute a status from the other's stale total.
+
+On production, the full sequence ran on a fresh invoice: a payment of 1.00 made it `Partial`; a 10 percent discount kept it `Partial`; a 100 percent discount brought the total to 0.00 and re-derived it to `Paid`, with the paid date set; a further discount was refused; reversing the payment took it back to `Delivered`; clearing the discount restored the total. Thirty-two of 32 assertions passed.
+
+A paid invoice is final at the discount endpoint on purpose. To change it, a manager reverses a payment first, which re-derives the status through the same function.
+
+## What production confirmed
+
+The payments change was verified on a live ₱452 invoice: a ₱1.00 payment made it `Partial`; ₱451 more made it `Paid`; a ₱0.50 overpayment left it `Paid`; manager reversals took it back to `Partial`, then `Delivered`, with the paid date cleared. Replays returned the original result, an unauthorised role was refused, and reversing the same payment twice was refused. Forty of 40 checks passed, and a separate full happy path from quotation to banked deposit passed 29 of 29.
+
+One small lesson came free. The first full-flow attempt picked the cheapest product in the catalogue, priced at ₱0.01, which cannot be split into a partial payment. **An end-to-end test of partial payment needs a price that can be partially paid,** and the test invoice that attempt created is still in production.
+
+## What to actually do
+
+1. **Never expose a "mark paid" action.** Record money, and derive the status from it.
+2. **Use one definition of the amount owed** for the balance, the status and the paid-in-full check.
+3. **Make the paid date mean settled,** and clear it when a reversal unsettles the invoice.
+4. **Put the derivation in one shared function and call it from every writer of money or totals,** under the invoice's row lock.
+5. **Count your legacy data before re-deriving it.** If two old sources disagree and neither is authoritative, keep both visible rather than rewriting history for one of them.
+6. **Keep banking and settlement separate in your reports.** A banked payment is not a paid invoice.
+
+## The takeaway
+
+A payment status that someone sets is a second copy of a fact the ledger already holds, and second copies drift. Here it drifted on the very first payment of every invoice, and every screen looked correct while it did.
+
+> **Record the money. Derive the status. Recompute it whenever the money or the total changes.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This payments module is part of the Python ERP backend I described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). For the ledger design behind a billing system's balances, see [Designing a Double-Entry Ledger for Utility Billing](https://ehnand.com/articles/utility-billing-ledger), and for why a correct total can still mislead, [Why a Correct Ledger Total Can Still Produce a Wrong Billing Statement](https://ehnand.com/articles/correct-ledger-wrong-billing-statement). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

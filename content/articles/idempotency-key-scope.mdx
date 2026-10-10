@@ -1,0 +1,69 @@
+---
+title: "An Idempotency Key Is Only as Exact as Its Scope: Too Narrow Repeats the Work, Too Wide Fakes a Success"
+seoTitle: "Idempotency Key Scope: Too Wide Fakes a Success"
+date: 2026-10-10
+category: "SaaS, Cloud & Security"
+tags: [idempotency, api-design, background-jobs, testing, reliability]
+summary: "An idempotency key means the same values along whatever dimensions the dedup layer includes, not the same operation. Four instances in two unrelated systems in two days, and why the too-wide direction, which replays another operation's result as a success, is the one you have to test on purpose."
+---
+
+A test called "identical replay, expect 201" kept getting 409. It looked like a broken idempotency store. It was a test sending the same JSON with different whitespace, and a store that hashed the exact bytes.
+
+The next day, reading the same API's code turned up the opposite failure. The same key and the same body sent to a *different invoice* would have replayed the first invoice's stored 200: nothing written, no audit row, and a success where the honest answer was 404.
+
+In the same two days, in an unrelated system, a background job that was meant to enqueue one run enqueued fifteen.
+
+**An idempotency key does not mean "the same operation". It means "the same values along whatever dimensions the dedup layer includes", and that layer is usually somewhere the author is not looking.**
+
+## Four instances, two directions
+
+| # | System | What the author meant by "same" | What the layer actually keyed on | Direction | What it looked like |
+|---|---|---|---|---|---|
+| 1 | Python HTTP API, hand-written idempotency store | the same deposit payload | the exact request bytes, whitespace included | too narrow | A reformatted replay got 409 instead of the stored 201 |
+| 2 | Same API | the same write *to this invoice* | actor, endpoint *template* and key, plus a hash of the body; the invoice id in the path was in none of them | too wide | Same key and body aimed at another invoice replays the first invoice's success |
+| 3 | Background-job platform | one matching run per tenant and generation | the platform's default scope for a key set inside a task: **the parent run** | too narrow | 15 runs from one parent run, 14 of them no-ops that each waited about 20 minutes on a one-at-a-time queue, under a comment saying it "enqueues one run" |
+| 4 | Same platform | this retry attempt of this render | a global key with a five-minute expiry, keyed only per render | too wide | Attempt 2 would have received attempt 1's finished run, and the retry chain would have stopped with no error |
+
+In every case the key silently **gained** a dimension the author did not intend (the request bytes, the parent run) or **lost** one the author assumed was there (the path id, the attempt number).
+
+## The two directions fail differently
+
+This is the part that decides where to test:
+
+- **A key that is too narrow** repeats the work or returns a conflict. Both are visible. You can count duplicate runs, and a 409 on a request your test calls identical is loud.
+- **A key that is too wide** returns *another operation's stored result as a success*. Nothing is written, nothing errors, and the caller is told it worked. On a money path, that is a fabricated success, and it leaves a receipt that stops anyone from retrying.
+
+Instances 3 and 4 are worth reading together, because they are the same kind of key fixed in opposite directions. Moving a key from run scope to global scope cures the over-running of instance 3 and creates the silent swallowing of instance 4, **unless the missing dimension goes into the key string at the same time**: the generation for the matching run, the attempt number for the retry. The shipped retry key carries the attempt number for exactly that reason.
+
+## Why it keeps happening
+
+- **The scope is a default of somebody else's code.** A byte hash, an endpoint *template* constant and an SDK's default scope are each correct for *some* caller. None of them is visible at the call site, where the author writes only `key`.
+- **Existing call sites are safe by accident of layout.** In the HTTP API, the payment and deposit routes carry their resource id inside the body, so the body hash happens to cover it. The one older route with an id in the path had been patched by hand. Nothing structural stopped the next path-parameter route from forgetting, and one did.
+- **The obvious test passes in the dangerous direction.** "Same key, same body, expect the stored response" passes for a key that is too wide. It only fails for one that is too narrow. A suite that contains only the obvious test catches the loud failure and certifies the silent one.
+
+The fix for instance 2 is one line, folding the path identity into the hash:
+
+```python
+request_hash=idempotency.request_hash(f"{invoice_id}\0{context.raw_body or ''}")
+```
+
+The better fix is structural: make the path identity a required argument of the hash function, so it cannot be omitted on the next route.
+
+## What to actually do
+
+1. **Write the key's identity down as a tuple before choosing a mechanism:** actor, target resource, payload, producer, attempt or generation. Then check each element against what the store or SDK actually hashes and scopes on.
+2. **Test both directions.** Same operation, reformatted or retried: expect a replay, not a 409 and not a second run. *Different* operation with the same key string (another path id, another attempt, another generation): expect a 409 or a new run, never a replay.
+3. **Make the identity impossible to omit.** A required parameter on the hash function, or a key-building helper that demands a scope and a generation.
+4. **When deduplication "does nothing", count before you trust it.** Group runs by key and scope, or diff the raw request bodies.
+5. **Generate keys at the client for money writes.** Content alone cannot tell a retry from a second real payment; only the caller knows which it is.
+6. **Read your platform's default key scope** before you rely on a key you set inside a job. A key that only deduplicates within its own run deduplicates nothing across runs.
+
+## The takeaway
+
+A too-narrow key costs you compute and a confused test. A too-wide key costs you the truth: it tells a caller that an operation happened when a different one did. The first announces itself. The second has to be hunted.
+
+> **Decide what "same" means as a list of dimensions, and test the case where one of them differs.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These instances come from [Adam AI](https://ehnand.com/projects/adam-ai) and the Python ERP backend I described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). For the run-scoped key found while cutting a job's cost, see [Cutting a Matching Job's Cost in Four Phases](https://ehnand.com/articles/shadow-run-before-the-switch), and for what a fabricated success does next, [A False Success Writes a Receipt, and the Receipt Forecloses the Retry](https://ehnand.com/articles/false-success-leaves-a-receipt). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

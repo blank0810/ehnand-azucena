@@ -1,0 +1,128 @@
+---
+title: "Private Images Behind CloudFront Signed URLs: Deleting the Object Does Not Revoke the Link"
+seoTitle: "CloudFront Signed URLs: Deleting Doesn't Revoke"
+date: 2026-10-10
+category: "SaaS, Cloud & Security"
+tags: [aws, cloudfront, security, aws-lambda, python]
+summary: "How a Python ERP on AWS Lambda serves tenant images through CloudFront signed URLs from one private bucket: the upload and confirm flow, an expiry rounded to the hour, a signing key loaded lazily, and a production measurement showing that deleting an object does not revoke a link already handed out."
+---
+
+I deleted an image through the API and got a 204. Then I fetched the signed link that had been issued for it before the delete. It returned 200, with the header `Hit from cloudfront`. Three times in a row.
+
+The object was gone from the bucket. The edge did not care. It had a cached copy, the link's signature was still valid, and CloudFront served it.
+
+That measurement changed how I describe the security of every image this system serves. **With CloudFront signed URLs, the link's expiry is the revocation boundary, not the object's existence. Pick the expiry as if it were the longest you could tolerate a deleted image staying visible.**
+
+## The setup
+
+The system is the Python ERP backend I described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). Its pictures, such as company logos, contact photos and product images, live in **one private S3 bucket shared by every tenant**, under a key layout that carries ownership in the path:
+
+```text
+<tenant>/<resource>/<name>-<id>/<kind>/<file>-<12 hex>.png
+```
+
+Nothing in the bucket is public. Images used to be read back through S3 presigned GET URLs; they are now served as **CloudFront signed URLs**, from the edge.
+
+## Upload, confirm, then link
+
+A picture takes three calls, and the middle one is where the safety lives:
+
+| Step | What happens |
+|---|---|
+| `upload-url` | The API mints a presigned PUT for a fresh key inside the record's own folder |
+| `PUT` | The client uploads the bytes straight to S3 |
+| `confirm` | The API checks the key belongs to that record, the object exists, and the bytes are really an image |
+| `links` | The API returns a CloudFront signed URL for the key |
+
+`confirm` refuses anything it cannot vouch for, with a 422:
+
+- **A key from another record.** The check matches the record's id as a whole path segment, so `acme-142` never passes for record 42. It deliberately ignores the name part, so renaming a company between `upload-url` and `confirm` does not reject a good upload.
+- **A well-formed key that was never uploaded.** Under a prefix-scoped grant, a `HEAD` on a missing key returns 403, not 404, so the code treats 403 as missing.
+- **A path traversal attempt.**
+- **Bytes that are not what the extension claims.** A text file uploaded as `.jpg` is rejected and the object is deleted.
+
+## Round the expiry to the hour
+
+Every read of a record signs its image key again. If each signature expired "now plus a day", every response would carry a different URL, and every client image cache would miss. So the expiry is rounded:
+
+```python
+def signed_url_expiry(now: datetime) -> datetime:
+    # The start of the current UTC hour plus 25 hours: every response within one
+    # clock hour carries the identical URL, so client image caches hit. A URL lives
+    # between 24 and 25 hours, so a link from the latest read has at least a day left.
+    return now.astimezone(UTC).replace(minute=0, second=0, microsecond=0) + timedelta(hours=25)
+```
+
+Two reads in the same clock hour now return the identical URL, and the production check measured a link's remaining lifetime at 24.5 hours, inside the designed 24 to 25. That window is also, as it turned out, the revocation window.
+
+## Load the signing key on first use, not at import
+
+The CloudFront private key lives in SSM Parameter Store, encrypted. It is read on the first signing call and cached, never at import time:
+
+- **An SSM failure at import would kill every route,** including the ones that never sign anything, before the Lambda handler even exists.
+- **A failed read is retried by the next request,** because the cache does not keep exceptions, instead of being pinned for the life of the container.
+
+CloudFront signed URLs are specified as RSA-SHA1. That algorithm is CloudFront's choice, not ours, and the code says so in a comment, so nobody "upgrades" it into URLs CloudFront rejects.
+
+## Deleting does not revoke a link already out
+
+This is the production measurement from the opening, done deliberately after the first run looked like a contradiction:
+
+| Step | Result |
+|---|---|
+| Fetch a fresh signed URL three times | `Miss`, `Miss`, then `Hit` |
+| Delete the object through the API | 204; a later confirm says no object exists at that key |
+| Fetch the same URL three times | **200, `Hit from cloudfront`, every time** |
+| Same flow, deleting before the edge warms | 403 |
+
+In the first run, one URL returned 403 after deletion and another returned 200. The only difference was whether that edge had cached the object yet.
+
+What actually bounds the exposure is the signature. CloudFront validates it before serving even a cached copy, so a link stops working when it expires, at most 25 hours here. Nothing in this system issues a CloudFront invalidation on delete today. If a deleted image ever had to disappear immediately, the options are an invalidation on delete or a much shorter expiry, and each costs something: invalidations are a request per delete, and short expiries defeat the client cache the rounding exists for. Whether a day is acceptable is a product decision. The point is that it is now a known, written number instead of an assumption that delete means gone.
+
+## One module owns every picture
+
+The first version lived inside the CRM module. A later change moved it into its own Lambda, the eighth in the system, which owns every module's pictures and nothing else:
+
+- **Resources are rows in a registry** (companies and logo, contacts and image, products and image), each reusing that resource's existing view and update permissions. No new permission and no migration were needed.
+- **The media module writes no business table.** `confirm` hands back the key, and the module that owns the record stores it in its own column.
+- **The app calls the media API directly.** No Lambda in this system calls another module's API over HTTP: a cross-module HTTP call cannot join the caller's database transaction, splits one logical write into two that can half-fail, and spends the API gateway's 29-second budget twice.
+- **Media is now the only signer and the only writer.** The modules that used to sign their own links lost the bucket grant and the signing key.
+
+## The bug the plan contained
+
+The plan reused the CRM's cleanup sweep in `confirm`: after a successful upload, delete every other object in the record's folder, so a replaced logo leaves exactly one file behind.
+
+In the CRM that was safe, because the same call also wrote the new key onto the record. In the media module, `confirm` deliberately writes no record. **The sweep would have deleted the object the record still pointed at, the live logo,** the moment someone uploaded a replacement they had not yet saved. It was caught while writing the API test flow, before any production run, and then re-proved on the real bucket: two objects in one folder, confirm the second, both survive.
+
+**A cleanup sweep is only safe inside the call that also writes the record it cleans up for.** Move the sweep without the write, and it deletes the thing the record still references.
+
+## What production confirmed
+
+- No API key: 403. No bearer token: 401. Unknown path or wrong method: 404.
+- The full lifecycle through the real gateway and CloudFront. The signed URL returned the uploaded bytes exactly, 21,927 of them, with no auth headers at all. Unsigned and tampered signatures: 403.
+- A role matrix: a role with no view permission gets 404, a role that can view but not update gets 403, roles with update get 200.
+- A before-and-after diff of four production endpoints' responses showed only additions, nothing removed or changed, for the first additive release.
+- The API test collection passed 18 of 18 on the media flows and 81 of 81 on the read-only folders.
+
+## What this does not cover yet
+
+Almost every picture value in production is still a legacy path from the system this ERP replaced, and those pass through unsigned. Signing applies to new uploads. The design is proven on production; most of the existing images have not been moved into it.
+
+## What to actually do
+
+1. **Treat a signed URL's expiry as your revocation time,** and write that number down where the next engineer will see it.
+2. **Round the expiry to a fixed boundary** so repeated reads return the same URL and client caches work.
+3. **Validate on confirm, not on upload-url:** ownership by id segment, existence, and the real bytes.
+4. **Load signing keys lazily, outside import time,** so a parameter-store hiccup fails one request instead of every route.
+5. **Keep cleanup sweeps in the same call as the record write they depend on.**
+6. **Measure deletion against a warm edge,** not a cold one, before you tell anyone that deleting an image removes it.
+
+## The takeaway
+
+A private bucket and signed URLs give you control over who can *get* a link. They do not give you control over a link you already gave out. That control is the expiry, and on a CDN a deleted object stays reachable through a cached copy until that expiry runs out.
+
+> **On a CDN, delete removes the object. The expiry removes the access.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build Python backends on AWS Lambda, API Gateway, CloudFront and Terraform, including the ERP behind this module. For a related case where a security property depends on more than the code you wrote, see [Nothing Re-Reads a Value That Was Resolved at Deploy Time](https://ehnand.com/articles/nothing-re-reads-deploy-time-values). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

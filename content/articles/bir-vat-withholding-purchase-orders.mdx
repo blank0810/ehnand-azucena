@@ -1,0 +1,125 @@
+---
+title: "VAT and Withholding on Philippine Purchase Orders: Derive the Type, Store the Amounts, Lock at Approval"
+seoTitle: "BIR VAT and Withholding on Purchase Orders, in Code"
+date: 2026-10-10
+category: "Business Systems & Data Integrity"
+tags: [accounting, tax, python, data-integrity, api-design]
+summary: "How I added BIR-ready VAT, VAT-exempt and expanded withholding amounts to an ERP's purchase orders: a per-line VAT flag the type is derived from, required inputs with no silent defaults, one rounding per order, and amounts stored at write time so an approved order cannot drift."
+---
+
+A client's accounting team sent six changes to the purchasing module of their ERP, all for one purpose: BIR reporting. They wanted each purchase order's supplier TIN, its VAT and VAT-exempt amounts, its expanded withholding, and its type of purchase (VAT, Non-VAT or Mixed) in the Excel export they file from.
+
+Only one of the six needed new backend work. Getting there took an analysis before any code, and the one that remained, the tax breakdown, took a design that answers a question accounting systems get wrong surprisingly often: **where does a tax classification live, and when does it stop being allowed to change?**
+
+**Derive what can be derived, require what cannot, round once, store the result when it is written, and let the approval that already exists be the lock.**
+
+## Six asks, one backend change
+
+Before designing anything, each ask was traced to what already existed:
+
+| Client ask | What it actually needed |
+|---|---|
+| Remove the "Paid PO" list | A screen change. The API filter stays. |
+| Add "Received" | Nothing. The receive endpoint had been live for three weeks. |
+| Remove "Purchase Payables" | A screen change. The API filter and Pay action stay. |
+| Supplier TIN in the export | The column existed. Added a format check, and the TIN and address on every order read. |
+| Tax breakdown in the export | **New: VAT, exempt and withholding amounts** |
+| Type of purchase | **New: derived from the lines** |
+
+That table is worth as much as the code. Two of the six would otherwise have become backend work for problems that lived in the mobile screens, which belong to the app team, not to the API.
+
+## Where the classification lives
+
+The breakdown lives **on the purchase order itself**, set by the same create and edit endpoints that set its lines and prices. Those endpoints already refuse any change once an order is past New or Rejected. So the tax breakdown **locks at approval with no extra code**, and the approver approves the tax figures together with the total.
+
+Two alternatives were rejected on purpose. Default tax settings on the supplier would have been a second place for the truth to live, and a source of quiet disagreement when a supplier's status changes. A separate correction endpoint for Accounting would have reopened approved orders through a side door.
+
+## Derive the type, never accept it
+
+The type of purchase is never sent by the client. Each line carries a required `vatable` boolean, and the server derives the type from the lines:
+
+| Lines | Type of purchase |
+|---|---|
+| Every line VAT-able | VAT |
+| No line VAT-able | Non-VAT |
+| Some of each | Mixed |
+
+With one way to state the classification, a header and its lines can never disagree, and Mixed needs no special case. A header field saying "VAT" over a line that is exempt is a contradiction the schema simply cannot express.
+
+Withholding is the one header field: `none`, `goods` or `services`. The rates are the ones the client's accounting team works with, 1 percent on goods and 2 percent on services, which are the expanded withholding rates top withholding agents apply to purchases from local suppliers. Whether a business must withhold, and at what rate, is its accountant's call; the code's job is to apply the answer consistently.
+
+## No silent defaults on tax inputs
+
+Both inputs are **required**, with no default:
+
+- A default `vatable: true` would claim input VAT on purchases from a Non-VAT supplier.
+- A default `withholding: "none"` would under-withhold on every order where nobody remembered to choose.
+
+Either default makes the common case one field shorter and the wrong case invisible. On a document that ends up in a tax filing, an omitted field should be a rejected request, not a guessed answer. Missing `vatable`, a null `withholding`, and a malformed TIN all return 422.
+
+That choice has a cost, and the app team was told the same evening: until the mobile app sends the two new fields, its purchase order create is refused. That was preferable to an app quietly creating orders with tax figures nobody chose.
+
+## One function, rounded once, stored at write time
+
+Prices are VAT-inclusive, as in the client's own sheet. The VAT inside a VAT-able amount is therefore 12/112 of it, and withholding is taken on the amount net of VAT. All of it is in one function, which the create and edit paths both call:
+
+```python
+def purchase_tax(lines: Sequence[tuple[Decimal, bool]], withholding: str) -> PurchaseTax:
+    flags = [vatable for _, vatable in lines]
+    purchase_type: PurchaseType = "VAT" if all(flags) else "Mixed" if any(flags) else "Non-VAT"
+    vatable = sum((amount for amount, flag in lines if flag), start=ZERO)
+    exempt = sum((amount for amount, flag in lines if not flag), start=ZERO)
+    vat = round_money(vatable * _VAT_RATE / (1 + _VAT_RATE))
+    net_of_vat = vatable - vat + exempt
+    return PurchaseTax(
+        purchase_type=purchase_type,
+        exempt_amount=round_money(exempt),
+        vat_amount=vat,
+        withholding_amount=round_money(net_of_vat * _WITHHOLDING_RATES[withholding]),
+    )
+```
+
+Three decisions are encoded in those lines:
+
+- **`Decimal`, half-up, never floats.** Money arithmetic in binary floating point is a rounding bug waiting for the right amount.
+- **Rounded once, on the whole order, never per line.** Rounding each line and summing can land a cent away from the figure the accountant's sheet computes on the total.
+- **The rates are constants and the amounts are stored.** VAT, exempt, withholding and type are written to the order on every create and edit. Net of VAT and amount due are subtractions done on read. If a statutory rate ever changes, orders already approved keep the figures they were approved with.
+
+## The worked figures
+
+These are pinned in unit tests and were reproduced to the cent against production:
+
+| Order | Type | VAT | Net of VAT | Withholding | Amount due |
+|---|---|---|---|---|---|
+| 300.00, all VAT-able, goods | VAT | 32.14 | 267.86 | 2.68 | 297.32 |
+| 200.00 VAT-able + 100.00 exempt, goods | Mixed | 21.43 | 278.57 | 2.79 | 297.21 |
+| 300.00, nothing VAT-able, services | Non-VAT | 0.00 | 300.00 | 6.00 | 294.00 |
+
+The first row matches the client's own sheet. Every order read now carries the supplier's TIN, address and this breakdown, so the BIR export needs no per-order detail call.
+
+## Shipping it without breaking the running version
+
+The new columns went in as `NOT NULL` with defaults, and with `CHECK` constraints on the type, the withholding value and non-negative amounts. The defaults exist for one reason: the migration is applied before the new code is deployed, and the old code had to keep inserting orders in between.
+
+The production API test collection was uploaded only *after* the deploy, not at commit. The old version rejected unknown fields, so the new request bodies would have failed in the shared workspace until the new code was live.
+
+Verification ran in layers. 1,824 unit tests passed, up from 1,785. The production collection ran 125 requests and 416 assertions; every changed request passed, and the failures in that run were all in one unrelated, pre-existing payment fixture. Then a direct `curl` pass, 12 of 12, created a Mixed order with goods withholding, switched it to services (withholding 5.57, due 294.43), and confirmed each refusal. The implementation session's first live-check report cited the collection run alone; I asked for the direct curl pass, which the project's own rule requires for every release. A scripted collection and hand-built requests fail in different ways, which is the point of running both.
+
+## What to actually do
+
+1. **Trace every requested change to what already exists before designing.** Here, one of six asks needed new backend work.
+2. **Put a tax classification on the document it describes, and let its existing approval lock it.** No supplier defaults, no correction side door.
+3. **Derive the type from the lines.** One way to state a fact means no way for two statements of it to disagree.
+4. **Make tax inputs required.** A default on a tax field is a guess that will be filed.
+5. **Use decimal money, round once per document, and store the computed amounts at write time.** Derive only what is a plain subtraction of stored values.
+6. **Deploy schema before code with defaults that keep the old version writing,** and publish new API contracts only after the code that accepts them is live.
+
+## The takeaway
+
+Most tax bugs in business software are not arithmetic. They are a classification stored in two places, a default nobody chose, a rounding done per line instead of per document, or a figure recomputed after approval. The arithmetic here is three lines. The rest of the design exists so those three lines see the same inputs every time, and their answer stays the one that was approved.
+
+> **Derive the type, require the inputs, round once, store the result, and let approval be the lock.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This purchasing module is part of the Python ERP backend I described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). For a ledger that has to stay correct on the receivables side, see [Designing a Double-Entry Ledger for Utility Billing](https://ehnand.com/articles/utility-billing-ledger). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

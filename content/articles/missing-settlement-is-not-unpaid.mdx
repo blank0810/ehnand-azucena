@@ -1,0 +1,136 @@
+---
+title: "A Missing Settlement Is Not an Unpaid Sale: Rebuilding Card Reconciliation as an App"
+seoTitle: "Card Reconciliation: Missing Data Is Not Unpaid"
+date: 2026-10-10
+category: "Business Systems & Data Integrity"
+tags: [reconciliation, payments, data-integrity, postgresql, typescript]
+summary: "The first production run of a rebuilt card reconciliation flagged 300 sales as unpaid. Every one had been paid. Tracing them one by one fixed the matcher, and exposed why a reconciliation needs a third outcome besides paid and unpaid."
+---
+
+The first time the rebuilt reconciliation ran September on production, it reported 300 card sales as unpaid, worth CHF 33,450.51. Every one of them had been paid.
+
+The app replaces a set of monthly scripts I had been running by hand for a Swiss petrol station group. It pairs every sale recorded at the fuel terminals with the card acquirer's settlement record, so the business knows whether each sale was actually paid. A false "unpaid" is not a harmless warning. Each one is a sale somebody has to chase with the acquirer, and 300 of them make the report useless.
+
+The fix was not to loosen the matcher until the number went away. I traced all 300 against the acquirer's data on production, counted what was there, and changed only what the counts justified. September then read 40,532 of 40,532 sales matched, alongside 20,009 of 20,009 on the second terminal system.
+
+**An unmatched sale is a claim about the data you had, not about the money. "Unpaid" is only true when the data that would hold the payment is actually there, so card reconciliation needs three outcomes, not two: paid, unpaid, and not checked yet.**
+
+## Why the monthly scripts became an app
+
+Every month used to look the same: download the exports from each system, copy last month's folder, edit the period, run the matcher, write up the findings by hand. The matching itself was sound. What kept going wrong was the input. Incomplete exports were found late, including a daily acquirer export with most of one card scheme's rows missing, which any completeness check that only counts files or days would pass.
+
+The app's job is the part around the matcher:
+
+| Stage | What it does |
+|---|---|
+| Fetch | Pulls each source's files daily over SFTP, read-only |
+| Store | Keeps every raw file in Postgres, parses it once, stores each sale once |
+| Coverage | Shows, per source and per day, whether the data that should exist does |
+| Reconcile | Runs each terminal-and-acquirer pair for one completed month |
+| Report | Lists results in the app and sends a formal monthly email |
+
+It is a Next.js 16 web app and a separate worker process, sharing TypeScript service packages, on Node 22 and PostgreSQL 17 through Drizzle. Jobs and schedules run on pg-boss. The worker is a separate process on purpose: it holds the SFTP credentials, and the internet-facing web process does not.
+
+## Fetch read-only, store raw, count repeats
+
+Three decisions in the ingestion layer did most of the work of making later numbers trustworthy:
+
+- **The fetch key cannot write.** The SFTP key is restricted on the server side to read-only SFTP. I tested that a shell and a `mkdir` are both refused, because another automation reads the same folder and must never find a file the app put there. The server's host key is pinned in configuration, not accepted on first connect.
+- **Raw files are kept, and money is an integer.** Every downloaded file is stored as-is in a `bytea` column, so any result can be traced back to the original bytes. Amounts are `bigint` thousandths of a franc. History is append-only.
+- **A sale is stored once, and a repeat is counted, not ignored.** One terminal system exports incrementally, so each sale appears in exactly one file, keyed on source, external id and timestamp. The acquirer's portal exports overlap: July alone had 33 exports, 4 of them at the portal's 3,000-row export cap, carrying 2,689 repeated transactions. Overlap is resolved per transaction, the copy from the file stored last counting.
+
+## Coverage comes before matching
+
+Before anything is reconciled, a status grid answers a simpler question: for each source and each day, is the data there?
+
+A day becomes due at a fixed time the next morning, set per source. A day only counts as covered once a file exported *after the day ended* covers it, because a file taken mid-day is incomplete by construction. Each day is Missing, Warnings, OK, or Expected (not due yet). A per-brand check flags a day where the acquirer holds records for fewer than half the terminals that took that card brand, on a day with 20 or more sales. It is aimed at exactly the kind of export that once arrived with a card scheme missing.
+
+## Port first, and prove it with the old numbers
+
+The matchers were ported from the legacy scripts before any rule was changed. A developer-only regression test reads the legacy July and August inputs in place and must reproduce their results exactly, for both pairs: August on the first pair matched 40,937 of 40,938 with one unpaid sale of CHF 34.16, and on the second, 19,217 of 19,218 with one unpaid sale of CHF 90.01. The new parser for the second terminal system reproduced August exactly: 19,218 card sales settled through the acquirer, CHF 1,359,350.26.
+
+That test is what made the September fix safe. Every later change had to keep July and August identical, or explain the difference.
+
+## Why were 300 paid sales reported as unpaid?
+
+All 300 came from one cause: **the older file layout from one terminal system, used until 20 September, carries no authorisation code.** The code field was `000000` on all 38,363 sale rows in that layout. Without it, the primary match on terminal and authorisation code cannot run, so every one of those sales had to fall through to the fallback match on terminal, card and amount inside a time window.
+
+Read-only queries on production, counts only, sorted the 300:
+
+| Count | What the acquirer's data held | Why the fallback missed it |
+|---|---|---|
+| 281 | A record exactly 2 rappen lower | The acquirer rounds the terminal's three-decimal amounts half up and often lands 2 rappen low; the fallback allowed 1 |
+| 16 | Same terminal, card and amount, 7 to 10 minutes earlier | The fallback window reached only 7 minutes back |
+| 3 | Same terminal and card, 1 to 2.5 minutes apart, a different amount | No rule paired a different amount |
+| **0** | **Nothing at all** | |
+
+Zero of the 300 lacked an acquirer record. The matcher was not finding missing payments; it was failing to recognise present ones.
+
+## Widen only to what you measured
+
+Each fix went in with its measurement written into the code comment beside the constant, so the next person who wants to change it has to argue with the data:
+
+| Rule | Before | After | Evidence |
+|---|---|---|---|
+| Fallback amount, acquirer lower | 1 rappen | **2 rappen** | 281 sales exactly 2 lower; 2 higher or 3 lower stays unpaired |
+| Fallback window, acquirer earlier | 7 minutes | **12 minutes** | 16 sales at -7 to -10 minutes: -10 once, -9 three times, -8 nine times, -7 three times |
+| Third tier | none | **same terminal and card, any amount** | 3 sales; shown as overpaid or underpaid, never hidden as paid |
+
+The window is deliberately asymmetric. The acquirer stamps the authorisation and the terminal stamps the end of fuelling, so the acquirer's time runs earlier. Measured on 599 matched pairs, the offsets were -5 minutes twice, -4 fourteen times, -3 126 times, -2 339 times, -1 116 times and 0 twice. A symmetric window of plus or minus three minutes would have dropped the tail.
+
+The third tier matters as much as the widening. A sale paired with a different amount is not "paid": it is overpaid or underpaid, and it shows as such. That rule changed one historical result on purpose. August's CHF 34.16 sale, unpaid in the legacy run, now shows as overpaid, because the acquirer charged CHF 80.00 two minutes later on the same terminal and card. That is a better question to take to the acquirer than "where is this sale?"
+
+July reproduced unchanged for both pairs after every fix. September became:
+
+| Pair | Sales | Matched | Unpaid | Paid by amount |
+|---|---|---|---|---|
+| Terminal system A to acquirer | 40,532 | 40,532 | **0** | 100.0089% |
+| Terminal system B to acquirer | 20,009 | 20,009 | **0** | 99.9978% |
+
+## Not checked yet is the third outcome
+
+The September fix exposed a second false "unpaid" that had not happened yet. The acquirer's data on production ended on 1 October. Run October early and almost every October sale is left without an acquirer record, not for want of payment but for want of the file.
+
+So a sale without an acquirer record is now **not checked yet**, with its own list, its own count and its own line in the email, whenever any of these hold:
+
+1. the acquirer has no data for the sale's day: before its go-live, missing, or not due yet;
+2. the sale was made in the first 15 minutes after midnight and the previous day has no acquirer data, because the match windows reach back across midnight;
+3. the acquirer lacks the sale's card brand that day (the per-brand check above);
+4. the sale's station has no acquirer terminal mapped.
+
+October's early runs then showed 5,243 and 3,784 sales as not checked yet, instead of thousands of false unpaids, and exactly one genuinely unpaid sale of CHF 62.02 that waits for October's run before anyone acts on it.
+
+The limit is stated in the rule itself: it checks that the acquirer's data *exists*, not that it is right. When the day's file is present and holds no payment, the sale is unpaid.
+
+## A month is judged when it is over
+
+Every run is one pair and one completed month. The schedule runs the previous month on the 1st at 13:00, and a run goes ahead even with incomplete inputs, because the email says which inputs were incomplete. A goal like "no paid sale ever shows as unpaid" is judged on September, which is closed, not on October, which is still arriving.
+
+## Shipping it to one small server
+
+The app runs natively on a single server, without Docker in production, and deploys itself. A systemd timer checks `main` every five minutes with a read-only deploy key. Only for a new commit, it runs the typecheck and the full test suite on the server as the gate, then builds, migrates, switches and health-checks, rolling back on failure. A pushed commit was live two minutes later on the first proof. The first production fetch stored 9 files, 6,056 sales and CHF 441,309.57, identical to my local database from the same files.
+
+From the design on 29 September to live on 8 October took nine days, and both pairs reconciled cleanly for September on 10 October.
+
+## What this does not prove yet
+
+The first scheduled monthly run is on 1 November, covering October; every run so far was started by hand. The acquirer's files currently reach the app through an inbox folder that stands in for an SFTP feed, filled by hand. The report email is built and wired but has not been sent to its recipients. August's one unpaid sale on the second pair, October's one, and the overpaid August sale still need the acquirer's portal to confirm them. I will report on those when they happen, not before.
+
+## What to actually do
+
+1. **Make "not checked yet" a first-class outcome.** If the data that would prove payment is missing, the sale is unchecked, with a reason. Never let a missing file become an unpaid sale.
+2. **Check coverage before you reconcile, per day and per card brand.** Counting files is not coverage; a complete-looking export can be missing a whole scheme.
+3. **Port the old matcher first and pin it with a regression test on real months.** Every later rule change then has to reproduce history exactly or explain the difference.
+4. **Trace every false result before you change a tolerance.** Sort them by what the counterparty's data actually holds. Here, 0 of 300 lacked a record.
+5. **Widen to the measured maximum, and write the measurement beside the constant.** A tolerance with its evidence in the comment is a decision; without it, it is a guess the next person will widen again.
+6. **Pair different amounts as overpaid or underpaid, never as paid.** A near-miss is a question for the acquirer, and the report should ask it.
+
+## The takeaway
+
+A reconciliation that only knows paid and unpaid will turn every gap in its inputs into a debt somebody chases. The 300 false unpaids were a matcher problem, and measuring them fixed it. The thousands of October sales that would have followed were an input problem, and only a third outcome stops them.
+
+> **Missing data is not an unpaid sale. Say "not checked yet", and say why.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build data-integrity-critical business systems including the [Swiss Energy Platform Suite](https://ehnand.com/projects/swiss-energy-platform-suite), whose card transaction reconciliation this app now automates, and [Adam AI](https://ehnand.com/projects/adam-ai). For the matching techniques themselves, see [Document Reconciliation: The Matching Strategies That Actually Work](https://ehnand.com/articles/document-matching-strategies), and for records that never arrive at all, [A System Cannot Report What Fell Out of It](https://ehnand.com/articles/detecting-missing-records-census). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

@@ -1,0 +1,84 @@
+---
+title: "A Gate Built for a Person Waits Forever Where No Person Is"
+seoTitle: "Unattended Jobs Hang on Prompts Built for People"
+date: 2026-10-10
+category: "AI & Automation"
+tags: [automation, ai-assisted-development, macos, operations, debugging]
+summary: "A terminal prompt, a macOS privacy check, a disk-encryption unlock and an AI agent's approval step all protect something by waiting for a person. Run unattended, each one waits forever, and from outside the wait looks exactly like slow work. How to tell waiting from working, and what to do before anything runs alone."
+---
+
+An AI coding agent ran in a background shell for 28 minutes and 48 seconds. In that time it used zero seconds of CPU, wrote no session file, opened no network connection and produced no output. It was not thinking. It was waiting for someone to type into a terminal that did not exist.
+
+The same shape turned up on a client's production Mac Mini on 9 October. Listing a folder over one SSH route returned nothing, not even an error, until the client gave up after 25 seconds. Over another SSH route, the same command on the same folder returned instantly.
+
+**A gate built for an attended session has one default when nobody answers: wait. For the gate's author that is the safe choice. For an unattended caller it is a hang with no end condition, and from outside it looks exactly like work.**
+
+## Four gates, four settings
+
+| Gate | What it expects | The unattended caller | What it looked like |
+|---|---|---|---|
+| A command-line tool reading extra input from stdin | a person typing | an AI coding agent's CLI run from a background shell, whose stdin never ends | 28:48 elapsed, 0 s of CPU, sleeping in a futex wait, no output |
+| macOS privacy protection on `~/Desktop` | a person at the screen allowing access | an SSH session whose shell was started by a root daemon without Full Disk Access | `ls` on the folder hung with no error until the client's timeout, twice |
+| FileVault disk unlock after a restart | a person typing the password at the machine | the whole production stack after any reboot or power cut | not triggered: nobody has physical access, so a restart would leave the site down at the unlock screen |
+| An AI agent deciding its plan needs approval | a person approving | the same agent with approvals set to "never" | the opposite failure: the run **ended** with exit code 0, having written nothing |
+
+Every one of these gates is right for the setting it was built for. A prompt, a privacy check, a disk password and an approval question all protect something by refusing to act without a person. None of them is a bug.
+
+## What they share
+
+- **With nobody there, each one waits rather than fails.**
+- **The wait is indistinguishable from work.** No error, no output, an open process. Elapsed time tells you nothing. Only the *absence of side effects* does: no CPU time, no session file, no network, no writes.
+- **The caller giving up does not end the wait.** The SSH client timed out, and four `ls` processes were still sitting on the Mac Mini afterwards, waiting for an answer, until they were killed.
+- **The gate keys on an identity, not on the job.** macOS grants folder access per binary: the same SSH login worked through Apple's own SSH daemon, which carries a grant, and hung through a second SSH daemon, which did not. The CLI's prompt keys on whether stdin is a terminal. FileVault keys on the boot. So a workaround that changes the binary, its path, or how it is launched can quietly re-arm a gate that looked solved, and a session testing from the already-granted path never sees it.
+
+The fourth row is the same failure turned inside out. That gate did not wait; it ended the run. A clean exit code then hid that nothing had happened, and it was found only by reading the working tree afterwards.
+
+## How do you tell waiting from working?
+
+Look at what the process has done, not how long it has existed:
+
+```bash
+ps -o pid,etime,time,stat,wchan -p <pid>
+```
+
+A long `etime` with `time` near zero, sleeping on a futex or a read, is waiting. The stuck CLI's numbers were 28:48 and 00:00:00.
+
+On macOS, a privacy gate has its own tell: you can read a protected folder's own entry with `ls -d`, and the listing of its contents is what hangs. That split is exactly what the Mac Mini showed.
+
+And check for side effects where they should be: a session file, a connection, output, a write. A job that has produced none of them in half an hour is not slow.
+
+## Answer every gate in advance, or make it fail fast
+
+Before running anything unattended (a background shell, a remote session, a daemon, a scheduled job, anything that must survive a reboot), list every gate on its path that expects a person, and give each one an answer in advance or a way to fail fast:
+
+| Gate | Answer it in advance | Make it fail fast instead |
+|---|---|---|
+| A tool that reads stdin or prompts | `</dev/null`, or the tool's non-interactive or `--yes` flag | Watch CPU time, not elapsed time. For `ssh`, `-o BatchMode=yes` refuses instead of prompting |
+| macOS privacy protection | Full Disk Access for the **exact** binary that runs the work | Wrap remote probes in `timeout`, then check for leftover processes |
+| FileVault after a restart | Auto-login or FileVault off: a security trade-off on a production machine, and the client's call | None exists, so it becomes an operating rule: never restart that machine remotely |
+| An agent asking for approval | Say in the prompt that the design is approved | Check the artifact, `git status` and `git diff --stat`, never the exit code |
+
+The FileVault row is the instructive one. It is the only gate of the four with no technical answer, so it has to become a rule. **And a rule only works where the actor reads it.** The `</dev/null` fix for the stuck CLI was known after the first hang, written into notes, and the hang recurred four more times over the following month, because the command written into the instruction files the agents actually loaded still lacked it.
+
+## What this does not claim
+
+That any of these gates should be removed. Each protects something real, and disk encryption on a production machine that holds secrets is a deliberate choice. It also does not claim the macOS wait is a visible dialog on that screen. That is the likely explanation, but nobody was at the machine to see it.
+
+## What to actually do
+
+1. **List the person-gates on every unattended path before it runs:** prompts, OS permission checks, unlock screens, approval steps.
+2. **Close stdin for anything run in the background,** and use non-interactive flags wherever a tool has them.
+3. **Grant OS permissions to the exact binary that does the work,** and re-check after an upgrade moves its path.
+4. **Diagnose hangs by CPU time and side effects, not elapsed time.**
+5. **Put a timeout on every remote probe, and clean up what the timeout leaves running.**
+6. **Turn gates with no technical answer into written rules, in the files the actor actually loads.**
+
+## The takeaway
+
+Most automation failures announce themselves. This kind does not: the process is alive, healthy by every measure you would think to check, and waiting politely for a person who is never coming.
+
+> **Before anything runs alone, ask what it will wait for, and who was supposed to answer.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I run AI coding agents and unattended jobs against production systems, including the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system), where the first of these hangs was measured. For the boundary of what an agent can verify on its own, see [An AI Implementer's Sandbox Is Your Verification Boundary](https://ehnand.com/articles/implementer-sandbox-verification-boundary). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*
