@@ -276,7 +276,7 @@ export const PROJECTS: Project[] = [
       "Firebase Auth",
       "CloudFront",
     ],
-    period: "Jul 2026 – Present",
+    period: "Jul 2026 – Sep 2026",
     role: "Lead Backend Developer",
     status: "Live Production",
     category: "Backend Platform",
