@@ -15,7 +15,7 @@ That measurement changed how I describe the security of every image this system 
 
 ## The setup
 
-The system is the Python ERP backend I described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). Its pictures, such as company logos, contact photos and product images, live in **one private S3 bucket shared by every tenant**, under a key layout that carries ownership in the path:
+The system is the [Serverless ERP Backend](https://ehnand.com/projects/serverless-erp-backend), whose deployment I described in [Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda). Its pictures, such as company logos, contact photos and product images, live in **one private S3 bucket shared by every tenant**, under a key layout that carries ownership in the path:
 
 ```text
 <tenant>/<resource>/<name>-<id>/<kind>/<file>-<12 hex>.png

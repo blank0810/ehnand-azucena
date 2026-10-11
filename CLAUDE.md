@@ -39,7 +39,7 @@ Browser-authored interactions are deliberately limited to the progressively enha
 - `src/config/site.ts` owns `SITE_URL`, site identity, and the canonical Person id `${SITE_URL}/#person`.
 - `src/data/profile.ts` and `src/data/career.ts` own contact, history, education, skills, and credential evidence.
 
-The FastAPI Python 3.14 ERP article is published, but there is no public ERP project. Do not add `/projects/multi-tenant-erp-backend`, project schema, project sitemap entries, or internal project links until the owner publishes complete resources.
+The ERP backend is public as `/projects/serverless-erp-backend` (owner-approved 2026-10-11). It is described by its architecture and engineering only: never name the client, tenant, agency, staff, repository, hostnames, or AWS identifiers, and never claim tenants it does not serve. Its image is an authored architecture diagram whose source lives in `docs/diagrams/serverless-erp-backend/`; update the diagram when the deployed system changes.
 
 ## Routes and discovery
 
