@@ -26,7 +26,7 @@ The obvious move is a package. I looked, and none fit:
 | httpSMS | Its relay exists for triggering texts remotely and needs Firebase. The goal was the opposite: everything on the municipality's own network. |
 | **A small Kotlin bridge** | Android's `SmsManager` API is stable, it needs one permission, and dual-SIM control stays possible later. |
 
-The bridge is one Kotlin file of 220 lines, registered in `MainActivity` and reached from Dart over a `MethodChannel` named `initao/sms`. It exposes two methods, `status()` and `send()`, and calls back into Dart with each result.
+The bridge is one Kotlin file of 220 lines, registered in `MainActivity` and reached from Dart over a single `MethodChannel`. It exposes two methods, `status()` and `send()`, and calls back into Dart with each result.
 
 ## What the Kotlin bridge actually does
 
@@ -153,4 +153,4 @@ The first send was in Test Mode, to a test number, on one phone model. Both halv
 
 ---
 
-*I'm Ehnand Azucena, full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system) for a Philippine municipality: Laravel 12, MySQL 8, Sanctum, Laravel Reverb, and a Flutter meter-reading app that now carries a Kotlin SMS bridge. For the ledger behind the bills those texts announce, see [Designing a Double-Entry Ledger for Utility Billing](https://ehnand.com/articles/utility-billing-ledger). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*
+*I'm Ehnand Azucena, full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/water-billing-system) for Philippine municipalities: Laravel 12, MySQL 8, Sanctum, Laravel Reverb, and a Flutter meter-reading app that now carries a Kotlin SMS bridge. For the ledger behind the bills those texts announce, see [Designing a Double-Entry Ledger for Utility Billing](https://ehnand.com/articles/utility-billing-ledger). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

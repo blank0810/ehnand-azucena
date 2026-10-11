@@ -1,2 +1,3 @@
 /blog /articles 308
 /blog/* /articles/:splat 308
+/projects/initao-water-billing-system /projects/water-billing-system 308

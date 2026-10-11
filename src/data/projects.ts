@@ -45,7 +45,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "config-pointing-outside-your-repo",
     "pairing-vs-prompt-injection",
   ],
-  "initao-water-billing-system": [
+  "water-billing-system": [
     "offline-first-laravel",
     "flutter-on-device-sms-outbox",
     "laravel-scheduler-catch-up-office-hours",
@@ -440,12 +440,12 @@ export const PROJECTS: Project[] = [
     liveUrl: "https://budget.umbra.build",
   },
   {
-    slug: "initao-water-billing-system",
+    slug: "water-billing-system",
     title: "Water Billing System",
     description:
-      "Won via competitive government bidding for the Municipality of Initao. Full billing lifecycle from meter reading to payment collection, offline-first mobile API for field workers, WebSocket real-time notifications, and a double-entry ledger ensuring audit-grade financial integrity.",
+      "Water billing platform for Philippine municipalities, first won through competitive government bidding and now running for more than one municipality on its own on-premises server. Full billing lifecycle from meter reading to payment collection, an offline-first mobile API for meter readers, WebSocket real-time notifications, and a double-entry ledger ensuring audit-grade financial integrity.",
     longDescription: `
-      The Water Billing System is a government enterprise platform won via competitive bidding for the Municipality of Initao. It manages the full water billing lifecycle from meter reading to payment collection.
+      The Water Billing System is a government enterprise platform for Philippine municipal water utilities. It was first won through competitive government bidding, and the same system now runs for more than one municipality, each on its own on-premises server. It manages the full water billing lifecycle from meter reading to payment collection.
 
       **Key Capabilities:**
 
@@ -467,10 +467,10 @@ export const PROJECTS: Project[] = [
 
       **Impact:**
 
-      Digitized water billing operations for the municipality, replacing manual ledger-based processes with a system that ensures accurate billing, real-time payment tracking, and audit-ready financial records.
+      Digitized water billing operations for the municipalities it serves, replacing manual ledger-based processes and legacy desktop databases with a system that ensures accurate billing, real-time payment tracking, and audit-ready financial records.
     `,
     image: {
-      src: "/images/projects/initao-water-bill.webp",
+      src: "/images/projects/water-billing.webp",
       width: 1890,
       height: 667,
       alt: "Water Billing System dashboard screenshot",
@@ -486,12 +486,11 @@ export const PROJECTS: Project[] = [
       "Docker",
       "Laravel Sanctum",
     ],
-    period: "Feb 2026 – April 2026",
+    period: "Feb 2026 – Present",
     role: "Lead Developer",
     status: "Deployed",
     category: "Government / Enterprise",
-    relatedArticleSlugs: RELATED_ARTICLES["initao-water-billing-system"],
-    githubUrl: "https://github.com/blank0810/initao-water-billing",
+    relatedArticleSlugs: RELATED_ARTICLES["water-billing-system"],
   },
   {
     slug: "repsshield",

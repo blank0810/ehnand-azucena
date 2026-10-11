@@ -8,8 +8,8 @@ import { getProjectBySlug, type Project } from "@/data/projects"
 export const FEATURED_PROJECT_SLUGS = [
   "adam-ai",
   "repsshield",
-  "initao-water-billing-system",
-  "kai-assistant",
+  "water-billing-system",
+  "serverless-erp-backend",
   "swiss-energy-platform-suite",
 ] as const
 

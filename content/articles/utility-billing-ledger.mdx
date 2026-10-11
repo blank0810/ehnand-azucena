@@ -9,7 +9,7 @@ summary: "Most billing systems store a balance column and slowly corrupt it. Her
 
 Most billing systems start with a `balance` column on the customer table. It is the obvious design, and it is wrong in a way that takes about eight months to become visible.
 
-I built the billing engine for the Municipality of Initao's water utility — full lifecycle, from meter reading through bill generation to payment. This post is about the data model underneath it, and specifically why a mutable balance column cannot survive contact with real customers.
+I built the billing engine for a Philippine municipal water utility — full lifecycle, from meter reading through bill generation to payment. This post is about the data model underneath it, and specifically why a mutable balance column cannot survive contact with real customers.
 
 ## Why a balance column fails
 
@@ -86,4 +86,4 @@ If money moves through your system, do not store a balance. Store the events tha
 
 ---
 
-*I'm Ehnand Azucena — full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system): Laravel 12, PHP 8.2, MySQL 8, with a double-entry accounting ledger, offline-first meter reading, and configurable rate schedules. I take remote contract and lead engagements — [get in touch](https://ehnand.com/#contact).*
+*I'm Ehnand Azucena — full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/water-billing-system): Laravel 12, PHP 8.2, MySQL 8, with a double-entry accounting ledger, offline-first meter reading, and configurable rate schedules. I take remote contract and lead engagements — [get in touch](https://ehnand.com/#contact).*

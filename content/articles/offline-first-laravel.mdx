@@ -9,7 +9,7 @@ summary: "How I built an offline-first mobile API for municipal water meter read
 
 Field data collection breaks the assumption every web app is built on: that the network is there when the user presses Save.
 
-For the Municipality of Initao's water billing system, the users are meter readers walking routes through barangays where connectivity is unreliable or simply absent. They capture a reading, a photo of the meter as evidence, and a QR scan identifying the connection. Then they walk to the next house. The reading has to be committed to the device *immediately* and reconciled with the server whenever a signal returns — which might be four hours and two hundred readings later.
+In the municipal water billing system I lead, the users are meter readers walking routes through barangays where connectivity is unreliable or simply absent. They capture a reading, a photo of the meter as evidence, and a QR scan identifying the connection. Then they walk to the next house. The reading has to be committed to the device *immediately* and reconciled with the server whenever a signal returns — which might be four hours and two hundred readings later.
 
 This post covers how that sync model works in Laravel, and the design decisions that matter more than the framework you pick.
 
@@ -91,4 +91,4 @@ Offline-first is not a networking feature you bolt on. It changes your data mode
 
 ---
 
-*I'm Ehnand Azucena — full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/initao-water-billing-system), a full water utility platform for a Philippine municipality won through competitive government bidding: Laravel 12, MySQL 8, Sanctum, Laravel Reverb. I take remote contract and lead engagements — [get in touch](https://ehnand.com/#contact).*
+*I'm Ehnand Azucena — full stack and lead developer. I led delivery of the [Water Billing System](https://ehnand.com/projects/water-billing-system), a full water utility platform for Philippine municipalities, first won through competitive government bidding: Laravel 12, MySQL 8, Sanctum, Laravel Reverb. I take remote contract and lead engagements — [get in touch](https://ehnand.com/#contact).*

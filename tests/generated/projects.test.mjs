@@ -52,11 +52,11 @@ test("ERP project is absent and Adam case study remains rendered", async () => {
 })
 
 test("Water Billing uses the new title on the stable canonical route", async () => {
-  const html = await readGenerated("/projects/initao-water-billing-system")
+  const html = await readGenerated("/projects/water-billing-system")
   assert.match(html, /<h1[^>]*>Water Billing System<\/h1>/)
   assert.match(
     html,
-    /rel="canonical" href="https:\/\/ehnand\.com\/projects\/initao-water-billing-system"/,
+    /rel="canonical" href="https:\/\/ehnand\.com\/projects\/water-billing-system"/,
   )
   assert.match(html, />Back to all projects<\/a>/)
 })

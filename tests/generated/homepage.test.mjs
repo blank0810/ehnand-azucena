@@ -48,7 +48,7 @@ test("commissioning stages render four decorative semantic icons", async () => {
   )
 })
 
-test("homepage curates exactly the three approved systems", async () => {
+test("homepage curates exactly the five approved systems", async () => {
   const html = await readGenerated("/")
   const selectedSlugs = [...html.matchAll(/data-selected-system="([^"]+)"/g)].map(
     (match) => match[1],
@@ -56,8 +56,10 @@ test("homepage curates exactly the three approved systems", async () => {
 
   assert.deepEqual(selectedSlugs, [
     "adam-ai",
-    "initao-water-billing-system",
     "repsshield",
+    "water-billing-system",
+    "serverless-erp-backend",
+    "swiss-energy-platform-suite",
   ])
   assert.match(html, />Water Billing System</)
   assert.doesNotMatch(html, />Initao Water Billing System</)

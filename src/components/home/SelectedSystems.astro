@@ -3,8 +3,10 @@ import { getProjectBySlug, PROJECTS, type Project } from "@/data/projects"
 
 const selectedSlugs = [
   "adam-ai",
-  "initao-water-billing-system",
   "repsshield",
+  "water-billing-system",
+  "serverless-erp-backend",
+  "swiss-energy-platform-suite",
 ] as const
 
 const selected = selectedSlugs.map((slug) => getProjectBySlug(slug))
@@ -20,8 +22,9 @@ const projects = selected as Project[]
     <div class="section-heading">
       <h2 id="projects-title">Selected systems</h2>
       <p>
-        A focused record of production SaaS, public-service infrastructure, and
-        AI-assisted compliance. Browse the complete project inventory.
+        A focused record of production SaaS, AI-assisted compliance,
+        public-service infrastructure, a serverless ERP backend, and financial
+        reconciliation. Browse the complete project inventory.
       </p>
     </div>
 

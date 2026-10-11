@@ -98,7 +98,7 @@ All media below was present in the repository before the Astro presentation laye
 | Asset group | Repository source | Public use | Provenance |
 |---|---|---|---|
 | Portrait | `public/images/profile-new.jpg` | Homepage About evidence and default social image | Repository-provided |
-| Current and selected systems | `public/images/projects/adam-ai.webp`, `repsshield.webp`, `memberpulse.webp`, `initao-water-bill.webp`, `budget-app.webp`, and `playnow.webp` | Homepage records, project archive, and project details | Repository-provided |
+| Current and selected systems | `public/images/projects/adam-ai.webp`, `repsshield.webp`, `memberpulse.webp`, `water-billing.webp`, `budget-app.webp`, and `playnow.webp` | Homepage records, project archive, and project details | Repository-provided |
 | Historical project screenshots | `public/images/weather_app.png`, `edutracker.jpg`, `email_auto.jpg`, `lgu_hris.jpg`, `file_repo.jpg`, and `expert_sys.jpg` | Project archive and project details; `lgu_hris.jpg` supports both M1 HRIS records | Repository-provided |
 | Serverless ERP architecture diagram | `public/images/projects/serverless-erp-backend.webp`, rendered from `docs/diagrams/serverless-erp-backend/index.html` | Project archive and detail for the Serverless ERP Backend | Authored diagram in the site's tokens and IBM Plex, rendered with HyperFrames; a diagram, not a screenshot or ImageGen output |
 | Swiss Energy fallback | `public/images/projects/swiss-energy-placeholder.svg` | Clearly marked fallback for the Swiss Energy Platform Suite | Repository-provided fallback SVG |
