@@ -2,6 +2,7 @@
 title: "Deploying a Python 3.14 FastAPI ERP to AWS Lambda with Terraform"
 seoTitle: "Python 3.14 FastAPI on AWS Lambda with Terraform"
 date: 2026-08-16
+updated: 2026-10-11
 category: "SaaS, Cloud & Security"
 tags: [python-3.14, fastapi, terraform, aws-lambda, multi-tenancy]
 summary: "How I am packaging a FastAPI and Mangum ERP backend for AWS Lambda with Terraform while keeping the current one-tenant-per-stack boundary explicit."
@@ -12,6 +13,10 @@ Infrastructure as code is most useful when it makes the system's current boundar
 I am building a Python 3.14 ERP backend with FastAPI and Mangum for AWS Lambda. It is intended to grow into a multi-tenant SaaS backend, but the honest description today is narrower: **multi-tenancy is partially implemented, and one deployed stack supports one configured tenant**.
 
 Terraform is valuable here for more than repeatable deployment. It puts that boundary beside the Lambda, gateway, identity, permissions, and packaging decisions that enforce it. A reviewer can see what exists now and what still belongs to the future control plane.
+
+## Update, October 2026
+
+Two parts of this article describe the system as it stood in August. The single application Lambda has since been split into ten module functions (CRM, Delivery, Accounting, Purchasing, Inventory, Auth, Logs, Media, Wiki, and Task), each behind its own API Gateway REST API and Terraform root, sharing one core package. And the authorizer now calls a private tenant lookup that checks the requested tenant against a control database, so modules select that tenant's database from trusted context rather than from one configured value. The Mangum adapter, the Python 3.14 pinning, the packaging model, and the verification ladder below still describe how each module is built and shipped. The current architecture is on the [Serverless ERP Backend](https://ehnand.com/projects/serverless-erp-backend) project page.
 
 ## The request path
 

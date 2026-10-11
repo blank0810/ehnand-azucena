@@ -85,10 +85,70 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "firebase-email-verified-enforce-at-api",
     "cloudfront-signed-urls-delete-does-not-revoke",
     "idempotency-key-scope",
+    "working-function-proves-only-paths-reached",
+    "config-pointing-outside-your-repo",
+    "rehearsability-production-writes",
+    "scoped-results-never-name-their-scope",
+    "generators-are-tested-by-the-second-run",
+    "store-with-no-removal-path",
+    "approvals-expire-with-their-premise",
+    "read-criterion-not-label",
   ],
 }
 
 export const PROJECTS: Project[] = [
+  {
+    slug: "serverless-erp-backend",
+    title: "Serverless ERP Backend (Python on AWS Lambda)",
+    description:
+      "Serverless backend for a mobile and web ERP that replaces a legacy low-code system. Ten Python 3.14 API modules run as separate AWS Lambda functions behind API Gateway, with a Firebase token authorizer, tenant-aware routing to PostgreSQL, CloudFront-signed media, and Terraform for every module.",
+    longDescription: `
+      The backend for a mobile and web ERP covering sales, delivery, accounting, purchasing, and inventory, built to replace a legacy low-code system. I led backend development in a small team, from data model and API design through deployment and production verification.
+
+      **Architecture:**
+
+      • **Ten API modules** (CRM, Delivery, Accounting, Purchasing, Inventory, Auth, Logs, Media, Wiki, and Task), each its own Lambda function and API Gateway REST API, sharing one core package for permissions, idempotency, and audit
+      • **Firebase token authorizer** that verifies the ID token on every request, plus a tenant lookup that hands each module a trusted tenant context for selecting its database
+      • **Supporting services**: a queued notification sender and worker for email, SMS, chat, and push, and a keep-warm trigger
+      • **Terraform throughout**: one root per module and per supporting service, seventeen in all
+
+      **Engineering decisions:**
+
+      • **A role without view permission gets 404, not 403**, so the API never confirms that a record exists to someone who cannot see it
+      • **Idempotency keys on money writes**, scoped to the target record as well as the payload, so a replay cannot answer for a different invoice
+      • **Invoice payment status is derived from the payment ledger** after every payment, reversal, and discount, never set by an endpoint
+      • **Tax amounts are stored when a purchase order is written**, so an approved order keeps the figures it was approved with
+      • **One media module is the only signer and writer** for every module's images, served through CloudFront signed URLs
+      • **Verified email enforced in the API on every request**, with a named 401 rather than the gateway's generic deny
+
+      **Verification:**
+
+      More than 1,800 unit tests and more than 900 integration tests against a real PostgreSQL database. Release checks run the production API collections and direct curl requests against the live gateways.
+    `,
+    image: {
+      src: "/images/projects/serverless-erp-backend.webp",
+      width: 1600,
+      height: 900,
+      alt: "Architecture diagram of the serverless ERP backend: mobile and web clients, API Gateway, a token authorizer and tenant lookup, ten module Lambdas, and PostgreSQL, S3 with CloudFront, and notifications",
+    },
+    technologies: [
+      "Python 3.14",
+      "FastAPI",
+      "AWS Lambda",
+      "API Gateway",
+      "PostgreSQL",
+      "SQLAlchemy Core",
+      "Alembic",
+      "Terraform",
+      "Firebase Auth",
+      "CloudFront",
+    ],
+    period: "Jul 2026 – Sep 2026",
+    role: "Lead Backend Developer",
+    status: "Live Production",
+    category: "Backend Platform",
+    relatedArticleSlugs: RELATED_ARTICLES["serverless-erp-backend"],
+  },
   {
     slug: "niko-immobilienmakler",
     title: "Niko Immobilienmakler (Swiss Real Estate Brokerage Site)",
@@ -229,58 +289,6 @@ export const PROJECTS: Project[] = [
     status: "Deployed",
     category: "AI Agent",
     relatedArticleSlugs: RELATED_ARTICLES["kai-assistant"],
-  },
-  {
-    slug: "serverless-erp-backend",
-    title: "Serverless ERP Backend (Python on AWS Lambda)",
-    description:
-      "Serverless backend for a mobile and web ERP that replaces a legacy low-code system. Ten Python 3.14 API modules run as separate AWS Lambda functions behind API Gateway, with a Firebase token authorizer, tenant-aware routing to PostgreSQL, CloudFront-signed media, and Terraform for every module.",
-    longDescription: `
-      The backend for a mobile and web ERP covering sales, delivery, accounting, purchasing, and inventory, built to replace a legacy low-code system. I led backend development in a small team, from data model and API design through deployment and production verification.
-
-      **Architecture:**
-
-      • **Ten API modules** (CRM, Delivery, Accounting, Purchasing, Inventory, Auth, Logs, Media, Wiki, and Task), each its own Lambda function and API Gateway REST API, sharing one core package for permissions, idempotency, and audit
-      • **Firebase token authorizer** that verifies the ID token on every request, plus a tenant lookup that hands each module a trusted tenant context for selecting its database
-      • **Supporting services**: a queued notification sender and worker for email, SMS, chat, and push, and a keep-warm trigger
-      • **Terraform throughout**: one root per module and per supporting service, seventeen in all
-
-      **Engineering decisions:**
-
-      • **A role without view permission gets 404, not 403**, so the API never confirms that a record exists to someone who cannot see it
-      • **Idempotency keys on money writes**, scoped to the target record as well as the payload, so a replay cannot answer for a different invoice
-      • **Invoice payment status is derived from the payment ledger** after every payment, reversal, and discount, never set by an endpoint
-      • **Tax amounts are stored when a purchase order is written**, so an approved order keeps the figures it was approved with
-      • **One media module is the only signer and writer** for every module's images, served through CloudFront signed URLs
-      • **Verified email enforced in the API on every request**, with a named 401 rather than the gateway's generic deny
-
-      **Verification:**
-
-      More than 1,800 unit tests and more than 900 integration tests against a real PostgreSQL database. Release checks run the production API collections and direct curl requests against the live gateways.
-    `,
-    image: {
-      src: "/images/projects/serverless-erp-backend.webp",
-      width: 1600,
-      height: 900,
-      alt: "Architecture diagram of the serverless ERP backend: mobile and web clients, API Gateway, a token authorizer and tenant lookup, ten module Lambdas, and PostgreSQL, S3 with CloudFront, and notifications",
-    },
-    technologies: [
-      "Python 3.14",
-      "FastAPI",
-      "AWS Lambda",
-      "API Gateway",
-      "PostgreSQL",
-      "SQLAlchemy Core",
-      "Alembic",
-      "Terraform",
-      "Firebase Auth",
-      "CloudFront",
-    ],
-    period: "Jul 2026 – Sep 2026",
-    role: "Lead Backend Developer",
-    status: "Live Production",
-    category: "Backend Platform",
-    relatedArticleSlugs: RELATED_ARTICLES["serverless-erp-backend"],
   },
   {
     slug: "adam-ai",
