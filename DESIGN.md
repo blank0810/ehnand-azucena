@@ -66,10 +66,11 @@ Motion communicates continuity and state without becoming a separate visual laye
 - The featured-project record changes over 420 milliseconds and advances every seven seconds only when it is not paused, hovered, focused, hidden in a background tab, or subject to reduced motion. Previous, next, direct selectors, and a persistent Pause/Resume control remain available.
 - Sections and records reveal once over 360 milliseconds when they enter the viewport. The controller unobserves each completed element.
 - Native cross-document view transitions use a 180-millisecond exit and 280-millisecond entry while the header retains visual continuity.
+- One article, the *Leaving ClouDesk* farewell post, opens with an eight-second pixel-art loop as its hero above the title (`src/lib/farewell-scene.ts`, set by the article's `hero` frontmatter), in ClouDesk's own palette: a deliberate exception to the restrained system and the article format. It draws at 12 frames per second and stops whenever it is paused, offscreen, in a hidden tab, or subject to reduced motion. A persistent Pause/Play control remains available.
 
 All content is present and usable before and without animation. The static featured-project fallback links remain visible when enhancement does not initialize.
 
-Under `prefers-reduced-motion: reduce`, hero entry, project auto-rotation, record transitions, smooth scrolling, commissioning drawing, and native view-transition animation are removed or shown immediately in their completed state.
+Under `prefers-reduced-motion: reduce`, hero entry, project auto-rotation, record transitions, smooth scrolling, commissioning drawing, the farewell pixel loop, and native view-transition animation are removed or shown immediately in their completed state.
 
 ## Homepage sequence
 
@@ -101,6 +102,7 @@ All media below was present in the repository before the Astro presentation laye
 | Current and selected systems | `public/images/projects/adam-ai.webp`, `repsshield.webp`, `memberpulse.webp`, `water-billing.webp`, `budget-app.webp`, and `playnow.webp` | Homepage records, project archive, and project details | Repository-provided |
 | Historical project screenshots | `public/images/weather_app.png`, `edutracker.jpg`, `email_auto.jpg`, `lgu_hris.jpg`, `file_repo.jpg`, and `expert_sys.jpg` | Project archive and project details; `lgu_hris.jpg` supports both M1 HRIS records | Repository-provided |
 | Serverless ERP architecture diagram | `public/images/projects/serverless-erp-backend.webp`, rendered from `docs/diagrams/serverless-erp-backend/index.html` | Project archive and detail for the Serverless ERP Backend | Authored diagram in the site's tokens and IBM Plex, rendered with HyperFrames; a diagram, not a screenshot or ImageGen output |
+| Leaving ClouDesk pixel scene | `public/images/articles/leaving-cloudesk-farewell.png`, rendered by `docs/diagrams/leaving-cloudesk-farewell/render.mjs` from `src/lib/farewell-scene.ts` | No-script, reduced-motion and social-preview still for the *Leaving ClouDesk* hero | Authored pixel art; the cloud is downsampled from ClouDesk's public logo on cloudesk.co; not ImageGen output |
 | Swiss Energy fallback | `public/images/projects/swiss-energy-placeholder.svg` | Clearly marked fallback for the Swiss Energy Platform Suite | Repository-provided fallback SVG |
 | M1 Helpdesk fallback | `public/placeholder.svg` | Clearly marked fallback for the M1 Helpdesk record | Repository-provided fallback SVG |
 | Rendered certificates | `public/images/certificates/symfony7-fundamentals.png`, `advanced-react.png`, `react-basics.png`, `javascript-algorithms.png`, `responsive-web-design.png`, and `csxf-cybersecurity.png` | Homepage credential evidence | Repository-provided |

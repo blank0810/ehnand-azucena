@@ -27,7 +27,7 @@ content/case-studies/       Optional MDX project narratives
 public/                     Evidence images, headers, redirects, verification file
 ```
 
-Browser-authored interactions are deliberately limited to the progressively enhanced `/articles` search and category filter, system-aware theme selection, the five-project featured rotation, one-time section reveals, and the contact form. The contact form is the one interaction that genuinely requires JavaScript, because Turnstile cannot mint a token without it; the `mailto:` link stays as the `<noscript>` path. Every article and project record, including all five featured projects, is present in generated HTML; static fallback paths remain available without JavaScript.
+Browser-authored interactions are deliberately limited to the progressively enhanced `/articles` search and category filter, system-aware theme selection, the five-project featured rotation, one-time section reveals, the pixel-art farewell hero on the *Leaving ClouDesk* article, and the contact form. The contact form is the one interaction that genuinely requires JavaScript, because Turnstile cannot mint a token without it; the `mailto:` link stays as the `<noscript>` path. Every article and project record, including all five featured projects, is present in generated HTML; static fallback paths remain available without JavaScript.
 
 ## Sources of truth
 

@@ -601,6 +601,62 @@ html:not([data-theme="dark"]) .theme-toggle__icon--dark {
   background: var(--table-head);
 }
 
+/* The farewell post's hero: a 160x90-pixel scene above the title, shown at
+   exactly 7x (1120px inside its one-pixel border) on wide screens. */
+.farewell-scene {
+  width: min(100%, calc(70rem + 2px));
+  margin: 0 0 clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.farewell-scene__frame {
+  border: 1px solid var(--rule-strong);
+  background: #0a0f1f;
+}
+
+/* Both the still and the canvas are 16:9, so swapping them never shifts layout. */
+.farewell-scene__frame img,
+.farewell-scene__frame canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.farewell-scene__frame [hidden] {
+  display: none;
+}
+
+.farewell-scene figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  color: var(--graphite-soft);
+}
+
+.farewell-scene button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--graphite);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.farewell-scene button:hover {
+  border-color: var(--cobalt);
+  color: var(--cobalt-dark);
+}
+
+.farewell-scene button[hidden] {
+  display: none;
+}
+
 .overflow-region {
   overflow: auto;
   overscroll-behavior: contain;

@@ -1,4 +1,5 @@
 ---
+import FarewellScene from "@/components/articles/FarewellScene.astro"
 import Breadcrumbs from "@/components/site/Breadcrumbs.astro"
 import BaseLayout from "@/layouts/BaseLayout.astro"
 import {
@@ -6,6 +7,7 @@ import {
   type ArticleEntry,
 } from "@/lib/content"
 import { formatIsoDate } from "@/lib/dates"
+import { FAREWELL_STILL } from "@/lib/farewell-scene"
 
 interface Props {
   article: ArticleEntry
@@ -17,12 +19,15 @@ interface Props {
 const { article, canonicalPath, schemas, relatedArticles } = Astro.props
 const title = `${article.data.seoTitle ?? article.data.title} | Ehnand Azucena`
 const syndicated = article.data.syndicated
+const hero = article.data.hero
+const heroImagePath = hero === "farewell-scene" ? FAREWELL_STILL : undefined
 ---
 
 <BaseLayout
   title={title}
   description={article.data.summary}
   canonicalPath={canonicalPath}
+  imagePath={heroImagePath}
   robots={article.data.draft ? "noindex,nofollow" : "index,follow"}
   ogType="article"
   publishedTime={article.data.date}
@@ -45,6 +50,8 @@ const syndicated = article.data.syndicated
         <span>This article is available locally for review and is excluded from discovery feeds.</span>
       </aside>
     )}
+
+    {hero === "farewell-scene" && <FarewellScene />}
 
     <header class="article-detail__header">
       <p class="mono-label">{article.data.category}</p>

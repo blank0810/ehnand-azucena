@@ -20,6 +20,8 @@ const articles = defineCollection({
       tags: z.array(z.string().min(1)).min(1),
       summary: z.string().min(1),
       draft: z.boolean().default(false),
+      // A one-off hero above the title; the only one is the farewell post's pixel scene.
+      hero: z.enum(["farewell-scene"]).optional(),
       syndicated: z
         .object({
           devto: z.url().optional(),

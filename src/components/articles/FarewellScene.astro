@@ -1,0 +1,36 @@
+---
+import {
+  FAREWELL_ALT,
+  FAREWELL_STILL,
+  HEIGHT,
+  WIDTH,
+} from "@/lib/farewell-scene"
+---
+
+<figure class="farewell-scene" data-farewell-scene>
+  <div class="farewell-scene__frame">
+    <img
+      src={FAREWELL_STILL}
+      width={WIDTH * 8}
+      height={HEIGHT * 8}
+      alt={FAREWELL_ALT}
+      data-farewell-fallback
+    />
+    <canvas
+      width={WIDTH}
+      height={HEIGHT}
+      role="img"
+      aria-label={FAREWELL_ALT}
+      data-farewell-canvas
+      hidden
+    ></canvas>
+  </div>
+  <figcaption>
+    <span class="mono-label">A pixel goodbye, on an eight-second loop</span>
+    <button type="button" data-farewell-pause hidden>Pause animation</button>
+  </figcaption>
+</figure>
+
+<script>
+  import "@/scripts/farewell-scene"
+</script>
