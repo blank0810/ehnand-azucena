@@ -1,0 +1,124 @@
+---
+title: "Leaving ClouDesk: What I Built, What I Learned, and How I Handed It Over"
+seoTitle: "Leaving ClouDesk: What I Built and Handed Over"
+date: 2026-10-16
+category: "Engineering Practice & Reliability"
+tags: [handover, knowledge-management, engineering-leadership, ai-assisted-development, aws-lambda]
+summary: "My last day at ClouDesk was 16 October 2026. What I built in 21 months, from a multi-tenant SaaS for Australian associations to a ten-module serverless ERP, what the work taught me, and the handover I left in the repository: a 544-line guide and seven videos."
+---
+
+My last working day at ClouDesk was Friday, 16 October 2026, after 21 months as a full stack developer working remotely from the Philippines for a company based in Sydney.
+
+On the Monday of that week I shipped a role management API to production and verified it with 49 of 49 checks through the live gateways. The first run passed 43. The production permission catalogue listed 35 of the 99 codes the code enforces, and fixing that data, not the code, closed the gap.
+
+The rest of my last week went to the people staying: a 544-line handover written for the next developer and their coding agent, seven videos committed next to the code, a field guide to agentic coding presented to the team, and, on the last day, seven step-by-step guide videos for the people who use the app.
+
+**Hand over what the code cannot say, and put it where the code lives.** Anything that sits on the leaver's own accounts, or only in the leaver's head, stops working the day they go.
+
+This is what I built, what it taught me, and how the handover was put together.
+
+## What did I build at ClouDesk?
+
+Five bodies of work, from association SaaS to a serverless ERP, most of it on the backend.
+
+| Work | What it is | My part |
+|---|---|---|
+| [MemberPulse](https://ehnand.com/projects/memberpulse) | Multi-tenant SaaS for Australian professional associations: CPD tracking, courses, events, subscriptions, job boards, directories and sponsorships | Lead developer, February to August 2025. Stripe, Xero, HubSpot and PayPal integrations for cross-tenant payments, CRM sync and invoicing |
+| PG Pay | A high-value e-commerce platform for precious metals | Fixed transaction reliability issues and payment edge cases |
+| Warehouse computer vision | Ultralytics YOLO pipelines for warehouse operations | Built product classification and employee tracking |
+| Education platforms | ICOM International School in Malaysia, and a China-based internal learning system | Maintained and extended both in Laravel |
+| [Serverless ERP Backend](https://ehnand.com/projects/serverless-erp-backend) | The backend for a mobile and web ERP replacing a legacy low-code system: sales, delivery, accounting, purchasing and inventory | Lead backend developer from July 2026. Ten Python 3.14 modules on AWS Lambda, seventeen Terraform roots, more than 1,800 unit tests and more than 900 integration tests |
+
+The ERP is the one I can say most about, because I documented it as I went. More than a dozen articles on this site draw on it.
+
+## What did the ERP teach me?
+
+The lesson that cost the most was about deploys, and it came from a design rule working exactly as intended.
+
+### A correct fail-closed design can hide a broken deploy
+
+On 10 September I deployed six Lambda functions carrying the new delivery and accounting modules. For several hours, 30 endpoints that were live in production returned 404 to every user, administrators included.
+
+The functions were healthy. The database was ten migrations behind, so the permission rows for the new endpoints did not exist yet, and the delivery module was also missing its last three features, committed 27 minutes after the deploy. This API answers a missing view permission with 404, never 403, so it never confirms that a record exists to someone who cannot see it. That rule held: nothing leaked, nothing returned 500, no error was logged, and every function reported healthy the whole time. From outside, a missing permission row looked the same as an endpoint that was never deployed.
+
+Two checks against the deployed artifact found it, rather than against what I believed I had shipped. I compared each function's last-modified time with the commit times, both in UTC. The repository commits in UTC+8, and the 27-minute gap only shows when both sides are in one timezone. Then I downloaded the deployed package and listed what was in it. Applying the ten migrations and redeploying the delivery module fixed it.
+
+**When a refusal and an absence look the same, only a call that should succeed proves a deploy.**
+
+### Review is the step that earns its place
+
+The delivery and accounting release was 23 commits and 30 endpoints, giving 14 screens of the app a backend. I ran it as a split. A design document and a 31-task implementation plan were committed before any feature code, a coding agent implemented the plan in six runs, and each phase was reviewed before it was committed.
+
+Review found real defects in all six phases. Six out of six is not a sampling accident. It is why I never treat review of agent-written code as a formality.
+
+### The rest is already written up
+
+The other lessons each became an article:
+
+- [An idempotency key is only as exact as its scope](https://ehnand.com/articles/idempotency-key-scope), so a replay cannot answer for a different invoice.
+- [Payment status is derived from the ledger](https://ehnand.com/articles/derive-invoice-payment-status-from-ledger), never set by a button.
+- [Firebase sign-in never checks email_verified](https://ehnand.com/articles/firebase-email-verified-enforce-at-api), so the API has to.
+- [Deleting an object does not revoke a CloudFront signed URL](https://ehnand.com/articles/cloudfront-signed-urls-delete-does-not-revoke).
+- [VAT and withholding are stored and locked at approval](https://ehnand.com/articles/bir-vat-withholding-purchase-orders), so an approved purchase order keeps its figures.
+- [How the whole thing deploys](https://ehnand.com/articles/fastapi-erp-terraform-aws-lambda) with FastAPI, Mangum and Terraform.
+
+## What did we make as a team?
+
+The backend only mattered because a mobile and web app was built on it, so a real share of my work was making the API easy to build on.
+
+- **Short, structured change notes.** Backend changes went to the app developers as a short note grouped by module: the numbered user flow, the screen rules, the statuses, and where the details live.
+- **A production API collection that keeps up.** After the delivery and accounting release, the production Postman collection held 139 requests and none of the ten new folders, so the new endpoints were live but unreachable for anyone testing against production. I brought it to 292.
+- **Weekly demos with real data.** On 2 October I built a 13-slide deck of the week's changes, with each process animated step by step on app screens recreated from the app's own code, labels copied verbatim. It was used live in that afternoon's meeting, and on 9 October it grew to 22 slides.
+- **Reference pages beside the API docs.** Plain-language explainers for individual flows, an 892-line onboarding database spec, and an explainer for the token authorizer, all linked from the Swagger page.
+
+### A field guide to agentic coding
+
+On 14 October I presented a parting field guide to the team. It covered how an AI coding agent handles a prompt, what is in its context, and the layers that shape it: instruction files, skills, hooks, MCP servers and subagents, then parallel sessions and day-to-day habits. It ran to 36 slides, with every claim checked against the official Claude Code and OpenAI Codex documentation. I exported it to PowerPoint and to a 14-minute narrated video, so it outlives the meeting.
+
+My first run-through was too specific to one tool. I rebuilt the middle around the shared open formats, AGENTS.md, Agent Skills and MCP, with Claude Code as the main example rather than the only one.
+
+Researching it meant rereading my own setup against the documentation, and my setup failed two checks. The repository's guard hooks were configured only in an example settings file, so they had never run. Its instructions file had grown to 1,025 lines, where the documentation recommends staying under 200. Neither shows up in daily use. Both show up the moment you have to explain your setup to someone else.
+
+## How did I hand the system over?
+
+In the repository, in three forms built from one outline, for a teammate who was already on the team.
+
+| Piece | Form | Reader |
+|---|---|---|
+| `HANDOVER.md` | 544 lines at the repository root | The next developer's coding agent |
+| Handover guide | One HTML file that opens from disk | The next developer, in a browser |
+| Handover panel | A panel on the API's Swagger page | Anyone who opens the docs |
+| Seven videos | An 8 min 21 s welcome, five shorts of 60 to 78 s, and a 2 min 24 s "before you go" | Either page |
+
+All three share ten chapters: start here, architecture in a minute, one request's journey, the engineering hard rules, the business rules, the definition of done, an ops runbook, open threads and known gaps, an FAQ by symptom, and a glossary.
+
+Three decisions shaped it.
+
+**Every business rule cites the `file:line` that enforces it.** That made the chapter checkable, and checking it found two rules in the project's own agent instructions that lagged the code. One named a column the role no longer comes from. The other promised a 401 where the gateway now refuses first with a 403. Both went into the handover as traps. A rule written from memory would have repeated them.
+
+**The videos are committed to the repository**, about 25 MB of ordinary git blobs. An external host would have been quicker, but its links would live on my accounts and stop working when those close.
+
+**The open threads come in three lists:** what is not built, what is live but unverified, and the traps. Each item says enough to act on without me.
+
+What it leaves out is an account and access map. The recipient was already on the team with their own access, so it was scoped out. For a recipient from outside the team, that map would be the first chapter to add.
+
+On the last day I recorded seven more videos, this time for the people who use the app: an introduction and six steps from adding stock to recording a deposit. Each was captured on the deployed web app with the phone view beside it, and each runs 37 to 55 seconds.
+
+## How to hand over a system you built
+
+1. **Finish early enough to be questioned.** A handover finished on the last day cannot be challenged. Mine was committed four days out.
+2. **Cite the code for every rule.** A rule with a `file:line` can be checked, and checking is where the stale ones show up.
+3. **Keep it in the repository, videos included.** Anything hosted on your own accounts stops working when they close.
+4. **Write one copy for the next person's coding agent.** An agent can read a Markdown file in full. It cannot watch a video.
+5. **Split open work into not built, live but unverified, and traps.** Each list asks for a different action.
+6. **List every account you hold and mark each one revoke, transfer or rotate.** The cost of leaving was decided when the access was set up. The list is how you find out what it is.
+
+## The takeaway
+
+A handover is the system explaining itself to whoever stays. Put it in the repository, cite the code it describes, and write down what is unfinished as plainly as what works. Skip that, and the team inherits the code plus every question only you could have answered.
+
+To the team at ClouDesk: thank you for 21 months of work worth handing over properly.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. At ClouDesk I led backend development of the [Serverless ERP Backend](https://ehnand.com/projects/serverless-erp-backend) and development of [MemberPulse](https://ehnand.com/projects/memberpulse). For how I keep several AI coding agents from colliding in one repository, see [Several AI Coding Agents, One Checkout](https://ehnand.com/articles/parallel-ai-agents-locks-not-agreements). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

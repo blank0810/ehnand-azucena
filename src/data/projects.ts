@@ -93,7 +93,9 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "store-with-no-removal-path",
     "approvals-expire-with-their-premise",
     "read-criterion-not-label",
+    "leaving-cloudesk",
   ],
+  memberpulse: ["leaving-cloudesk"],
 }
 
 export const PROJECTS: Project[] = [
@@ -579,7 +581,7 @@ export const PROJECTS: Project[] = [
     role: "Lead Developer",
     status: "Live Production",
     category: "SaaS Platform",
-    relatedArticleSlugs: [],
+    relatedArticleSlugs: RELATED_ARTICLES.memberpulse,
     liveUrl: "https://memberpulse.com.au",
   },
   {
