@@ -62,11 +62,6 @@ export function buildPersonSchema(): Record<string, unknown> {
         "Multi-tenant Architecture",
       ],
     },
-    worksFor: {
-      "@type": "Organization",
-      name: "ClouDesk Pty. Ltd",
-      url: "https://cloudesk.co/",
-    },
     alumniOf: {
       "@type": "EducationalOrganization",
       name: "Mindanao State University - Naawan",

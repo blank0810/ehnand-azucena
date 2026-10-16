@@ -43,7 +43,7 @@ export const EXPERIENCES: Experience[] = [
     company: "ClouDesk Pty. Ltd",
     companyUrl: "https://cloudesk.co/",
     location: "Remote | Sydney, NSW Australia",
-    period: "Jan 2025 – Present",
+    period: "Jan 2025 – Oct 2026",
     description: [
       "Led backend development for MemberPulse, a multi-tenant SaaS platform serving professional associations across Australia — CPD tracking, job boards, events, sponsorships, and directories",
       "Integrated Stripe, Xero, HubSpot, and PayPal APIs for cross-tenant payment processing, CRM synchronization, and automated invoicing",
