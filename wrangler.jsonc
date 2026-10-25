@@ -12,6 +12,13 @@
 		"binding": "ASSETS",
 		"html_handling": "drop-trailing-slash",
 		"not_found_handling": "404-page",
+		// Static assets ignore Range, and Safari needs 206 responses to play
+		// video, so the article clips go through the Worker (worker/video.ts).
+		// With a pattern list, unlisted paths never reach the Worker, so the
+		// contact endpoint is listed too. Only these requests count against the
+		// Workers request limit; every other asset stays free. Workers Caching
+		// is deliberately not enabled: it would bill every static asset request.
+		"run_worker_first": ["/api/*", "/videos/*"],
 	},
 	// Recipient is pinned at the binding: even if every other check were
 	// defeated, this Worker cannot address a third party.

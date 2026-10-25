@@ -67,3 +67,19 @@ test("first-party CV is viewable but excluded from indexing", async () => {
   assert.match(response.headers.get("x-robots-tag") ?? "", /noindex/)
   assert.match(response.headers.get("x-robots-tag") ?? "", /noarchive/)
 })
+
+test("article videos answer byte ranges, which Safari needs to play them", async () => {
+  const path = "/videos/agentic-coding-101/02-scopes.mp4"
+
+  const whole = await request(path, { method: "HEAD" })
+  assert.equal(whole.status, 200)
+  assert.equal(whole.headers.get("accept-ranges"), "bytes")
+  assert.equal(whole.headers.get("x-content-type-options"), "nosniff")
+  const size = Number(whole.headers.get("content-length"))
+  assert.ok(size > 1_000_000)
+
+  const part = await request(path, { headers: { range: "bytes=0-99" } })
+  assert.equal(part.status, 206)
+  assert.equal(part.headers.get("content-range"), `bytes 0-99/${size}`)
+  assert.equal((await part.arrayBuffer()).byteLength, 100)
+})
