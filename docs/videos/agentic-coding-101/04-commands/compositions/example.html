@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>04-commands · example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-example { position: absolute; inset: 0; }
+
+        #e-title { left: 120px; top: 196px; }
+        #e-file { left: 120px; top: 290px; width: 960px; }
+        #e-notes { left: 1180px; top: 290px; width: 620px; }
+        #e-notes .k-row { display: block; height: auto; padding: 22px 0 22px 28px; }
+        #e-notes .k-dim { margin-top: 6px; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="stage-example">
+          <div class="k-step">3 / 4 · Example</div>
+
+          <h2 id="e-title" class="k-abs k-title">A command only you can run</h2>
+          <div id="e-file" class="k-abs k-file">
+            <div class="k-file-name">.claude/skills/deploy/SKILL.md</div>
+            <pre class="k-code"><span class="e-fm">---</span><span class="e-fm">name: deploy</span><span class="e-fm">description: Deploy to an environment</span><span id="e-dmi" class="e-fm">disable-model-invocation: true</span><span class="e-fm">---</span><span class="e-body">Deploy to $ARGUMENTS:</span><span class="e-body">1. Build the site.</span><span class="e-body">2. Run the checks.</span><span class="e-body">3. Deploy to $ARGUMENTS.</span></pre>
+          </div>
+          <div id="e-notes" class="k-abs">
+            <div id="e-head" class="k-head"><span style="padding-left: 28px">What that buys you</span></div>
+            <div id="e-n1" class="k-row"><span class="k-name">Only you can run it</span><span class="k-dim">The agent can't trigger it on its own</span></div>
+            <div id="e-n2" class="k-row"><span class="k-name">Steps in plain words</span><span class="k-dim">No code, just the procedure</span></div>
+            <div id="e-n3" class="k-row"><span class="k-name">No surprise deploys</span><span class="k-dim">Not when the code merely looks ready</span></div>
+            <div id="e-n4" class="k-row"><span class="k-name">Zero context until run</span><span class="k-dim">Its description isn't loaded either</span></div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/skills</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "example")
+          const at = k.at
+
+          k.title("#e-title")
+          k.fade("#e-file", at("l07"))
+          k.lines("#e-file .e-fm", at("l07") + 0.2, 0.1)
+          k.tint("#e-dmi", at("l08", "disable model"))
+          k.fade("#e-head", at("l08", "disable model"))
+          k.rise("#e-n1", at("l08", "so only you"))
+          k.lines("#e-file .e-body", at("l08b"), 0.2)
+          k.rise("#e-n2", at("l08b", "plain words"))
+          k.rise("#e-n3", at("l09"))
+          k.rise("#e-n4", at("l10"))
+          k.exit("#stage-example")
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

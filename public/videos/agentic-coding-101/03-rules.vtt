@@ -1,0 +1,73 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:05.293
+A rules file is plain Markdown the agent reads at the start of every session.
+
+00:00:05.643 --> 00:00:08.031
+Claude Code calls it CLAUDE.md.
+
+00:00:08.031 --> 00:00:11.574
+Codex and many other agents call it AGENTS.md.
+
+00:00:11.924 --> 00:00:14.214
+Put in it what you'd tell a new teammate:
+
+00:00:14.214 --> 00:00:18.068
+build commands, conventions, where things live, and what never to do.
+
+00:00:19.468 --> 00:00:21.601
+Rules load from broad to specific.
+
+00:00:21.951 --> 00:00:25.301
+Your organization's file, then yours, then the project's,
+
+00:00:25.301 --> 00:00:28.415
+then any folder below it, once the agent works there.
+
+00:00:28.765 --> 00:00:32.584
+They're combined, not replaced, and the closest one is read last.
+
+00:00:32.934 --> 00:00:35.292
+All of it is sent with every request,
+
+00:00:35.292 --> 00:00:37.841
+so every line costs context, every time.
+
+00:00:39.241 --> 00:00:40.371
+Here's a short one.
+
+00:00:40.721 --> 00:00:45.521
+It says: use pnpm, not npm, and run the tests before committing.
+
+00:00:45.871 --> 00:00:48.266
+An @ import pulls in another file,
+
+00:00:48.266 --> 00:00:51.717
+like the AGENTS.md your other tools already read.
+
+00:00:52.067 --> 00:00:55.592
+And a rule in .claude/rules can carry a paths field,
+
+00:00:55.592 --> 00:00:59.320
+so it loads only when the agent touches matching files.
+
+00:01:00.720 --> 00:01:02.736
+Keep it under two hundred lines.
+
+00:01:02.736 --> 00:01:06.139
+Longer files cost more context, and get followed less.
+
+00:01:06.489 --> 00:01:11.075
+Imports organize a file, but they don't shrink it: imported files load too.
+
+00:01:11.425 --> 00:01:15.648
+If two rules contradict each other, the agent may pick one arbitrarily,
+
+00:01:15.648 --> 00:01:16.481
+so prune them.
+
+00:01:16.831 --> 00:01:18.415
+Codex reads AGENTS.md,
+
+00:01:18.415 --> 00:01:22.591
+and stops adding files at thirty-two kilobytes by default.

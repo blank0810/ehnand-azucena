@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>02 Scopes · scene 4, gotchas and other agents</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Same faces as the host; the paths resolve from index.html, where scenes are assembled. */
+        @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+        #root { position: absolute; inset: 0; font-family: "Plex Sans", sans-serif; color: #15191f; }
+        #go-stage { position: absolute; inset: 0; }
+        #go-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #go-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+
+        .go-col { position: absolute; top: 196px; }
+        #go-thumb { left: 120px; width: 820px; }
+        #go-codex { left: 1040px; width: 760px; }
+        .go-title { font-weight: 620; font-size: 60px; line-height: 1.1; letter-spacing: -0.025em; }
+        .go-head { display: flex; justify-content: space-between; margin-top: 30px; padding-bottom: 14px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        .go-row { display: flex; justify-content: space-between; align-items: center; height: 130px; border-bottom: 1px solid #d0d5db; }
+        .go-q { display: block; font-weight: 600; font-size: 38px; letter-spacing: -0.015em; }
+        .go-a { display: block; width: 360px; }
+        .go-file { display: inline-block; padding: 4px 10px; background: #e8ebef; font: 500 28px/1.3 "Plex Mono", monospace; }
+        .go-who { display: block; margin-top: 8px; font-size: 28px; line-height: 1.25; color: #4e5763; }
+        #go-trust { color: #164bc5; font-weight: 600; }
+
+        #go-trap { position: absolute; left: 120px; top: 660px; width: 820px; }
+        #go-trap-head { padding-bottom: 14px; border-bottom: 2px solid #15191f; font: 600 28px/1 "Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #164bc5; }
+        #go-trap-body { margin-top: 22px; font-size: 32px; line-height: 1.35; }
+        #go-trap-body code { font: 500 30px/1 "Plex Mono", monospace; }
+        #go-cmd { display: inline-block; margin-top: 22px; padding: 6px 12px; background: #e8ebef; font: 500 28px/1.3 "Plex Mono", monospace; }
+      </style>
+
+      <div id="root" data-composition-id="gotchas" data-width="1920" data-height="1080">
+        <div id="go-stage">
+          <div id="go-step">4 / 4 · Gotchas</div>
+
+          <div id="go-thumb" class="go-col">
+            <h2 id="go-thumb-title" class="go-title">Rule of thumb</h2>
+            <div id="go-thumb-head" class="go-head"><span>If it is</span><span style="width: 360px">Put it in</span></div>
+            <div id="go-r1" class="go-row">
+              <span class="go-q">True in every repo</span>
+              <span class="go-a"><span class="go-file">~/.claude/</span><span class="go-who">User scope</span></span>
+            </div>
+            <div id="go-r2" class="go-row">
+              <span class="go-q">Needed by a teammate</span>
+              <span class="go-a"><span class="go-file">.claude/</span><span class="go-who">The project, committed</span></span>
+            </div>
+          </div>
+
+          <div id="go-trap">
+            <div id="go-trap-head">One trap</div>
+            <p id="go-trap-body">A <code>settings.local.json</code> you make by hand isn't ignored by git.</p>
+            <span id="go-cmd">echo .claude/settings.local.json &gt;&gt; .gitignore</span>
+          </div>
+
+          <div id="go-codex" class="go-col">
+            <h2 id="go-codex-title" class="go-title">Codex: same split</h2>
+            <div id="go-codex-head" class="go-head"><span>Scope · file</span></div>
+            <div id="go-c1" class="go-row">
+              <span class="go-a" style="width: 760px"><span class="go-file">~/.codex/config.toml</span><span class="go-who">You, in every project</span></span>
+            </div>
+            <div id="go-c2" class="go-row">
+              <span class="go-a" style="width: 760px"><span class="go-file">.codex/config.toml</span><span class="go-who">The project, <span id="go-trust">skipped until you trust it</span></span></span>
+            </div>
+          </div>
+
+          <div id="go-source">Sources: code.claude.com/docs/en/settings, developers.openai.com/codex/config-file/config-advanced</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const V = window.__vo
+          const S = V.scenes.gotchas[0]
+          // When a phrase is said: its share of the line's characters, from the line's exact start.
+          const at = (id, words) => {
+            const [s, e, say] = V.lines[id]
+            const i = words ? say.indexOf(words) : 0
+            if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+            return s - S + (i / say.length) * (e - s)
+          }
+          const tl = gsap.timeline({ paused: true })
+          const rise = { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }
+          const slide = { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }
+          const fade = { opacity: 1, duration: 0.4 }
+
+          tl.fromTo("#go-thumb-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 0.05)
+          tl.fromTo("#go-thumb-head", { opacity: 0 }, fade, at("l13", "if it's true") - 0.2)
+          tl.fromTo("#go-r1 .go-q", { opacity: 0, y: 20 }, rise, at("l13", "if it's true"))
+          tl.fromTo("#go-r1 .go-a", { opacity: 0, x: -20 }, slide, at("l13", "user scope"))
+          tl.fromTo("#go-r2 .go-q", { opacity: 0, y: 20 }, rise, at("l13", "If a teammate"))
+          tl.fromTo("#go-r2 .go-a", { opacity: 0, x: -20 }, slide, at("l13", "in the project"))
+
+          tl.fromTo("#go-trap-head", { opacity: 0, x: -16 }, slide, at("l14"))
+          tl.fromTo("#go-trap-body", { opacity: 0, y: 16 }, rise, at("l14", "a local settings"))
+          tl.fromTo("#go-cmd", { opacity: 0, scale: 0.94, transformOrigin: "0% 50%" }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, at("l14", "Add it"))
+
+          tl.fromTo("#go-codex-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, at("l15"))
+          tl.fromTo("#go-codex-head", { opacity: 0 }, fade, at("l15", "the same split"))
+          tl.fromTo("#go-c1", { opacity: 0, y: 20 }, rise, at("l15", "dot codex at home"))
+          tl.fromTo("#go-c2", { opacity: 0, y: 20 }, rise, at("l15", "and in the project"))
+          tl.fromTo("#go-trust", { opacity: 0 }, fade, at("l15", "it skips"))
+          tl.fromTo("#go-source", { opacity: 0 }, { opacity: 1, duration: 0.5 }, at("l13", "if it's true"))
+
+          // The last frame holds everything on screen: it is what a viewer sees when the clip ends.
+          window.__timelines["gotchas"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

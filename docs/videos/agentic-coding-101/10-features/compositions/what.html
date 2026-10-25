@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>10-features · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 700px; }
+        #w-list { left: 900px; top: 252px; width: 900px; }
+        #w-list .k-row { justify-content: flex-start; height: 116px; padding-left: 20px; }
+        .w-n { display: block; width: 60px; }
+        .w-what { display: block; width: 360px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 5 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">Four features for every session</h1>
+          <div id="w-list" class="k-abs">
+            <div id="w-head" class="k-head"><span style="padding-left: 20px; width: 440px">Feature</span><span style="flex: 1">How</span></div>
+            <div id="w-r1" class="k-row"><b class="w-n k-num">1</b><span class="w-what k-name">Steer</span><span class="k-tag">Shift+Tab</span></div>
+            <div id="w-r2" class="k-row"><b class="w-n k-num">2</b><span class="w-what k-name">Undo</span><span class="k-tag">Esc Esc</span>&#160;<span class="k-tag">/rewind</span></div>
+            <div id="w-r3" class="k-row"><b class="w-n k-num">3</b><span class="w-what k-name">Inspect</span><span class="k-tag">/context</span>&#160;<span class="k-tag">/doctor</span></div>
+            <div id="w-r4" class="k-row"><b class="w-n k-num">4</b><span class="w-what k-name">Run in parallel</span><span class="k-tag">--worktree</span></div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/commands</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.fade("#w-head", at("l02") - 0.2)
+          k.rise("#w-r1", at("l02", "steer"))
+          k.rise("#w-r2", at("l02", "undo"))
+          k.rise("#w-r3", at("l02", "inspect"))
+          k.rise("#w-r4", at("l02", "run in parallel"))
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

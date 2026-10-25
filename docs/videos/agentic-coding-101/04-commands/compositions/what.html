@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>04-commands · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 700px; }
+        #w-input { left: 120px; top: 600px; width: 640px; }
+        #w-builtin { left: 900px; top: 252px; width: 900px; }
+        #w-builtin .k-row { height: 104px; padding-left: 28px; }
+        #w-builtin .k-dim { width: 480px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 4 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">A saved prompt behind a slash</h1>
+          <div id="w-input" class="k-abs k-file">
+            <div class="k-file-name">Prompt</div>
+            <pre class="k-code"><span><b>/deploy</b> staging</span></pre>
+          </div>
+          <div id="w-builtin" class="k-abs">
+            <div id="w-head" class="k-head"><span style="padding-left: 28px">Built in</span><span style="width: 480px">What it does</span></div>
+            <div id="w-r1" class="k-row"><span class="k-tag">/clear</span><span class="k-dim">Starts a new conversation</span></div>
+            <div id="w-r2" class="k-row"><span class="k-tag">/compact</span><span class="k-dim">Summarizes it to free context</span></div>
+            <div id="w-r3" class="k-row"><span class="k-tag">/context</span><span class="k-dim">Shows what's loaded</span></div>
+            <div id="w-r4" class="k-row"><span class="k-tag">/model</span><span class="k-dim">Switches the model</span></div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/commands</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.rise("#w-input", at("l02"))
+          k.fade("#w-head", at("l03"))
+          k.rise("#w-r1", at("l03", "slash clear"))
+          k.rise("#w-r2", at("l03", "slash compact"))
+          k.rise("#w-r3", at("l03", "slash context"))
+          k.rise("#w-r4", at("l03", "slash model"))
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

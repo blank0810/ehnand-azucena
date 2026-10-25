@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>07-subagents · example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-example { position: absolute; inset: 0; }
+
+        #e-title { left: 120px; top: 196px; }
+        #e-file { left: 120px; top: 290px; width: 960px; }
+        #e-tools { left: 1140px; top: 290px; width: 660px; }
+        #e-tags { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 22px; }
+        #e-hand { left: 1140px; top: 640px; width: 660px; }
+        #e-hand .k-dim { margin-top: 12px; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="stage-example">
+          <div class="k-step">3 / 4 · Example</div>
+
+          <h2 id="e-title" class="k-abs k-title">This portfolio's article writer</h2>
+          <div id="e-file" class="k-abs k-file">
+            <div class="k-file-name">.claude/agents/article-writer.md</div>
+            <pre class="k-code"><span>---</span><span>name: <b>article-writer</b></span><span id="e-d1">description: &gt;</span><span id="e-d2">  Portfolio article writer for ehnand.com.</span><span id="e-d3">  <b>Use proactively whenever asked to</b> write,</span><span id="e-d4">  draft, plan, revise ... an article ...</span><span>tools: Read, Write, Edit, Bash, ...</span><span>---</span><span class="e-h">## Hard rules, never traded away</span><span class="e-h">## The house form</span><span class="e-h">## The verification gate</span></pre>
+          </div>
+          <div id="e-tools" class="k-abs">
+            <div id="e-tools-head" class="k-head"><span>Tools it may use</span></div>
+            <div id="e-tags"><span class="k-tag">Read</span><span class="k-tag">Write</span><span class="k-tag">Edit</span><span class="k-tag">Bash</span><span class="k-tag">Glob</span><span class="k-tag">Grep</span><span class="k-tag">WebFetch</span><span class="k-tag">WebSearch</span><span class="k-tag">Skill</span></div>
+          </div>
+          <div id="e-hand" class="k-abs">
+            <div id="e-hand-label" class="k-label">The description is the handoff</div>
+            <span id="e-hand-dim" class="k-dim">"Use proactively whenever asked to write..." tells the main agent when to call it.</span>
+          </div>
+          <div class="k-source">Source: this repository's .claude/agents/article-writer.md</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "example")
+          const at = k.at
+
+          k.title("#e-title")
+          k.fade("#e-file", at("l08"))
+          k.lines("#e-file .k-code span:not(.e-h)", at("l08") + 0.3, 0.1)
+          k.fade("#e-tools-head", at("l09", "the tools"))
+          k.lines("#e-tags .k-tag", at("l09", "the tools"), 0.06)
+          k.lines("#e-file .e-h", at("l09", "the house rules"), 0.3)
+          k.tint("#e-d3", at("l10"))
+          k.slide("#e-hand-label", at("l10"))
+          k.fade("#e-hand-dim", at("l10") + 0.3)
+          k.exit("#stage-example")
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

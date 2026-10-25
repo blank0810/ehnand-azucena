@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>04-commands · gotchas</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-gotchas { position: absolute; inset: 0; }
+
+        #g-left { left: 120px; top: 196px; width: 840px; }
+        #g-left .k-row { height: 118px; padding-left: 28px; }
+        #g-left .k-dim { width: 340px; }
+        #g-right { left: 1040px; top: 196px; width: 760px; }
+        #g-right .k-row { height: 118px; padding-left: 28px; }
+        .g-head { margin-top: 30px; }
+        #g-tags { display: flex; gap: 14px; }
+      </style>
+
+      <div id="root" data-composition-id="gotchas" data-width="1920" data-height="1080">
+        <div id="stage-gotchas">
+          <div class="k-step">4 / 4 · Gotchas</div>
+
+          <div id="g-left" class="k-abs">
+            <h2 id="g-t1" class="k-title">When to make one</h2>
+            <div id="g-h1" class="k-head g-head"><span style="padding-left: 28px">Signal</span><span style="width: 340px">Do</span></div>
+            <div id="g-r1" class="k-row"><span class="k-name">The same prompt, again</span><span class="k-dim">Save it as a command</span></div>
+            <div id="g-r2" class="k-row"><span class="k-name">The team needs it</span><span class="k-dim">Commit it to .claude/</span></div>
+            <div id="g-r3" class="k-row"><span class="k-name">It has side effects</span><span class="k-dim">Keep it manual</span></div>
+          </div>
+          <div id="g-right" class="k-abs">
+            <h2 id="g-t2" class="k-title">Codex</h2>
+            <div id="g-h2" class="k-head g-head"><span style="padding-left: 28px">Commands</span></div>
+            <div id="g-c1" class="k-row"><span id="g-tags"><span class="k-tag">/init</span><span class="k-tag">/review</span><span class="k-tag">/model</span></span><span class="k-dim">Built in</span></div>
+            <div id="g-c2" class="k-row"><span class="k-name">Custom prompts</span><span class="k-dim">Deprecated: <span class="k-cobalt">write a skill</span></span></div>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/skills, developers.openai.com/codex/custom-prompts</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "gotchas")
+          const at = k.at
+
+          k.title("#g-t1")
+          k.fade("#g-h1", at("l11") - 0.2)
+          k.rise("#g-r1", at("l11"))
+          k.rise("#g-r2", at("l12"))
+          k.rise("#g-r3", at("l13"))
+          k.title("#g-t2", at("l14"))
+          k.fade("#g-h2", at("l14") + 0.3)
+          k.rise("#g-c1", at("l14", "slash init"))
+          k.rise("#g-c2", at("l15"))
+          window.__timelines["gotchas"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

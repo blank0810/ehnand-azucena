@@ -12,7 +12,7 @@ The positioning is engineer-directed and AI-augmented. Ehnand owns discovery, ar
 
 ## Architecture
 
-Astro statically generates every public page. There is no React application, framework hydration runtime, or server adapter. A single Worker runtime entry exists solely to serve `POST /api/contact`; every other request falls through to the static assets binding untouched.
+Astro statically generates every public page. There is no React application, framework hydration runtime, or server adapter. A single Worker runtime entry serves `POST /api/contact` and answers byte-range requests for the article videos under `/videos/*`; every other request falls through to the static assets binding untouched.
 
 ```text
 src/pages/                  Static routes and XML/text endpoints
@@ -21,10 +21,10 @@ src/components/             Focused Astro presentation components
 src/data/                   Verified portfolio, career, FAQ, and taxonomy data
 src/lib/                    Content queries, schemas, dates, filters, and validation
 src/styles/global.css       Active stylesheet
-worker/                     Worker entry and the contact endpoint only
+worker/                     Worker entry, the contact endpoint, and video byte ranges
 content/articles/           MDX technical articles
 content/case-studies/       Optional MDX project narratives
-public/                     Evidence images, headers, redirects, verification file
+public/                     Evidence images, article videos, headers, redirects, verification file
 ```
 
 Browser-authored interactions are deliberately limited to the progressively enhanced `/articles` search and category filter, system-aware theme selection, the five-project featured rotation, one-time section reveals, the pixel-art farewell hero on the *Leaving ClouDesk* article, and the contact form. The contact form is the one interaction that genuinely requires JavaScript, because Turnstile cannot mint a token without it; the `mailto:` link stays as the `<noscript>` path. Every article and project record, including all five featured projects, is present in generated HTML; static fallback paths remain available without JavaScript.
@@ -36,6 +36,7 @@ Browser-authored interactions are deliberately limited to the progressively enha
 - `content/articles/*.mdx` is validated by `src/content.config.ts`. Drafts remain directly buildable for local review but are excluded from listings, related articles, RSS, and sitemap and use `noindex,nofollow`.
 - `src/data/article-categories.ts` owns the four article categories.
 - `src/data/faq.ts` feeds both visible FAQ content and homepage `FAQPage` JSON-LD.
+- `src/data/article-videos.ts` feeds both the `ArticleClip` figures an MDX article places with `<Clip id="…" />` and that article's `VideoObject` JSON-LD. Clip files ship in `public/videos/<article slug>/` (`.mp4`, `.vtt` captions, `.webp` poster); the transcript is read from the captions at build time, and the scripts and compositions that produced the clips live in `docs/videos/`.
 - `src/config/site.ts` owns `SITE_URL`, site identity, and the canonical Person id `${SITE_URL}/#person`.
 - `src/data/profile.ts` and `src/data/career.ts` own contact, history, education, skills, and credential evidence.
 
@@ -43,7 +44,7 @@ The ERP backend is public as `/projects/serverless-erp-backend` (owner-approved 
 
 ## Routes and discovery
 
-Canonical public routes are `/`, `/projects`, `/projects/[slug]`, `/articles`, `/articles/[slug]`, `/rss.xml`, `/sitemap.xml`, and `/robots.txt`. `/thank-you` is the contact form's native-submit landing page: `noindex,nofollow`, and absent from the sitemap and RSS. `POST /api/contact` is the only non-asset route and is served by the Worker. `public/_redirects` permanently maps `/blog` and `/blog/*` to the corresponding `/articles` paths.
+Canonical public routes are `/`, `/projects`, `/projects/[slug]`, `/articles`, `/articles/[slug]`, `/rss.xml`, `/sitemap.xml`, and `/robots.txt`. `/thank-you` is the contact form's native-submit landing page: `noindex,nofollow`, and absent from the sitemap and RSS. `POST /api/contact` is the only non-asset route and is served by the Worker; `/videos/*` are assets that the Worker serves with byte ranges. `public/_redirects` permanently maps `/blog` and `/blog/*` to the corresponding `/articles` paths.
 
 `BaseLayout.astro` emits one canonical Person entity. Page-specific Blog, BlogPosting, SoftwareApplication, BreadcrumbList, WebSite, ProfilePage, and FAQPage schemas reference that Person id rather than duplicating a person object.
 
@@ -77,7 +78,7 @@ Development is at `http://localhost:3001`, mapped to Astro port `4321`. Compose 
 
 ## Cloudflare
 
-`wrangler.jsonc` serves `dist/` through Cloudflare Workers Static Assets and adds exactly four things for the contact form: `main`, the `ASSETS` binding, a `send_email` binding with `destination_address` pinned to `contact@ehnand.com`, and a `ratelimits` binding. It still has no server adapter, database, storage binding, account id, route, or committed secret. `TURNSTILE_SECRET_KEY` is a Worker secret set with `wrangler secret put`; `TURNSTILE_SITE_KEY` is public and read at build time, defaulting to Cloudflare's test key with a loud build warning when unset.
+`wrangler.jsonc` serves `dist/` through Cloudflare Workers Static Assets and adds exactly four things for the contact form: `main`, the `ASSETS` binding, a `send_email` binding with `destination_address` pinned to `contact@ehnand.com`, and a `ratelimits` binding. It also sets `assets.run_worker_first` to `/api/*` and `/videos/*`: static assets answer a `Range` request with the whole file, Safari needs `206` responses to play video, and `worker/video.ts` answers single byte ranges. With a pattern list, unlisted paths never reach the Worker, which is why `/api/*` is listed too. Only those requests count against the Workers request limit. Workers Caching (`cache.enabled`) would slice ranges too, but it bills every static asset request on the site, so it stays off. It still has no server adapter, database, storage binding, account id, route, or committed secret. `TURNSTILE_SECRET_KEY` is a Worker secret set with `wrangler secret put`; `TURNSTILE_SITE_KEY` is public and read at build time, defaulting to Cloudflare's test key with a loud build warning when unset.
 
 `public/_headers` supplies conservative response headers; do not add a Content Security Policy without a complete asset and external-origin inventory plus browser verification. That inventory now includes `challenges.cloudflare.com`, which serves the Turnstile widget script and its frame.
 

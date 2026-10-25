@@ -1,0 +1,100 @@
+{
+  "id": "03-rules",
+  "chapter": 3,
+  "title": "Rules",
+  "rail": "Rules",
+  "sources": [
+    "https://code.claude.com/docs/en/memory",
+    "https://developers.openai.com/codex/agent-configuration/agents-md"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "A rules file is plain Markdown the agent reads at the start of every session."
+        },
+        {
+          "id": "l02",
+          "text": "Claude Code calls it CLAUDE.md.|Codex and many other agents call it AGENTS.md.",
+          "say": "Claude Code calls it Claude dot M D. Codex and many other agents call it agents dot M D."
+        },
+        {
+          "id": "l03",
+          "text": "Put in it what you'd tell a new teammate:|build commands, conventions, where things live, and what never to do."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l04",
+          "text": "Rules load from broad to specific."
+        },
+        {
+          "id": "l05",
+          "text": "Your organization's file, then yours, then the project's,|then any folder below it, once the agent works there."
+        },
+        {
+          "id": "l06",
+          "text": "They're combined, not replaced, and the closest one is read last."
+        },
+        {
+          "id": "l07",
+          "text": "All of it is sent with every request,|so every line costs context, every time."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l08",
+          "text": "Here's a short one."
+        },
+        {
+          "id": "l09",
+          "text": "It says: use pnpm, not npm, and run the tests before committing."
+        },
+        {
+          "id": "l10",
+          "text": "An @ import pulls in another file,|like the AGENTS.md your other tools already read.",
+          "say": "An at sign import pulls in another file, like the agents dot M D your other tools already read."
+        },
+        {
+          "id": "l11",
+          "text": "And a rule in .claude/rules can carry a paths field,|so it loads only when the agent touches matching files.",
+          "say": "And a rule in dot claude slash rules can carry a paths field, so it loads only when the agent touches matching files."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l12",
+          "text": "Keep it under two hundred lines.|Longer files cost more context, and get followed less."
+        },
+        {
+          "id": "l13",
+          "text": "Imports organize a file, but they don't shrink it: imported files load too."
+        },
+        {
+          "id": "l14",
+          "text": "If two rules contradict each other, the agent may pick one arbitrarily,|so prune them."
+        },
+        {
+          "id": "l15",
+          "text": "Codex reads AGENTS.md,|and stops adding files at thirty-two kilobytes by default.",
+          "say": "Codex reads agents dot M D, and stops adding files at thirty-two kilobytes by default."
+        }
+      ]
+    }
+  ]
+}

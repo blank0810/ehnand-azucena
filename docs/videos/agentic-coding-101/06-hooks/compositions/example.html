@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>06-hooks · example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-example { position: absolute; inset: 0; }
+
+        #e-title { left: 120px; top: 196px; }
+        #e-settings { left: 120px; top: 290px; width: 960px; }
+        #e-script { left: 1120px; top: 290px; width: 680px; }
+        #e-result { left: 1120px; top: 720px; width: 680px; }
+        #e-result .k-dim { margin-top: 12px; }
+        #e-more { left: 1120px; top: 880px; width: 680px; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="stage-example">
+          <div class="k-step">3 / 4 · Example</div>
+
+          <h2 id="e-title" class="k-abs k-title">Blocking a force push</h2>
+          <div id="e-settings" class="k-abs k-file">
+            <div class="k-file-name">.claude/settings.json</div>
+            <pre class="k-code"><span>{</span><span>  "hooks": {</span><span>    <b>"PreToolUse"</b>: [{</span><span>      "matcher": <b>"Bash"</b>,</span><span>      "hooks": [{</span><span>        "type": "command",</span><span>        "command": ".claude/hooks/no-force-push.sh"</span><span>      }]</span><span>    }]</span><span>  }</span><span>}</span></pre>
+          </div>
+          <div id="e-script" class="k-abs k-file">
+            <div class="k-file-name">.claude/hooks/no-force-push.sh</div>
+            <pre class="k-code"><span>#!/bin/sh</span><span>cmd=$(jq -r .tool_input.command)</span><span>case "$cmd" in</span><span>  *"push --force"*|*"push -f"*)</span><span>    echo "Force push is blocked." &gt;&amp;2</span><span>    <b>exit 2</b> ;;</span><span>esac</span></pre>
+          </div>
+          <div id="e-result" class="k-abs">
+            <div id="e-result-label" class="k-label">Result</div>
+            <span id="e-result-dim" class="k-dim">The push never runs. The agent reads "Force push is blocked." and changes course.</span>
+          </div>
+          <p id="e-more" class="k-abs k-dim">Same pattern: block edits to secrets, or format a file after every write.</p>
+          <div class="k-source">Source: code.claude.com/docs/en/hooks</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "example")
+          const at = k.at
+
+          k.title("#e-title")
+          k.fade("#e-settings", at("l09"))
+          k.lines("#e-settings .k-code span", at("l09") + 0.2, 0.08)
+          k.fade("#e-script", at("l10"))
+          k.lines("#e-script .k-code span", at("l10", "force push"), 0.12)
+          k.slide("#e-result-label", at("l11"))
+          k.fade("#e-result-dim", at("l11", "and the agent"))
+          k.rise("#e-more", at("l11b"))
+          k.exit("#stage-example")
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

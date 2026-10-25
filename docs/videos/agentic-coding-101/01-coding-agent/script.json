@@ -1,0 +1,101 @@
+{
+  "id": "01-coding-agent",
+  "chapter": 1,
+  "title": "What a coding agent is",
+  "rail": "The agent",
+  "sources": [
+    "https://code.claude.com/docs/en/how-claude-code-works",
+    "https://code.claude.com/docs/en/context-window",
+    "https://code.claude.com/docs/en/memory",
+    "https://code.claude.com/docs/en/skills"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "A coding agent is a model that uses tools in a loop."
+        },
+        {
+          "id": "l02",
+          "text": "It isn't autocomplete, and it isn't a chatbot."
+        },
+        {
+          "id": "l03",
+          "text": "It reads files, runs commands and edits code,|from a terminal, an editor, a desktop app or the web."
+        },
+        {
+          "id": "l03b",
+          "text": "It picks which tools to use from your prompt,|and from what it learns along the way."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l04",
+          "text": "Give it a task, and it works in three phases."
+        },
+        {
+          "id": "l05",
+          "text": "It gathers context, takes action, then verifies the result,|and goes round again until the task is done."
+        },
+        {
+          "id": "l06",
+          "text": "You can step in at any point.|Press Escape to stop it, or type a correction and it adjusts.",
+          "say": "You can step in at any point. Press escape to stop it, or type a correction, and it adjusts."
+        },
+        {
+          "id": "l07",
+          "text": "Risky actions are checked before they run:|in manual mode it asks you, in auto mode a classifier blocks them."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l08",
+          "text": "Before you type a word, its context window is already filling."
+        },
+        {
+          "id": "l09",
+          "text": "System instructions. Your CLAUDE.md. Saved memory.|A short description of every skill. The names of your MCP tools.",
+          "say": "System instructions. Your Claude dot M D. Saved memory. A short description of every skill. The names of your M C P tools."
+        },
+        {
+          "id": "l10",
+          "text": "Then your prompt, and everything it reads and runs after that."
+        },
+        {
+          "id": "l11",
+          "text": "When the window gets full, old tool output is cleared first,|then the conversation is summarized."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l12",
+          "text": "So context is a budget, and every layer in this series spends some of it.|Slash context shows what loaded, and what each part costs."
+        },
+        {
+          "id": "l13",
+          "text": "Codex, Cursor, Gemini CLI and Copilot run the same loop,|with their own names for the parts.",
+          "say": "Codex, Cursor, Gemini C L I and Copilot run the same loop, with their own names for the parts."
+        },
+        {
+          "id": "l14",
+          "text": "Everyone rents the same models.|The setup around them is the part you build."
+        }
+      ]
+    }
+  ]
+}

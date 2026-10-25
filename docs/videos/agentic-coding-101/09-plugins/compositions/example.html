@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>09-plugins · example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-example { position: absolute; inset: 0; }
+
+        #e-title { left: 120px; top: 196px; }
+        #e-list { left: 120px; top: 290px; width: 1680px; }
+        #e-list .k-row { justify-content: flex-start; height: 120px; padding-left: 28px; }
+        .e-name { width: 400px; }
+        .e-layer { display: block; width: 180px; }
+        .e-what { width: 1040px; }
+        #e-out { left: 120px; top: 846px; width: 1680px; }
+        #e-out .k-dim { margin-top: 12px; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="stage-example">
+          <div class="k-step">3 / 4 · Example</div>
+
+          <h2 id="e-title" class="k-abs k-title">Four worth installing</h2>
+          <div id="e-list" class="k-abs">
+            <div id="e-head" class="k-head"><span style="padding-left: 28px; width: 428px">Plugin</span><span style="width: 180px">Layer</span><span style="width: 1040px">What it does</span></div>
+            <div id="e-r1" class="k-row"><span class="e-name k-name">superpowers</span><span class="e-layer"><span class="k-tag">skills</span></span><span class="e-what k-dim">Brainstorm, plan, test first, debug, verify. This article was planned with its brainstorming skill.</span></div>
+            <div id="e-r2" class="k-row"><span class="e-name k-name">playwright</span><span class="e-layer"><span class="k-tag">MCP</span></span><span class="e-what k-dim">A real browser the agent drives: your dev server at phone width, then a screenshot.</span></div>
+            <div id="e-r3" class="k-row"><span class="e-name k-name">security-guidance</span><span class="e-layer"><span class="k-tag">hooks</span></span><span class="e-what k-dim">Warns about risky patterns as files change, and reviews the diff when the agent stops.</span></div>
+            <div id="e-r4" class="k-row"><span class="e-name k-name">claude-code-setup</span><span class="e-layer"><span class="k-tag">skill</span></span><span class="e-what k-dim">Reads your repository and recommends automations for each layer. Changes nothing.</span></div>
+          </div>
+          <div id="e-out" class="k-abs">
+            <div id="e-out-label" class="k-label">claude-code-setup, run on this portfolio, suggested</div>
+            <span id="e-out-dim" class="k-dim">A hook that enforces its Docker-only rule, and a /verify skill that runs all five checks.</span>
+          </div>
+          <div class="k-source">Sources: each plugin's files; a claude-code-setup run on this repository, 2026-10-25</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "example")
+          const at = k.at
+
+          k.title("#e-title")
+          k.fade("#e-head", at("l05"))
+          k.rise("#e-r1", at("l06"))
+          k.rise("#e-r2", at("l07"))
+          k.rise("#e-r3", at("l08"))
+          k.rise("#e-r4", at("l09"))
+          k.slide("#e-out-label", at("l09b"))
+          k.fade("#e-out-dim", at("l09b", "it suggested"))
+          k.exit("#stage-example")
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

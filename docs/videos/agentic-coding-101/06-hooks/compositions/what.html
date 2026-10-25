@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>06-hooks · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 700px; }
+        #w-who { left: 900px; top: 252px; width: 900px; }
+        #w-who .k-row { height: 120px; padding-left: 28px; }
+        #w-who .k-dim { width: 440px; }
+        #w-use { left: 900px; top: 640px; width: 900px; }
+        #w-tags { display: flex; gap: 16px; padding: 24px 0 0 28px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 4 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">Your code, at a set point, every time</h1>
+          <div id="w-who" class="k-abs">
+            <div id="w-head" class="k-head"><span style="padding-left: 28px">Layer</span><span style="width: 440px">Who decides it runs</span></div>
+            <div id="w-r1" class="k-row"><span class="k-name">Rules file</span><span class="k-dim">The model, each time it reads it</span></div>
+            <div id="w-r2" class="k-row"><span class="k-name k-cobalt">Hook</span><span class="k-dim">No one: it always runs</span></div>
+          </div>
+          <div id="w-use" class="k-abs">
+            <div id="w-use-head" class="k-head"><span style="padding-left: 28px">Use it for</span></div>
+            <div id="w-tags"><span id="w-t1" class="k-tag">Blocking</span><span id="w-t2" class="k-tag">Formatting</span><span id="w-t3" class="k-tag">Logging</span></div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/hooks</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.fade("#w-head", at("l02"))
+          k.rise("#w-r1", at("l02"))
+          k.rise("#w-r2", at("l02", "That makes"))
+          k.fade("#w-use-head", at("l03"))
+          k.pop("#w-t1", at("l03", "blocking"))
+          k.pop("#w-t2", at("l03", "formatting"))
+          k.pop("#w-t3", at("l03", "logging"))
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

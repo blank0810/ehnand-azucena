@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>03-rules · gotchas</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-gotchas { position: absolute; inset: 0; }
+
+        #g-left { left: 120px; top: 196px; width: 840px; }
+        #g-left .k-row { height: 120px; padding-left: 28px; }
+        #g-left .k-dim { width: 380px; }
+        #g-right { left: 1040px; top: 196px; width: 760px; }
+        #g-right .k-row { height: 120px; padding-left: 28px; }
+        #g-right .k-dim { width: 440px; }
+        .g-head { margin-top: 30px; }
+      </style>
+
+      <div id="root" data-composition-id="gotchas" data-width="1920" data-height="1080">
+        <div id="stage-gotchas">
+          <div class="k-step">4 / 4 · Gotchas</div>
+
+          <div id="g-left" class="k-abs">
+            <h2 id="g-t1" class="k-title">Keep it lean</h2>
+            <div id="g-h1" class="k-head g-head"><span style="padding-left: 28px">Rule</span><span style="width: 380px">Why</span></div>
+            <div id="g-r1" class="k-row"><span class="k-name">Under 200 lines</span><span class="k-dim">Longer costs context and gets followed less</span></div>
+            <div id="g-r2" class="k-row"><span class="k-name">Imports don't shrink it</span><span class="k-dim">Imported files load too</span></div>
+            <div id="g-r3" class="k-row"><span class="k-name">Prune contradictions</span><span class="k-dim">The agent may pick either one</span></div>
+          </div>
+          <div id="g-right" class="k-abs">
+            <h2 id="g-t2" class="k-title">Codex</h2>
+            <div id="g-h2" class="k-head g-head"><span style="padding-left: 28px">Reads</span><span style="width: 440px">Limit</span></div>
+            <div id="g-c1" class="k-row"><span class="k-tag">AGENTS.md</span><span class="k-dim">Stops adding files at <span class="k-cobalt">32 KiB</span> combined, by default</span></div>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/memory, developers.openai.com/codex/agent-configuration/agents-md</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "gotchas")
+          const at = k.at
+
+          k.title("#g-t1")
+          k.fade("#g-h1", at("l12") - 0.2)
+          k.rise("#g-r1", at("l12"))
+          k.rise("#g-r2", at("l13"))
+          k.rise("#g-r3", at("l14"))
+          k.title("#g-t2", at("l15"))
+          k.fade("#g-h2", at("l15") + 0.3)
+          k.rise("#g-c1", at("l15", "and stops"))
+          window.__timelines["gotchas"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

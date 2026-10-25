@@ -1,0 +1,70 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:05.144
+Every setting, rule, skill and agent in your coding setup lives at a scope.
+
+00:00:05.494 --> 00:00:07.735
+The scope decides who it applies to:
+
+00:00:07.735 --> 00:00:11.595
+just you, everyone on the project, or your whole organization.
+
+00:00:12.495 --> 00:00:14.437
+Claude Code has four settings scopes.
+
+00:00:14.787 --> 00:00:19.373
+User settings, in your home .claude folder, follow you into every project.
+
+00:00:19.723 --> 00:00:22.866
+Shared project settings are committed to the repository,
+
+00:00:22.866 --> 00:00:24.438
+so the whole team gets them.
+
+00:00:24.788 --> 00:00:28.223
+Project local settings are yours alone, in one project.
+
+00:00:28.573 --> 00:00:31.384
+When two disagree, the more specific scope wins,
+
+00:00:31.384 --> 00:00:35.015
+and managed settings from your organization override them all.
+
+00:00:35.915 --> 00:00:38.049
+The same split runs through every layer.
+
+00:00:38.399 --> 00:00:41.617
+Rules: a CLAUDE.md for you, one for the project,
+
+00:00:41.617 --> 00:00:44.500
+and a local one that stays on your machine.
+
+00:00:44.850 --> 00:00:49.437
+Skills and agents: a folder in .claude, at home or in the project.
+
+00:00:49.787 --> 00:00:55.696
+MCP servers: your user config, or a .mcp.json the team commits.
+
+00:00:56.046 --> 00:01:00.123
+Rules files don't replace each other: they all load, broadest first.
+
+00:01:00.123 --> 00:01:01.742
+Permission lists merge too.
+
+00:01:02.642 --> 00:01:06.403
+Rule of thumb: if it's true in every repo, put it in user scope.
+
+00:01:06.403 --> 00:01:09.106
+If a teammate needs it, put it in the project.
+
+00:01:09.456 --> 00:01:14.280
+One trap: a local settings file you make by hand isn't ignored by git.
+
+00:01:14.280 --> 00:01:16.347
+Add it to .gitignore yourself.
+
+00:01:16.697 --> 00:01:20.830
+Codex keeps the same split, with .codex at home and in the project,
+
+00:01:20.830 --> 00:01:24.099
+and it skips the project's folder until you trust it.

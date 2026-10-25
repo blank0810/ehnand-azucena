@@ -1,0 +1,113 @@
+{
+  "id": "06-hooks",
+  "chapter": 6,
+  "title": "Hooks",
+  "rail": "Hooks",
+  "sources": [
+    "https://code.claude.com/docs/en/hooks",
+    "https://developers.openai.com/codex/hooks"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "A hook is your own code that runs at a set point in the agent's lifecycle, every time."
+        },
+        {
+          "id": "l02",
+          "text": "No model decides whether it runs.|That makes hooks the only layer that enforces."
+        },
+        {
+          "id": "l03",
+          "text": "Use them for what must always happen: blocking, formatting, logging."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l04",
+          "text": "The lifecycle has points like session start, prompt submitted,|before a tool runs, after it runs, and stop."
+        },
+        {
+          "id": "l05",
+          "text": "Claude Code has thirty-three of them."
+        },
+        {
+          "id": "l06",
+          "text": "A hook can be a shell command, an HTTP call, an MCP tool, a prompt, or another agent.",
+          "say": "A hook can be a shell command, an H T T P call, an M C P tool, a prompt, or another agent."
+        },
+        {
+          "id": "l07",
+          "text": "Before a tool runs, a command that exits with code two blocks it."
+        },
+        {
+          "id": "l07b",
+          "text": "Each hook receives the event as JSON, like the exact command about to run.",
+          "say": "Each hook receives the event as JSON, like the exact command about to run."
+        },
+        {
+          "id": "l08",
+          "text": "And hooks from every scope all fire. They add up; they don't override."
+        },
+        {
+          "id": "l08b",
+          "text": "Run /hooks to see every hook that's configured.",
+          "say": "Run slash hooks to see every hook that's configured."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l09",
+          "text": "This one runs before every shell command."
+        },
+        {
+          "id": "l10",
+          "text": "If the command is a force push,|it prints the reason and exits with code two."
+        },
+        {
+          "id": "l11",
+          "text": "The push never happens,|and the agent reads the reason and changes course."
+        },
+        {
+          "id": "l11b",
+          "text": "The same pattern can block edits to secrets,|or format a file after every write."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l12",
+          "text": "A rule that says never edit .env is a request.|A hook that blocks it is a guarantee.",
+          "say": "A rule that says never edit dot env is a request. A hook that blocks it is a guarantee."
+        },
+        {
+          "id": "l13",
+          "text": "But prove it fires. In the setup behind this series,|the guard hooks sat in an example file and never ran."
+        },
+        {
+          "id": "l14",
+          "text": "Hooks cost no context unless they print something."
+        },
+        {
+          "id": "l15",
+          "text": "Codex has hooks too, in hooks.json, with a smaller set of events.",
+          "say": "Codex has hooks too, in hooks dot JSON, with a smaller set of events."
+        }
+      ]
+    }
+  ]
+}

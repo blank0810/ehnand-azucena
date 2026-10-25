@@ -1,0 +1,102 @@
+{
+  "id": "08-mcp",
+  "chapter": 8,
+  "title": "MCP",
+  "rail": "MCP",
+  "sources": [
+    "https://code.claude.com/docs/en/mcp",
+    "https://modelcontextprotocol.io",
+    "https://developers.openai.com/codex/mcp"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "MCP, the Model Context Protocol, is an open standard|for plugging outside systems into an agent as tools.",
+          "say": "M C P, the Model Context Protocol, is an open standard for plugging outside systems into an agent as tools."
+        },
+        {
+          "id": "l02",
+          "text": "A browser, a database, your docs, a search engine."
+        },
+        {
+          "id": "l03",
+          "text": "Claude Code, Codex, Cursor and many others support it."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l04",
+          "text": "The agent talks to an MCP server, and the server talks to the system.",
+          "say": "The agent talks to an M C P server, and the server talks to the system."
+        },
+        {
+          "id": "l05",
+          "text": "Servers run on your machine, or remotely over HTTP.",
+          "say": "Servers run on your machine, or remotely over H T T P."
+        },
+        {
+          "id": "l06",
+          "text": "At the start, only tool names load.|Full definitions load when a tool is needed, so adding servers barely touches your context."
+        },
+        {
+          "id": "l07",
+          "text": "Servers have scopes too:|local first, then the project's .mcp.json, then your user config.",
+          "say": "Servers have scopes too: local first, then the project's dot M C P dot JSON, then your user config."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l08",
+          "text": "These clips were fact-checked with a web search and scraping server."
+        },
+        {
+          "id": "l09",
+          "text": "It searched and fetched the official docs,|and the agent compared the wording before a line was written."
+        },
+        {
+          "id": "l09b",
+          "text": "Every claim traces back to an official page,|and each clip lists its sources on screen."
+        },
+        {
+          "id": "l10",
+          "text": "Without it, the agent works from what it remembers, which can be out of date."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l11",
+          "text": "Each server is a new set of permissions, so add only what you trust."
+        },
+        {
+          "id": "l12",
+          "text": "Big tool results land in your context, and they count against it."
+        },
+        {
+          "id": "l13",
+          "text": "Pair a server with a skill:|the server gives access, the skill gives the know-how."
+        },
+        {
+          "id": "l14",
+          "text": "Codex configures servers under mcp_servers in config.toml,|and the same servers work in both.",
+          "say": "Codex configures servers under M C P servers in config dot toml, and the same servers work in both."
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,12 @@ import ProseRule from "@/components/content/ProseRule.astro"
 import { absoluteUrl, PERSON_ID } from "@/config/site"
 import ArticleLayout from "@/layouts/ArticleLayout.astro"
 import {
+  articleVideos,
+  isoDuration,
+  videoPaths,
+  videoTranscript,
+} from "@/lib/article-videos"
+import {
   assertContentIntegrity,
   entrySlug,
   getAllArticles,
@@ -34,6 +40,21 @@ const canonicalUrl = absoluteUrl(canonicalPath)
 const relatedArticles = await getRelatedArticles(article, 3)
 const { Content } = await render(article)
 
+// The section clips the article embeds, from the same records as their figures.
+const videos = articleVideos(slug).map((video) => {
+  const paths = videoPaths(slug, video)
+  return {
+    "@type": "VideoObject",
+    name: video.title,
+    description: video.description,
+    thumbnailUrl: absoluteUrl(paths.poster),
+    uploadDate: article.data.date,
+    duration: isoDuration(video.seconds),
+    contentUrl: absoluteUrl(paths.mp4),
+    transcript: videoTranscript(slug, video).join(" "),
+  }
+})
+
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -52,6 +73,7 @@ const articleSchema = {
   keywords: article.data.tags,
   author: { "@id": PERSON_ID },
   publisher: { "@id": PERSON_ID },
+  ...(videos.length > 0 && { video: videos }),
 }
 
 const breadcrumbSchema = {

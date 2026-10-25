@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>04-commands · how</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-how { position: absolute; inset: 0; }
+
+        #h-title { left: 120px; top: 196px; }
+        #h-files { left: 120px; top: 300px; width: 1000px; }
+        #h-files .k-row { height: 104px; padding-left: 28px; }
+        #h-same { left: 1240px; top: 350px; width: 560px; }
+        #h-big { display: inline-block; padding: 10px 24px; background: #164bc5; color: #ffffff; font-size: 44px; }
+        #h-same .k-dim { margin-top: 18px; }
+        #h-args { left: 120px; top: 590px; width: 1000px; }
+        #h-home { left: 120px; top: 830px; width: 1000px; }
+        #h-home .k-row { height: 96px; padding-left: 28px; }
+      </style>
+
+      <div id="root" data-composition-id="how" data-width="1920" data-height="1080">
+        <div id="stage-how">
+          <div class="k-step">2 / 4 · How it works</div>
+
+          <h2 id="h-title" class="k-abs k-title">Commands are skills now</h2>
+          <div id="h-files" class="k-abs">
+            <div id="h-head" class="k-head"><span style="padding-left: 28px">Either file</span></div>
+            <div id="h-r1" class="k-row"><span class="k-tag">.claude/commands/deploy.md</span></div>
+            <div id="h-r2" class="k-row"><span class="k-tag">.claude/skills/deploy/SKILL.md</span></div>
+          </div>
+          <div id="h-same" class="k-abs">
+            <span id="h-big" class="k-tag">/deploy</span>
+            <span class="k-dim">The same command, either way</span>
+          </div>
+          <div id="h-args" class="k-abs k-file">
+            <div class="k-file-name">You type /deploy staging, and the file receives</div>
+            <pre class="k-code"><span><b>$ARGUMENTS</b> = staging</span></pre>
+          </div>
+          <div id="h-home" class="k-abs">
+            <div id="h-r3" class="k-row"><span class="k-tag">~/.claude/skills/deploy/</span><span class="k-dim" style="width: 420px">Yours, in every project</span></div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/skills</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "how")
+          const at = k.at
+
+          k.title("#h-title")
+          k.fade("#h-head", at("l05"))
+          k.rise("#h-r1", at("l05", "dot claude slash commands"))
+          k.rise("#h-r2", at("l05", "a skill at"))
+          k.pop("#h-same", at("l05", "both give you"))
+          k.rise("#h-args", at("l06"))
+          k.rise("#h-r3", at("l06b"))
+          k.exit("#stage-how")
+          window.__timelines["how"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

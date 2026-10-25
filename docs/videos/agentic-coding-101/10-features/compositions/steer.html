@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>10-features · steer</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-steer { position: absolute; inset: 0; }
+
+        #s-title { left: 120px; top: 196px; }
+        #s-key { right: 120px; top: 206px; }
+        #s-table { left: 120px; top: 320px; width: 1680px; }
+        #s-table .k-row { justify-content: flex-start; height: 112px; padding-left: 28px; }
+        .s-mode { display: block; width: 400px; }
+        .s-what { width: 1200px; font-size: 32px; }
+      </style>
+
+      <div id="root" data-composition-id="steer" data-width="1920" data-height="1080">
+        <div id="stage-steer">
+          <div class="k-step">2 / 5 · Steer</div>
+
+          <h2 id="s-title" class="k-abs k-title">Steer: permission modes</h2>
+          <div id="s-key" class="k-abs"><span class="k-dim" style="display: inline">Cycle with </span><span id="s-tab" class="k-tag">Shift+Tab</span></div>
+          <div id="s-table" class="k-abs">
+            <div id="s-head" class="k-head"><span style="padding-left: 28px; width: 428px">Mode</span><span style="flex: 1">What the agent does</span></div>
+            <div id="s-r1" class="k-row"><span class="s-mode"><span id="s-m1" class="k-tag">auto</span></span><span class="k-dim s-what">A classifier blocks risky actions. The terminal's default</span></div>
+            <div id="s-r2" class="k-row"><span class="s-mode"><span id="s-m2" class="k-tag">manual</span></span><span class="k-dim s-what">Asks before file edits and shell commands</span></div>
+            <div id="s-r3" class="k-row"><span class="s-mode"><span id="s-m3" class="k-tag">accept edits</span></span><span class="k-dim s-what">Edits files without asking; asks for other commands</span></div>
+            <div id="s-r4" class="k-row"><span class="s-mode"><span id="s-m4" class="k-tag">plan</span></span><span class="k-dim s-what">Explores and writes a plan; edits wait for your approval</span></div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/permission-modes</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "steer")
+          const at = k.at
+
+          k.title("#s-title")
+          k.pop("#s-key", at("l03"))
+          k.fade("#s-head", at("l03", "cycles"))
+          ;[["1", "auto"], ["2", "manual"], ["3", "accept edits"], ["4", "and plan"]].forEach(([i, w]) => {
+            k.rise(`#s-r${i}`, at("l03", w))
+            tl.fromTo(`#s-m${i}`, { backgroundColor: "#164bc5", color: "#ffffff" }, { backgroundColor: "#e8ebef", color: "#15191f", duration: 0.3, immediateRender: false }, at("l03", w) + 0.6)
+          })
+          tl.fromTo("#s-m1", { backgroundColor: "#e8ebef", color: "#15191f" }, { backgroundColor: "#164bc5", color: "#ffffff", duration: 0.3, immediateRender: false }, at("l04"))
+          tl.fromTo("#s-m1", { backgroundColor: "#164bc5", color: "#ffffff" }, { backgroundColor: "#e8ebef", color: "#15191f", duration: 0.3, immediateRender: false }, at("l05") - 0.3)
+          tl.fromTo("#s-m4", { backgroundColor: "#e8ebef", color: "#15191f" }, { backgroundColor: "#164bc5", color: "#ffffff", duration: 0.3, immediateRender: false }, at("l05"))
+          k.exit("#stage-steer")
+          window.__timelines["steer"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

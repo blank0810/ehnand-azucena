@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>10-features · inspect</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-inspect { position: absolute; inset: 0; }
+
+        #i-title { left: 120px; top: 196px; }
+        #i-table { left: 120px; top: 310px; width: 1680px; }
+        #i-table .k-row { justify-content: flex-start; height: 130px; padding-left: 28px; }
+        .i-cmd { display: block; width: 300px; }
+        .i-what { width: 1300px; font-size: 32px; }
+        #i-rule { left: 120px; top: 700px; width: 1680px; }
+      </style>
+
+      <div id="root" data-composition-id="inspect" data-width="1920" data-height="1080">
+        <div id="stage-inspect">
+          <div class="k-step">4 / 5 · Inspect</div>
+
+          <h2 id="i-title" class="k-abs k-title">Inspect: see what's really loaded</h2>
+          <div id="i-table" class="k-abs">
+            <div id="i-head" class="k-head"><span style="padding-left: 28px; width: 328px">Command</span><span style="flex: 1">Shows</span></div>
+            <div id="i-r1" class="k-row"><span class="i-cmd"><span class="k-tag">/context</span></span><span class="k-dim i-what">What loaded and what each part costs, with what to trim when a tool or memory file gets heavy</span></div>
+            <div id="i-r2" class="k-row"><span class="i-cmd"><span class="k-tag">/doctor</span></span><span class="k-dim i-what">A checkup of your installation, settings, extensions and rules files</span></div>
+          </div>
+          <div id="i-rule" class="k-abs k-title">Check both before you blame the model.</div>
+          <div class="k-source">Source: code.claude.com/docs/en/commands</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "inspect")
+          const at = k.at
+
+          k.title("#i-title")
+          k.fade("#i-head", at("l08"))
+          k.rise("#i-r1", at("l08"))
+          k.rise("#i-r2", at("l09"))
+          k.rise("#i-rule", at("l10"))
+          k.tint("#i-rule", at("l10") + 0.8)
+          k.exit("#stage-inspect")
+          window.__timelines["inspect"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

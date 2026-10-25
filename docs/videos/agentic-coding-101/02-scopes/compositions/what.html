@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>02 Scopes · scene 1, what it is</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Same faces as the host; the paths resolve from index.html, where scenes are assembled. */
+        @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+        #root { position: absolute; inset: 0; font-family: "Plex Sans", sans-serif; color: #15191f; }
+        #what-stage { position: absolute; inset: 0; }
+        /* Which of the four scenes is playing, so a viewer can find their place in the series. */
+        #what-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #what-title { position: absolute; left: 120px; top: 300px; width: 660px; font-weight: 620; font-size: 84px; line-height: 1.02; letter-spacing: -0.03em; }
+        #what-sub { position: absolute; left: 120px; top: 560px; width: 600px; font-size: 34px; line-height: 1.35; color: #4e5763; }
+        #what-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+
+        .what-group { position: absolute; left: 900px; width: 900px; }
+        .what-head { padding-bottom: 14px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #what-layers { top: 252px; }
+        #what-tags { display: flex; gap: 20px; padding-top: 28px; }
+        .what-tag { display: block; padding: 10px 20px; background: #e8ebef; font: 500 34px/1.2 "Plex Mono", monospace; color: #15191f; }
+
+        #what-reach { top: 500px; }
+        .what-row { display: flex; justify-content: space-between; align-items: center; height: 120px; border-bottom: 1px solid #d0d5db; }
+        .what-who { font-weight: 600; font-size: 40px; letter-spacing: -0.015em; }
+        .what-dots { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; width: 380px; }
+        .what-dots i { display: block; width: 24px; height: 24px; background: #87919d; }
+        .what-dots i.you { background: #164bc5; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="what-stage">
+          <div id="what-step">1 / 4 · What it is</div>
+          <h1 id="what-title">Every setting lives at a scope</h1>
+          <p id="what-sub">The scope decides who it applies to.</p>
+
+          <div id="what-layers" class="what-group">
+            <div class="what-head">Lives at a scope</div>
+            <div id="what-tags">
+              <span id="what-t1" class="what-tag">Settings</span>
+              <span id="what-t2" class="what-tag">Rules</span>
+              <span id="what-t3" class="what-tag">Skills</span>
+              <span id="what-t4" class="what-tag">Agents</span>
+            </div>
+          </div>
+
+          <!-- One cobalt square is you; the grey ones are everyone else the scope reaches. -->
+          <div id="what-reach" class="what-group">
+            <div id="what-reach-head" class="what-head">Who it applies to</div>
+            <div id="what-r1" class="what-row">
+              <span class="what-who">Just you</span>
+              <span class="what-dots"><i class="you"></i></span>
+            </div>
+            <div id="what-r2" class="what-row">
+              <span class="what-who">Everyone on the project</span>
+              <span class="what-dots"><i class="you"></i><i></i><i></i><i></i><i></i></span>
+            </div>
+            <div id="what-r3" class="what-row">
+              <span class="what-who">Your whole organization</span>
+              <span class="what-dots"><i class="you"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            </div>
+          </div>
+
+          <div id="what-source">Source: code.claude.com/docs/en/settings</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const V = window.__vo
+          const S = V.scenes.what[0]
+          // When a phrase is said: its share of the line's characters, from the line's exact start.
+          const at = (id, words) => {
+            const [s, e, say] = V.lines[id]
+            const i = words ? say.indexOf(words) : 0
+            if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+            return s - S + (i / say.length) * (e - s)
+          }
+          const tl = gsap.timeline({ paused: true })
+          const rise = { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
+          const pop = { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }
+
+          // Frame 0 is the poster: the title is already in place, everything else waits for its words.
+          tl.fromTo("#what-layers .what-head", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, at("l01") - 0.1)
+          ;[["#what-t1", "setting"], ["#what-t2", "rule"], ["#what-t3", "skill"], ["#what-t4", "agent"]].forEach(([el, word]) => {
+            tl.fromTo(el, { opacity: 0, scale: 0.9 }, pop, at("l01", word))
+          })
+
+          tl.fromTo("#what-sub", { opacity: 0, y: 20 }, rise, at("l02"))
+          tl.fromTo("#what-reach-head", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, at("l02", "who"))
+          ;[["#what-r1", "just you"], ["#what-r2", "everyone"], ["#what-r3", "your whole"]].forEach(([row, words]) => {
+            const t = at("l02", words)
+            // The whole row arrives, rule included, so no empty rules wait on screen.
+            tl.fromTo(row, { opacity: 0, y: 24 }, rise, t)
+            tl.fromTo(`${row} .what-dots i`, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.02 }, t + 0.15)
+          })
+          tl.fromTo("#what-source", { opacity: 0 }, { opacity: 1, duration: 0.5 }, at("l01", "skill"))
+
+          tl.to("#what-stage", { opacity: 0, duration: 0.3, ease: "power1.in" }, V.scenes.what[1] - S - 0.3)
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

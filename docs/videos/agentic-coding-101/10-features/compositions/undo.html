@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>10-features · undo</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-undo { position: absolute; inset: 0; }
+
+        #u-title { left: 120px; top: 196px; }
+        #u-keys { left: 120px; top: 310px; width: 1680px; display: flex; align-items: center; gap: 18px; }
+        #u-restore { left: 120px; top: 410px; width: 1680px; }
+        #u-tags { display: flex; gap: 16px; padding: 22px 0 0 28px; }
+        #u-limits { left: 120px; top: 600px; width: 1680px; }
+        #u-limits .k-row { justify-content: flex-start; height: 96px; padding-left: 28px; }
+        .u-what { display: block; width: 520px; }
+      </style>
+
+      <div id="root" data-composition-id="undo" data-width="1920" data-height="1080">
+        <div id="stage-undo">
+          <div class="k-step">3 / 5 · Undo</div>
+
+          <h2 id="u-title" class="k-abs k-title">Undo: rewind</h2>
+          <div id="u-keys" class="k-abs"><span id="u-k1" class="k-tag">Esc Esc</span><span id="u-or" class="k-dim" style="display: inline">or</span><span id="u-k2" class="k-tag">/rewind</span></div>
+          <div id="u-restore" class="k-abs">
+            <div id="u-restore-head" class="k-head"><span style="padding-left: 28px">Restore</span></div>
+            <div id="u-tags"><span id="u-t1" class="k-tag">The code</span><span id="u-t2" class="k-tag">The conversation</span><span id="u-t3" class="k-tag">Both</span></div>
+          </div>
+          <div id="u-limits" class="k-abs">
+            <div id="u-limits-head" class="k-head"><span style="padding-left: 28px">Know its limits</span></div>
+            <div id="u-r1" class="k-row"><span class="u-what k-name">Shell-only changes</span><span class="k-dim">A file only shell commands changed isn't tracked</span></div>
+            <div id="u-r2" class="k-row"><span class="u-what k-name">Not version control</span><span class="k-dim">Keep using git for real history</span></div>
+            <div id="u-r3" class="k-row"><span class="u-what k-name">Survives a resume</span><span class="k-dim">Checkpoints are saved with the conversation</span></div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/checkpointing</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "undo")
+          const at = k.at
+
+          k.title("#u-title")
+          k.pop("#u-k1", at("l06", "escape twice"))
+          k.fade("#u-or", at("l06", "or type"))
+          k.pop("#u-k2", at("l06", "slash rewind"))
+          k.fade("#u-restore-head", at("l06", "to restore"))
+          k.pop("#u-t1", at("l06", "the code"))
+          k.pop("#u-t2", at("l06", "the conversation"))
+          k.pop("#u-t3", at("l06", "or both"))
+          k.fade("#u-limits-head", at("l07"))
+          k.rise("#u-r1", at("l07", "only shell"))
+          k.rise("#u-r2", at("l07", "no replacement"))
+          k.rise("#u-r3", at("l07b"))
+          k.exit("#stage-undo")
+          window.__timelines["undo"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

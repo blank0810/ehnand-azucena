@@ -1,0 +1,26 @@
+/* Scene kit for clips 03 to 10: shared type and record styles, inlined into each
+   clip's index.html by shell.mjs. Scenes add only positions, so every clip reads
+   as one system (Production Trace tokens, IBM Plex, 28 px floor). */
+.k-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+.k-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+.k-abs { position: absolute; }
+.k-title-xl { font-weight: 620; font-size: 84px; line-height: 1.02; letter-spacing: -0.03em; }
+.k-title { font-weight: 620; font-size: 60px; line-height: 1.1; letter-spacing: -0.025em; }
+.k-sub { font-size: 34px; line-height: 1.35; color: #4e5763; }
+.k-body { font-size: 32px; line-height: 1.35; }
+.k-head { display: flex; justify-content: space-between; padding-bottom: 14px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+.k-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #d0d5db; }
+.k-name { display: block; font-weight: 600; font-size: 36px; letter-spacing: -0.015em; }
+.k-dim { display: block; font-size: 28px; line-height: 1.3; color: #4e5763; }
+.k-tag { display: inline-block; padding: 4px 12px; background: #e8ebef; font: 500 28px/1.3 "Plex Mono", monospace; color: #15191f; }
+.k-label { font: 600 28px/1 "Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #164bc5; }
+.k-cobalt { color: #164bc5; }
+.k-mark { position: absolute; width: 6px; background: #164bc5; }
+/* A real file on screen: name bar, then the text exactly as it would be on disk. */
+.k-file { background: #ffffff; border: 2px solid #d0d5db; }
+.k-file-name { padding: 12px 24px; border-bottom: 2px solid #d0d5db; font: 500 28px/1.2 "Plex Mono", monospace; color: #4e5763; }
+.k-code { margin: 0; padding: 18px 24px; white-space: pre; font: 400 28px/1.5 "Plex Mono", monospace; color: #15191f; }
+.k-code b { font-weight: 600; color: #164bc5; }
+.k-code i { font-style: normal; color: #4e5763; }
+.k-code span { display: block; }
+.k-num { font: 600 30px/1 "Plex Mono", monospace; color: #164bc5; }

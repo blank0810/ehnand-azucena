@@ -1,0 +1,44 @@
+---
+// A section's narrated clip, placed in MDX as <Clip id="scopes" />. Press to
+// play (no autoplay, no bytes until then), captions on by default, and the
+// transcript one disclosure away for anyone who would rather read.
+import {
+  articleVideo,
+  clockDuration,
+  videoPaths,
+  videoTranscript,
+} from "@/lib/article-videos"
+
+interface Props {
+  id: string
+}
+
+const slug = Astro.url.pathname.split("/").filter(Boolean).at(-1) ?? ""
+const video = articleVideo(slug, Astro.props.id)
+const paths = videoPaths(slug, video)
+const transcript = videoTranscript(slug, video)
+---
+
+<div class="article-clip">
+  <figure>
+    <video
+      controls
+      preload="none"
+      playsinline
+      width="1920"
+      height="1080"
+      poster={paths.poster}
+      aria-label={`Video: ${video.title}`}
+    >
+      <source src={paths.mp4} type="video/mp4" />
+      <track kind="captions" src={paths.vtt} srclang="en" label="English" default />
+    </video>
+    <figcaption class="mono-label">
+      Video version of this section · {clockDuration(video.seconds)} · AI-narrated voice
+    </figcaption>
+  </figure>
+  <details class="article-clip__transcript">
+    <summary>Read the transcript</summary>
+    {transcript.map((paragraph) => <p>{paragraph}</p>)}
+  </details>
+</div>

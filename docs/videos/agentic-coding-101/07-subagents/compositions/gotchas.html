@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>07-subagents · gotchas</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-gotchas { position: absolute; inset: 0; }
+
+        #g-left { left: 120px; top: 196px; width: 900px; }
+        #g-left .k-row { height: 100px; padding-left: 28px; }
+        #g-left .k-dim { width: 380px; }
+        #g-when { left: 120px; top: 760px; width: 900px; }
+        #g-when .k-dim { margin-top: 12px; }
+        #g-when-label { line-height: 1.35; }
+        #g-right { left: 1100px; top: 196px; width: 700px; }
+        #g-right .k-row { height: 104px; padding-left: 28px; }
+        .g-head { margin-top: 30px; }
+      </style>
+
+      <div id="root" data-composition-id="gotchas" data-width="1920" data-height="1080">
+        <div id="stage-gotchas">
+          <div class="k-step">4 / 4 · Gotchas</div>
+
+          <div id="g-left" class="k-abs">
+            <h2 id="g-t1" class="k-title">The costs</h2>
+            <div id="g-h1" class="k-head g-head"><span style="padding-left: 28px">Cost</span><span style="width: 380px">So</span></div>
+            <div id="g-r1" class="k-row"><span class="k-name">Summaries lose detail</span><span class="k-dim">You see only what it reports</span></div>
+            <div id="g-r2" class="k-row"><span class="k-name">More tokens overall</span><span class="k-dim">Each builds its own context</span></div>
+            <div id="g-r3" class="k-row"><span class="k-name">It knows nothing yet</span><span class="k-dim">Give it a full brief</span></div>
+          </div>
+          <div id="g-when" class="k-abs">
+            <div id="g-when-label" class="k-label">Use one when a side task would flood the conversation</div>
+            <span id="g-when-dim" class="k-dim">The setup behind this series now defaults to the main session.</span>
+          </div>
+          <div id="g-right" class="k-abs">
+            <h2 id="g-t2" class="k-title">Codex</h2>
+            <div id="g-h2" class="k-head g-head"><span style="padding-left: 28px">Custom agents</span></div>
+            <div id="g-c1" class="k-row"><span class="k-tag">config.toml</span><span class="k-dim">Defined in TOML</span></div>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/sub-agents, developers.openai.com/codex/subagents</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "gotchas")
+          const at = k.at
+
+          k.title("#g-t1")
+          k.fade("#g-h1", at("l11") - 0.2)
+          k.rise("#g-r1", at("l11"))
+          k.rise("#g-r2", at("l12"))
+          k.rise("#g-r3", at("l12b"))
+          k.slide("#g-when-label", at("l13"))
+          k.fade("#g-when-dim", at("l13", "The setup behind"))
+          k.title("#g-t2", at("l14"))
+          k.fade("#g-h2", at("l14") + 0.3)
+          k.rise("#g-c1", at("l14", "defined"))
+          window.__timelines["gotchas"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

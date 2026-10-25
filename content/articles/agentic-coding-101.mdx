@@ -1,0 +1,206 @@
+---
+title: "Agentic Coding 101"
+seoTitle: "Agentic Coding 101: Rules, Skills, Hooks and MCP"
+date: 2026-10-25
+draft: false
+category: "AI & Automation"
+tags: [agentic-coding, ai-assisted-development, claude-code, codex, workflow]
+summary: "What a coding agent is and the seven layers that shape it, from rules files to skills, hooks, subagents, MCP and plugins, explained with Claude Code and the Codex equivalents. Ten narrated clips of about 90 seconds, plus the two checks my own setup failed when I had to explain it."
+---
+
+import Clip from "@/components/articles/ArticleClip.astro"
+
+On 14 October 2026 I presented a field guide to agentic coding to the team I was about to leave. Researching it meant checking my own setup against the official documentation, line by line, and the setup failed two checks. Its guard hooks were configured only in an example settings file, so they had never run once. Its instructions file had grown to 1,025 lines, where the documentation recommends staying under 200.
+
+Neither problem showed up in daily use. Both showed up the moment I had to explain the setup to someone else.
+
+**Everyone rents the same model. The setup around it is the part you build, and the part you have to check.**
+
+This is the public version of that field guide, which I describe in [Leaving ClouDesk](https://ehnand.com/articles/leaving-cloudesk). It starts with what a coding agent is, then builds up the setup around it one layer at a time: where settings live, rules files, commands, skills, hooks, subagents, MCP servers and plugins. Claude Code is the main example, and each section names the Codex equivalent, because the ideas carry across tools.
+
+Each section has a narrated clip of about 90 seconds, with captions on and a transcript underneath. The voice is AI-generated (Kokoro, voice af_heart), the music is "Minimal Tech Ambient" by Good_B_Music from Pixabay, and every claim on screen lists the documentation page it came from. The text stands on its own if you would rather read.
+
+A setup is a set of decisions written down. This repository's instructions open with one: every Node, Astro and pnpm command runs through Docker Compose, never on the host. Keep that line in mind. It is a rule, the agent reads it as a request, and the hooks section shows what it takes to make it a guarantee.
+
+## What a coding agent is
+
+A coding agent is a model that uses tools in a loop. Give it a task and it gathers context, takes an action, checks the result, and goes round again until the task is done. It reads files, runs commands and edits code. Autocomplete suggests the next line and a chatbot answers in a window, but neither acts on your project.
+
+Before you type a word, the agent's context window is already filling: system instructions, your rules file, saved memory, a short description of every skill, and the names of your MCP tools. Then come your prompt and everything the agent reads and runs. When the window fills, old tool output is cleared first and then the conversation is summarized. Context is the budget, and every layer below spends some of it.
+
+You can step in at any point. `Esc` stops the agent, and a typed correction is read before its next step. Risky actions are checked before they run: in manual mode the agent asks you, and in auto mode a classifier blocks them. That approval step is a gate built for a person, and [a gate built for a person waits forever where no person is](https://ehnand.com/articles/person-gates-hang-unattended-jobs) if the agent runs unattended.
+
+For about three months, from 8 July to 27 September 2026, I split this loop between two agents: one planned and reviewed, the other wrote the code. I retired that split. One agent in one session now does both, and I review the result. Codex, Cursor, Gemini CLI and GitHub Copilot all run the same loop under their own names.
+
+<Clip id="coding-agent" />
+
+## Scopes: where each piece of the setup lives
+
+Every setting, rule, skill and agent lives at a scope, and the scope decides who it applies to. Claude Code has four settings scopes:
+
+| Scope | File | Who it affects |
+|---|---|---|
+| Managed | `managed-settings.json` | Everyone your organization deploys it to |
+| Project local | `.claude/settings.local.json` | You, in this project only |
+| Shared project | `.claude/settings.json` | Everyone in the project, once committed |
+| User | `~/.claude/settings.json` | You, in every project |
+
+When two disagree, the more specific one wins, and managed settings override them all. A file passed with `claude --settings` ranks just below managed. Lists such as permission rules merge across files rather than replacing each other.
+
+The same split runs through every layer: a `CLAUDE.md` for you and one for the project, skills and agents under `~/.claude/` or the project's `.claude/`, and MCP servers in your user config or a committed `.mcp.json`. The rule of thumb is short. If it is true in every repository, it goes in user scope. If a teammate needs it, it goes in the project.
+
+One trap: Claude Code keeps `settings.local.json` out of git only when it creates the file. Make one by hand and you have to add it to `.gitignore` yourself. Codex keeps the same split, with `~/.codex/config.toml` for you and `.codex/config.toml` in the project, and it ignores the project's `.codex` folder until you trust the project.
+
+<Clip id="scopes" />
+
+## Rules files: CLAUDE.md and AGENTS.md
+
+A rules file is plain Markdown the agent reads at the start of every session. Claude Code calls it `CLAUDE.md`; Codex and many other agents read `AGENTS.md`. Put in it what you would tell a new teammate: build commands, conventions, where things live, and what never to do.
+
+Rules load from broad to specific: the organization's file, then yours, then the project's, then a subfolder's once the agent works there. They are combined, not replaced, and the closest one is read last. All of it is sent with every request, so every line costs context every time.
+
+```markdown
+# Project rules
+@AGENTS.md
+
+- Use pnpm, not npm.
+- Run the tests before committing.
+```
+
+The `@AGENTS.md` line imports the file other tools already read. A rule in `.claude/rules/` can carry a `paths` field so it loads only when the agent touches matching files. Keep the whole thing under 200 lines: longer files cost more context and get followed less, and imports organize a file without shrinking it, because imported files load too. If two rules contradict each other the agent may pick either, which is the strongest argument for pruning. My 1,025-line file was all of these problems at once. Codex reads `AGENTS.md` and stops adding files at 32 KiB by default.
+
+<Clip id="rules" />
+
+## Commands: saved prompts behind a slash
+
+A command is a saved prompt you run by typing a slash and its name. The built-in ones run the session itself: `/clear` starts a new conversation, `/compact` summarizes it to free context, `/context` shows what is loaded, and `/model` switches models.
+
+Your own commands are now part of skills. A file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both give you `/deploy`, and whatever you type after the name arrives as `$ARGUMENTS`. Setting `disable-model-invocation: true` in the frontmatter means only you can run it, which is what you want for anything with side effects. You do not want an agent deciding to deploy because the code looks ready. Until you run it, its description stays out of context entirely.
+
+The signal to make one is typing the same opening prompt again. Codex has its own built-ins, such as `/init`, `/review` and `/model`; its custom prompts are deprecated, so for your own commands in Codex, write a skill.
+
+<Clip id="commands" />
+
+## Skills: know-how the agent loads when it needs it
+
+A skill is a folder with a `SKILL.md` inside: a name, a description and instructions, plus optional scripts and reference files. Skills follow the open [Agent Skills](https://agentskills.io) standard, so Claude Code and Codex read the same format.
+
+They load in stages. At session start only each skill's name and description are in context. When a task matches the description, or you type its name, the full instructions load, and scripts or references load only when the instructions call for them. A long list of skills costs one description each until one is used.
+
+The clips in this article were built with a video skill, and it carried rules I would not have thought to write down: the first frame becomes the thumbnail, so the title must be on screen from frame zero, and text under 28 pixels gets flagged. None of that was in a prompt. The description is the trigger, so write it as "Use when" and the situation, and keep it short, because every description costs context on every request. When you paste the same playbook a third time, make it a skill. Codex reads skills from `.agents/skills`, and you call one by typing `$` and its name.
+
+<Clip id="skills" />
+
+## Hooks: the only layer that enforces
+
+A hook is your own code that runs at a set point in the agent's lifecycle, every time. No model decides whether it runs, which makes hooks the only layer that enforces anything. Claude Code has 33 hook events, from session start to session end, and a hook can be a shell command, an HTTP call, an MCP tool, a prompt or another agent. Hooks from every scope all fire; none overrides another.
+
+This one runs before every shell command and blocks a force push:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{ "type": "command", "command": ".claude/hooks/no-force-push.sh" }]
+    }]
+  }
+}
+```
+
+```sh
+#!/bin/sh
+cmd=$(jq -r .tool_input.command)
+case "$cmd" in
+  *"push --force"*|*"push -f"*)
+    echo "Force push is blocked." >&2
+    exit 2 ;;
+esac
+```
+
+Exit code 2 before a tool runs blocks the tool, and the agent reads the reason and changes course. "Never edit `.env`" in a rules file is a request; a hook that blocks the edit is a guarantee. This repository's Docker-only rule is the same kind of request, and a `PreToolUse` hook that refuses `pnpm` on the host would make it a guarantee.
+
+But prove a hook fires. Mine sat in an example file and never ran, and nothing in daily use told me so. Trigger each one once on purpose. Hooks cost no context unless they print something. Codex has hooks too, in `hooks.json`, with a smaller set of events.
+
+<Clip id="hooks" />
+
+## Subagents: side tasks in their own context
+
+A subagent is a separate worker with its own context, tools and instructions, and it hands back only a summary. If a question means reading forty files, a subagent reads them in its own window and returns ten lines, and your context barely moves. Claude Code ships with Explore, Plan and a general-purpose agent; your own go in `.claude/agents/`.
+
+This portfolio has one, `article-writer`, a Markdown file with a description, the tools it may use and the house rules for every article. Its description says when to hand off, so the main agent knows when to call it.
+
+The costs are real. Summaries lose detail and you see only what the subagent chose to report, which is the same problem as [an AI implementer's sandbox being your verification boundary](https://ehnand.com/articles/implementer-sandbox-verification-boundary): whatever it could not check, its report will not mention. Each subagent also builds its own context, so the total spend goes up, and it starts fresh, so it needs a full brief. Use one when a side task would flood the conversation, not by default. My own setup now defaults to the main session. Codex supports custom agents too, defined in TOML.
+
+<Clip id="subagents" />
+
+## MCP: plugging outside systems in as tools
+
+MCP, the Model Context Protocol, is an open standard for plugging outside systems into an agent as tools: a browser, a database, your docs, a search engine. The agent talks to an MCP server, and the server talks to the system, either on your machine or remotely over HTTP. Only tool names load at session start; full definitions load when a tool is needed, so adding servers barely touches your context. Servers have scopes too: local first, then the project's `.mcp.json`, then your user config.
+
+The facts in these clips were checked with a web search and scraping server. It fetched the official documentation for each claim, and the wording was compared before a line of narration was written. When the server hit its free daily limit partway through, the remaining pages came straight from the documentation sites. Without either, an agent works from what it remembers, which can be out of date.
+
+Each server is a new set of permissions, so add only what you trust. Large tool results land in your context and count against it. A server gives access; pair it with a skill for the know-how. Codex configures servers under `[mcp_servers]` in `config.toml`, and the same servers work in both.
+
+<Clip id="mcp" />
+
+## Plugins, and four worth installing
+
+A plugin bundles skills, commands, hooks, subagents and MCP servers into one install, from a marketplace. Install one with `/plugin install name@marketplace`; its skills arrive with the plugin's name in front, such as `/superpowers:brainstorming`. A plugin can be on for you alone or for everyone in the repository through its committed settings.
+
+| Plugin | Layer | What it does |
+|---|---|---|
+| superpowers | Skills | Brainstorm, plan, test first, debug, verify. This article was planned with its brainstorming skill. |
+| playwright | MCP | A real browser the agent drives, such as your dev server at phone width, then a screenshot. |
+| security-guidance | Hooks | Warns about risky patterns as files change, and reviews the diff when the agent stops. |
+| claude-code-setup | Skill | Reads your repository and recommends automations for each layer, without changing anything. |
+
+I ran claude-code-setup on this repository while making the clips. It suggested a hook that enforces the Docker-only rule, and a `/verify` skill that runs the repository's five Docker checks in one command.
+
+A plugin loads into every session and can run code on your machine, so read its hooks before you install it, and install only what you use, because every skill description costs context. The signal to build your own is a second repository needing the same setup. Codex has plugins too, shared with ChatGPT.
+
+<Clip id="plugins" />
+
+## Feature highlights: steer, undo, inspect, run in parallel
+
+The layers shape the agent; a few features shape each session.
+
+- **Steer.** `Shift+Tab` cycles the permission modes: auto, manual, accept edits and plan. Auto is the default in the terminal, with a classifier blocking risky actions instead of asking. Plan mode explores and writes a plan without touching your source files until you approve it.
+- **Undo.** Press `Esc` twice or run `/rewind` to restore the code, the conversation or both. It will not undo a file that only shell commands changed, and it is no replacement for git.
+- **Inspect.** `/context` shows what loaded and what each part costs, and `/doctor` checks your installation, settings and rules files. Check both before you blame the model.
+- **Run in parallel.** `claude --worktree <name>` gives each session its own checkout, so parallel work does not collide. Then subagents for side tasks, agent view to watch background sessions, and agent teams, still experimental, for agents that coordinate.
+
+Parallel sessions in one checkout need more than good intentions: when [several AI coding agents shared one checkout](https://ehnand.com/articles/parallel-ai-agents-locks-not-agreements), every agreement between them failed and the lock did not. Codex has the same ideas, with `/permissions` for approvals and the sandbox and `/review` for a second look at your changes.
+
+<Clip id="features" />
+
+## Which agentic coding layer should I use?
+
+Most setups go wrong by using a strong layer for a weak problem, or the reverse. Start from the symptom:
+
+| Symptom | Layer | Context cost |
+|---|---|---|
+| The agent gets a convention wrong twice | Rules file | Every request |
+| You type the same opening prompt again | Command | None until used, if user-only |
+| You paste the same playbook a third time | Skill | A description per request |
+| You copy data from a tab the agent can't see | MCP | Tool names only |
+| A side task floods the conversation | Subagent | Kept separate |
+| Something must happen every time | Hook | Zero unless it prints |
+| A second repository needs the same setup | Plugin | The sum of its parts |
+
+## What to actually do
+
+1. Start with one rules file under 200 lines, and add a rule only after the agent gets something wrong twice.
+2. Put anything that must always hold in a hook, then trigger it once on purpose to prove it fires.
+3. Run `/context` at the start of a session and check what actually loaded.
+4. Turn the third repeat of a playbook into a skill with a "Use when" description.
+5. Use subagents for side tasks that would flood the conversation, not by default.
+6. Read a plugin's hooks before installing it, and install only what you use.
+
+## The takeaway
+
+A setup you can't explain is a setup you haven't checked. Mine looked fine in daily use, with hooks that never ran and a rules file five times the recommended length, and it only failed when I had to describe it to someone else. Explain yours to someone, or to a document, before you trust it.
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. I build with coding agents on production systems, including the [Serverless ERP Backend](https://ehnand.com/projects/serverless-erp-backend) and the [Water Billing System](https://ehnand.com/projects/water-billing-system). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

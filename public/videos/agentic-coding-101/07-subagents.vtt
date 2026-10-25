@@ -1,0 +1,64 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:05.464
+A subagent is a separate worker, with its own context, tools and instructions.
+
+00:00:05.814 --> 00:00:08.801
+It does a side task and hands back only a summary.
+
+00:00:10.201 --> 00:00:12.611
+Say a question means reading forty files.
+
+00:00:12.961 --> 00:00:16.247
+In the main conversation, all forty would fill your context.
+
+00:00:16.597 --> 00:00:20.189
+Hand it to a subagent, and it reads them in its own window,
+
+00:00:20.189 --> 00:00:21.589
+then returns ten lines.
+
+00:00:21.939 --> 00:00:26.696
+It starts fresh, without your conversation's history, so your context barely moves.
+
+00:00:27.046 --> 00:00:31.784
+Claude Code ships with Explore, Plan, and a general-purpose agent.
+
+00:00:31.784 --> 00:00:33.937
+Your own go in .claude/agents.
+
+00:00:34.287 --> 00:00:36.454
+You can also ask for one directly:
+
+00:00:36.454 --> 00:00:39.897
+use a subagent to find every place the config is read.
+
+00:00:41.297 --> 00:00:44.135
+This portfolio has one called article writer.
+
+00:00:44.485 --> 00:00:48.087
+It's a Markdown file with a description, the tools it may use,
+
+00:00:48.087 --> 00:00:52.677
+and the house rules for every article: the structure, the tone, and the checks.
+
+00:00:53.027 --> 00:00:57.357
+Its description says when to hand off, so the main agent knows when to call it.
+
+00:00:58.757 --> 00:01:02.448
+Summaries lose detail, and you only see what it chose to report.
+
+00:01:02.798 --> 00:01:07.897
+It also spends more tokens overall, because each subagent builds its own context.
+
+00:01:08.247 --> 00:01:12.065
+It can't see what you've already read or decided, so give it a full brief.
+
+00:01:12.415 --> 00:01:17.041
+So use one when a side task would flood the conversation, not by default.
+
+00:01:17.041 --> 00:01:20.970
+The setup behind this series now defaults to the main session.
+
+00:01:21.320 --> 00:01:24.627
+Codex supports custom agents too, defined in TOML.

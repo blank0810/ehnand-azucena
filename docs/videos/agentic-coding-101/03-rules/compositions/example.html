@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>03-rules · example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-example { position: absolute; inset: 0; }
+
+        #e-title { left: 120px; top: 196px; }
+        #e-main { left: 120px; top: 300px; width: 860px; }
+        #e-rule { left: 1060px; top: 300px; width: 740px; }
+        #e-note { left: 1060px; top: 650px; width: 740px; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="stage-example">
+          <div class="k-step">3 / 4 · Example</div>
+
+          <h2 id="e-title" class="k-abs k-title">A short rules file</h2>
+          <div id="e-main" class="k-abs k-file">
+            <div class="k-file-name">CLAUDE.md</div>
+            <pre class="k-code"><span id="e-l1"><i># Project rules</i></span><span id="e-l2"><b>@AGENTS.md</b></span><span id="e-l3"> </span><span id="e-l4">- Use pnpm, not npm.</span><span id="e-l5">- Run the tests before committing.</span></pre>
+          </div>
+          <div id="e-rule" class="k-abs k-file">
+            <div class="k-file-name">.claude/rules/api.md</div>
+            <pre class="k-code"><span>---</span><span><b>paths:</b></span><span>  - "src/api/**"</span><span>---</span><span>- Validate every input.</span><span>- Use the shared error format.</span></pre>
+          </div>
+          <p id="e-note" class="k-abs k-dim">Loads only when the agent reads or edits a file under src/api/.</p>
+          <div class="k-source">Source: code.claude.com/docs/en/memory</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "example")
+          const at = k.at
+
+          k.title("#e-title")
+          k.fade("#e-main", at("l08"))
+          k.lines("#e-l1", at("l08") + 0.3)
+          k.lines("#e-l4", at("l09", "use pnpm"))
+          k.lines("#e-l5", at("l09", "run the tests"))
+          k.lines("#e-l2", at("l10", "import"))
+          k.fade("#e-rule", at("l11"))
+          k.lines("#e-rule .k-code span", at("l11") + 0.3, 0.1)
+          k.rise("#e-note", at("l11", "so it loads"))
+          k.exit("#stage-example")
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>08-mcp · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 700px; }
+        #w-label { left: 900px; top: 252px; }
+        #w-sys { left: 900px; top: 320px; width: 900px; }
+        #w-who { left: 900px; top: 600px; width: 900px; }
+        .w-tags { display: flex; flex-wrap: wrap; gap: 16px; padding: 24px 0 0 28px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 4 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">Outside systems, plugged in as tools</h1>
+          <div id="w-label" class="k-abs k-label">Model Context Protocol, an open standard</div>
+          <div id="w-sys" class="k-abs">
+            <div id="w-sys-head" class="k-head"><span style="padding-left: 28px">For example</span></div>
+            <div class="w-tags"><span id="w-t1" class="k-tag">A browser</span><span id="w-t2" class="k-tag">A database</span><span id="w-t3" class="k-tag">Your docs</span><span id="w-t4" class="k-tag">A search engine</span></div>
+          </div>
+          <div id="w-who" class="k-abs">
+            <div id="w-who-head" class="k-head"><span style="padding-left: 28px">Supported by</span></div>
+            <div class="w-tags"><span id="w-a1" class="k-tag">Claude Code</span><span id="w-a2" class="k-tag">Codex</span><span id="w-a3" class="k-tag">Cursor</span><span id="w-a4" class="k-tag">Many others</span></div>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/mcp, modelcontextprotocol.io</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.slide("#w-label", at("l01", "Model Context"))
+          k.fade("#w-sys-head", at("l02") - 0.2)
+          ;[["#w-t1", "browser"], ["#w-t2", "database"], ["#w-t3", "docs"], ["#w-t4", "search"]].forEach(([el, w]) => k.pop(el, at("l02", w)))
+          k.fade("#w-who-head", at("l03") - 0.2)
+          ;[["#w-a1", "Claude Code"], ["#w-a2", "Codex"], ["#w-a3", "Cursor"], ["#w-a4", "many others"]].forEach(([el, w]) => k.pop(el, at("l03", w)))
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

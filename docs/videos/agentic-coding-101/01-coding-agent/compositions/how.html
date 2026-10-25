@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>01 What a coding agent is · scene 2, how it works</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Same faces as the host; the paths resolve from index.html, where scenes are assembled. */
+        @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+        #root { position: absolute; inset: 0; font-family: "Plex Sans", sans-serif; color: #15191f; }
+        #how-stage { position: absolute; inset: 0; }
+        #how-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #how-title { position: absolute; left: 120px; top: 196px; font-weight: 620; font-size: 60px; line-height: 1.1; letter-spacing: -0.025em; }
+        #how-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+        .how-tag { display: block; padding: 6px 14px; background: #e8ebef; font: 500 28px/1.2 "Plex Mono", monospace; color: #15191f; }
+
+        /* The loop: stations on a commissioning rail, with the way back drawn above it. */
+        #how-svg { position: absolute; left: 0; top: 0; }
+        #how-task { position: absolute; left: 120px; top: 400px; }
+        #how-done { position: absolute; left: 1700px; top: 400px; }
+        .how-node { position: absolute; top: 406px; width: 28px; height: 28px; margin-left: -14px; background: #f6f7f8; border: 3px solid #87919d; }
+        .how-node b { position: absolute; inset: -3px; background: #164bc5; }
+        .how-label { position: absolute; top: 456px; width: 380px; margin-left: -190px; text-align: center; }
+        .how-label strong { display: block; font-weight: 600; font-size: 36px; letter-spacing: -0.015em; }
+        .how-label span { display: block; margin-top: 6px; font-size: 28px; line-height: 1.25; color: #4e5763; }
+        #how-again { position: absolute; left: 700px; top: 296px; width: 440px; text-align: center; font: 500 28px/1 "Plex Mono", monospace; color: #164bc5; }
+
+        .how-box { position: absolute; top: 700px; width: 780px; }
+        #how-steer { left: 120px; }
+        #how-risk { left: 1020px; }
+        .how-head { padding-bottom: 14px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        .how-row { display: flex; align-items: center; gap: 24px; height: 84px; border-bottom: 1px solid #d0d5db; }
+        .how-row .how-tag { width: 240px; text-align: center; }
+        .how-key { display: block; width: 240px; font-weight: 600; font-size: 32px; }
+        .how-says { display: block; font-size: 30px; line-height: 1.25; }
+      </style>
+
+      <div id="root" data-composition-id="how" data-width="1920" data-height="1080">
+        <div id="how-stage">
+          <div id="how-step">2 / 4 · How it works</div>
+          <h2 id="how-title">The agent loop</h2>
+
+          <svg id="how-svg" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true">
+            <line id="how-rail" x1="290" y1="420" x2="1690" y2="420" stroke="#87919d" stroke-width="2" />
+            <line id="how-out" x1="1320" y1="420" x2="1690" y2="420" stroke="#164bc5" stroke-width="3" />
+            <path id="how-arc" d="M1320 404 C 1320 318, 480 318, 480 404" fill="none" stroke="#164bc5" stroke-width="3" />
+            <path id="how-head" d="M480 404 L470 386 L490 386 Z" fill="#164bc5" />
+          </svg>
+          <span id="how-task" class="how-tag">Your task</span>
+          <span id="how-done" class="how-tag">Done</span>
+          <div id="how-again">Not done? Go round again</div>
+
+          <div id="how-n1" class="how-node" style="left: 480px"><b></b></div>
+          <div id="how-n2" class="how-node" style="left: 900px"><b></b></div>
+          <div id="how-n3" class="how-node" style="left: 1320px"><b></b></div>
+          <div id="how-l1" class="how-label" style="left: 480px"><strong>Gather context</strong><span>Searches and reads files</span></div>
+          <div id="how-l2" class="how-label" style="left: 900px"><strong>Take action</strong><span>Edits code, runs commands</span></div>
+          <div id="how-l3" class="how-label" style="left: 1320px"><strong>Verify result</strong><span>Runs tests, checks output</span></div>
+
+          <div id="how-steer" class="how-box">
+            <div id="how-steer-head" class="how-head">Step in</div>
+            <div id="how-esc" class="how-row"><span class="how-tag">Esc</span><span class="how-says">Stops it now</span></div>
+            <div id="how-enter" class="how-row"><span class="how-tag">Type + Enter</span><span class="how-says">A correction it reads next</span></div>
+          </div>
+          <div id="how-risk" class="how-box">
+            <div id="how-risk-head" class="how-head">Risky actions</div>
+            <div id="how-manual" class="how-row"><span class="how-key">Manual mode</span><span class="how-says">Asks you first</span></div>
+            <div id="how-automode" class="how-row"><span class="how-key">Auto mode</span><span class="how-says">A classifier blocks them</span></div>
+          </div>
+
+          <div id="how-source">Source: code.claude.com/docs/en/how-claude-code-works</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const V = window.__vo
+          const S = V.scenes.how[0]
+          // When a phrase is said: its share of the line's characters, from the line's exact start.
+          const at = (id, words) => {
+            const [s, e, say] = V.lines[id]
+            const i = words ? say.indexOf(words) : 0
+            if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+            return s - S + (i / say.length) * (e - s)
+          }
+          const tl = gsap.timeline({ paused: true })
+          const rise = { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }
+          const fade = { opacity: 1, duration: 0.4 }
+          // A station lights while the agent is in that phase, then dims to a lit outline.
+          // Each station is lit twice, so every tween states both ends and none renders before its time.
+          const light = (k, t, hold = 0.9) => {
+            tl.fromTo(`#how-n${k} b`, { opacity: 0 }, { opacity: 1, duration: 0.15, immediateRender: false }, t)
+            tl.fromTo(`#how-n${k} b`, { opacity: 1 }, { opacity: 0, duration: 0.3, immediateRender: false }, t + hold)
+          }
+
+          tl.fromTo("#how-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 0.05)
+          tl.fromTo("#how-source", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.3)
+
+          // "Give it a task, and it works in three phases."
+          tl.fromTo("#how-task", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, at("l04", "a task"))
+          tl.fromTo("#how-rail", { opacity: 0 }, fade, at("l04", "a task") + 0.2)
+          ;[1, 2, 3].forEach((k) => tl.fromTo(`#how-n${k}`, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, at("l04", "three") + (k - 1) * 0.12))
+          tl.set("#how-n1 b, #how-n2 b, #how-n3 b", { opacity: 0 }, 0)
+
+          // First lap, each phase on its words; then the way back draws and a faster second lap runs.
+          const phases = [[1, "gathers"], [2, "takes action"], [3, "verifies"]]
+          phases.forEach(([k, words]) => {
+            tl.fromTo(`#how-l${k}`, { opacity: 0, y: 16 }, rise, at("l05", words))
+            light(k, at("l05", words))
+          })
+          const again = at("l05", "goes round")
+          const arcLength = 1100
+          tl.fromTo("#how-arc", { strokeDasharray: arcLength, strokeDashoffset: arcLength }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, again)
+          tl.fromTo("#how-head", { opacity: 0 }, { opacity: 1, duration: 0.2 }, again + 0.75)
+          tl.fromTo("#how-again", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, again + 0.3)
+          ;[1, 2, 3].forEach((k, i) => light(k, again + 0.9 + i * 0.35, 0.3))
+          const done = at("l05", "until the task is done")
+          tl.fromTo("#how-out", { strokeDasharray: 370, strokeDashoffset: 370 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, done)
+          tl.fromTo("#how-done", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, done + 0.4)
+          tl.to("#how-done", { backgroundColor: "#164bc5", color: "#ffffff", duration: 0.3 }, done + 0.8)
+
+          // "You can step in at any point."
+          tl.fromTo("#how-steer-head", { opacity: 0 }, fade, at("l06"))
+          tl.fromTo("#how-esc", { opacity: 0, y: 16 }, rise, at("l06", "Press escape"))
+          tl.fromTo("#how-enter", { opacity: 0, y: 16 }, rise, at("l06", "type a correction"))
+
+          // "Risky actions are checked before they run."
+          tl.fromTo("#how-risk-head", { opacity: 0 }, fade, at("l07"))
+          tl.fromTo("#how-manual", { opacity: 0, y: 16 }, rise, at("l07", "in manual mode"))
+          tl.fromTo("#how-automode", { opacity: 0, y: 16 }, rise, at("l07", "in auto mode"))
+
+          tl.to("#how-stage", { opacity: 0, duration: 0.3, ease: "power1.in" }, V.scenes.how[1] - S - 0.3)
+          window.__timelines["how"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>08-mcp · gotchas</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-gotchas { position: absolute; inset: 0; }
+
+        #g-left { left: 120px; top: 196px; width: 860px; }
+        #g-left .k-row { height: 110px; padding-left: 28px; }
+        #g-left .k-dim { width: 360px; }
+        #g-right { left: 1060px; top: 196px; width: 740px; }
+        #g-file { margin-top: 30px; }
+        #g-same { left: 1060px; top: 660px; width: 740px; }
+        .g-head { margin-top: 30px; }
+      </style>
+
+      <div id="root" data-composition-id="gotchas" data-width="1920" data-height="1080">
+        <div id="stage-gotchas">
+          <div class="k-step">4 / 4 · Gotchas</div>
+
+          <div id="g-left" class="k-abs">
+            <h2 id="g-t1" class="k-title">Before you add one</h2>
+            <div id="g-h1" class="k-head g-head"><span style="padding-left: 28px">Watch</span><span style="width: 360px">So</span></div>
+            <div id="g-r1" class="k-row"><span class="k-name">New permissions</span><span class="k-dim">Add only what you trust</span></div>
+            <div id="g-r2" class="k-row"><span class="k-name">Big results</span><span class="k-dim">They land in your context</span></div>
+            <div id="g-r3" class="k-row"><span class="k-name">Access isn't know-how</span><span class="k-dim">Pair the server with a skill</span></div>
+          </div>
+          <div id="g-right" class="k-abs">
+            <h2 id="g-t2" class="k-title">Codex</h2>
+            <div id="g-file" class="k-file">
+              <div class="k-file-name">~/.codex/config.toml</div>
+              <pre class="k-code"><span><b>[mcp_servers.playwright]</b></span><span>command = "npx"</span><span>args = ["@playwright/mcp@latest"]</span></pre>
+            </div>
+          </div>
+          <p id="g-same" class="k-abs k-dim">The same servers work in Claude Code and Codex.</p>
+          <div class="k-source">Sources: code.claude.com/docs/en/mcp, developers.openai.com/codex/mcp</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "gotchas")
+          const at = k.at
+
+          k.title("#g-t1")
+          k.fade("#g-h1", at("l11") - 0.2)
+          k.rise("#g-r1", at("l11"))
+          k.rise("#g-r2", at("l12"))
+          k.rise("#g-r3", at("l13"))
+          k.title("#g-t2", at("l14"))
+          k.rise("#g-file", at("l14", "under M C P"))
+          k.rise("#g-same", at("l14", "and the same"))
+          window.__timelines["gotchas"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

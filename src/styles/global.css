@@ -657,6 +657,47 @@ html:not([data-theme="dark"]) .theme-toggle__icon--dark {
   display: none;
 }
 
+/* A section's narrated clip: native controls, a ruled frame like the other
+   evidence images, and the transcript behind one disclosure. */
+.article-clip {
+  margin-block: 1.5rem 2rem;
+}
+
+.article-clip figure {
+  margin: 0;
+}
+
+.article-clip video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--rule-strong);
+  background: var(--image-surface);
+}
+
+.article-clip figcaption {
+  margin-top: 0.75rem;
+  color: var(--graphite-soft);
+}
+
+.article-clip__transcript {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.article-clip__transcript summary {
+  min-height: 2.75rem;
+  padding-block: 0.6rem;
+  color: var(--cobalt-dark);
+  font-weight: 500;
+}
+
+.article-clip__transcript p {
+  margin-top: 0.75rem;
+  color: var(--graphite-soft);
+}
+
 .overflow-region {
   overflow: auto;
   overscroll-behavior: contain;

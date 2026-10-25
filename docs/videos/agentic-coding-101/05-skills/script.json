@@ -1,0 +1,107 @@
+{
+  "id": "05-skills",
+  "chapter": 5,
+  "title": "Skills",
+  "rail": "Skills",
+  "sources": [
+    "https://code.claude.com/docs/en/skills",
+    "https://agentskills.io",
+    "https://developers.openai.com/codex/build-skills"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "A skill is a folder with a SKILL.md inside:|a name, a description, and instructions.",
+          "say": "A skill is a folder with a skill dot M D inside: a name, a description, and instructions."
+        },
+        {
+          "id": "l02",
+          "text": "It can carry scripts and reference files too."
+        },
+        {
+          "id": "l03",
+          "text": "Skills follow an open standard,|so Claude Code and Codex read the same format."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l04",
+          "text": "Skills load in stages."
+        },
+        {
+          "id": "l05",
+          "text": "At the start, only each skill's name and description are in context."
+        },
+        {
+          "id": "l06",
+          "text": "When a task matches the description, or you type its slash name,|the full instructions load."
+        },
+        {
+          "id": "l07",
+          "text": "Scripts and reference files load only when the instructions need them,|so a long list of skills costs little until one is used."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l08",
+          "text": "These clips were built with a video skill."
+        },
+        {
+          "id": "l09",
+          "text": "It carried rules that weren't obvious:|the first frame becomes the thumbnail, and text under twenty-eight pixels gets flagged."
+        },
+        {
+          "id": "l10",
+          "text": "None of that was in a prompt.|The skill loaded it when the task needed it."
+        },
+        {
+          "id": "l10b",
+          "text": "It also knew how to check and render each clip,|so that part never needed explaining."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l11",
+          "text": "The description is the trigger,|so write it as \"Use when\" and the situation."
+        },
+        {
+          "id": "l12",
+          "text": "Every description costs context on every request, so keep them short."
+        },
+        {
+          "id": "l13",
+          "text": "If a personal skill and a project skill share a name, the personal one wins."
+        },
+        {
+          "id": "l14",
+          "text": "When you paste the same playbook a third time, make it a skill."
+        },
+        {
+          "id": "l14b",
+          "text": "A long procedure can run in its own subagent,|so it doesn't flood your conversation."
+        },
+        {
+          "id": "l15",
+          "text": "Codex reads skills from .agents/skills,|and you call one by typing a dollar sign and its name.",
+          "say": "Codex reads skills from dot agents slash skills, and you call one by typing a dollar sign and its name."
+        }
+      ]
+    }
+  ]
+}

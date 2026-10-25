@@ -1,0 +1,107 @@
+{
+  "id": "02-scopes",
+  "chapter": 2,
+  "title": "Scopes",
+  "rail": "Scopes",
+  "sources": [
+    "https://code.claude.com/docs/en/settings",
+    "https://code.claude.com/docs/en/memory",
+    "https://code.claude.com/docs/en/skills",
+    "https://code.claude.com/docs/en/sub-agents",
+    "https://code.claude.com/docs/en/mcp",
+    "https://developers.openai.com/codex/config-file/config-basic",
+    "https://developers.openai.com/codex/config-file/config-advanced"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "Every setting, rule, skill and agent in your coding setup lives at a scope."
+        },
+        {
+          "id": "l02",
+          "text": "The scope decides who it applies to:|just you, everyone on the project, or your whole organization."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l03",
+          "text": "Claude Code has four settings scopes."
+        },
+        {
+          "id": "l04",
+          "text": "User settings, in your home .claude folder, follow you into every project.",
+          "say": "User settings, in your home dot claude folder, follow you into every project."
+        },
+        {
+          "id": "l05",
+          "text": "Shared project settings are committed to the repository,|so the whole team gets them."
+        },
+        {
+          "id": "l06",
+          "text": "Project local settings are yours alone, in one project."
+        },
+        {
+          "id": "l07",
+          "text": "When two disagree, the more specific scope wins,|and managed settings from your organization override them all."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l08",
+          "text": "The same split runs through every layer."
+        },
+        {
+          "id": "l09",
+          "text": "Rules: a CLAUDE.md for you, one for the project,|and a local one that stays on your machine.",
+          "say": "Rules: a Claude dot M D for you, one for the project, and a local one that stays on your machine."
+        },
+        {
+          "id": "l10",
+          "text": "Skills and agents: a folder in .claude, at home or in the project.",
+          "say": "Skills and agents: a folder in dot claude, at home or in the project."
+        },
+        {
+          "id": "l11",
+          "text": "MCP servers: your user config, or a .mcp.json the team commits.",
+          "say": "M C P servers: your user config, or a dot M C P dot JSON the team commits."
+        },
+        {
+          "id": "l12",
+          "text": "Rules files don't replace each other: they all load, broadest first.|Permission lists merge too."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l13",
+          "text": "Rule of thumb: if it's true in every repo, put it in user scope.|If a teammate needs it, put it in the project."
+        },
+        {
+          "id": "l14",
+          "text": "One trap: a local settings file you make by hand isn't ignored by git.|Add it to .gitignore yourself.",
+          "say": "One trap: a local settings file you make by hand isn't ignored by git. Add it to dot git ignore yourself."
+        },
+        {
+          "id": "l15",
+          "text": "Codex keeps the same split, with .codex at home and in the project,|and it skips the project's folder until you trust it.",
+          "say": "Codex keeps the same split, with dot codex at home and in the project, and it skips the project's folder until you trust it."
+        }
+      ]
+    }
+  ]
+}

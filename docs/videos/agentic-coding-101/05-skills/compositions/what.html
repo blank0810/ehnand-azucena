@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>05-skills · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 700px; }
+        #w-tree { left: 900px; top: 252px; width: 900px; }
+        #w-fields { left: 900px; top: 560px; width: 900px; }
+        #w-tags { display: flex; gap: 16px; padding: 24px 0 0 28px; }
+        #w-std { left: 900px; top: 760px; width: 900px; }
+        #w-std .k-dim { margin-top: 12px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 4 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">Know-how in a folder</h1>
+          <div id="w-tree" class="k-abs k-file">
+            <div class="k-file-name">.claude/skills/</div>
+            <pre class="k-code"><span id="w-l1">my-skill/</span><span id="w-l2">  <b>SKILL.md</b></span><span id="w-l3">  scripts/check.sh</span><span id="w-l4">  reference.md</span></pre>
+          </div>
+          <div id="w-fields" class="k-abs">
+            <div id="w-head" class="k-head"><span style="padding-left: 28px">SKILL.md holds</span></div>
+            <div id="w-tags"><span id="w-t1" class="k-tag">name</span><span id="w-t2" class="k-tag">description</span><span id="w-t3" class="k-tag">instructions</span></div>
+          </div>
+          <div id="w-std" class="k-abs">
+            <div id="w-std-label" class="k-label">An open standard</div>
+            <span id="w-std-dim" class="k-dim">Claude Code and Codex read the same format (agentskills.io)</span>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/skills, agentskills.io</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.fade("#w-tree", at("l01") - 0.2)
+          k.lines("#w-l1, #w-l2", at("l01", "folder"), 0.4)
+          k.fade("#w-head", at("l01", "inside"))
+          k.pop("#w-t1", at("l01", "a name"))
+          k.pop("#w-t2", at("l01", "a description"))
+          k.pop("#w-t3", at("l01", "instructions"))
+          k.lines("#w-l3", at("l02", "scripts"))
+          k.lines("#w-l4", at("l02", "reference"))
+          k.slide("#w-std-label", at("l03"))
+          k.fade("#w-std-dim", at("l03", "so Claude"))
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

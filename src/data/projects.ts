@@ -59,6 +59,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "submission-set-not-viewport",
     "implementer-sandbox-verification-boundary",
     "lookalike-instrument-correlated-error",
+    "agentic-coding-101",
   ],
   "swiss-energy-platform-suite": [
     "document-matching-strategies",
@@ -94,6 +95,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "approvals-expire-with-their-premise",
     "read-criterion-not-label",
     "leaving-cloudesk",
+    "agentic-coding-101",
   ],
   memberpulse: ["leaving-cloudesk"],
 }

@@ -1,0 +1,112 @@
+{
+  "id": "04-commands",
+  "chapter": 4,
+  "title": "Commands",
+  "rail": "Commands",
+  "sources": [
+    "https://code.claude.com/docs/en/commands",
+    "https://code.claude.com/docs/en/skills",
+    "https://developers.openai.com/codex/custom-prompts"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "A command is a saved prompt behind a slash."
+        },
+        {
+          "id": "l02",
+          "text": "Type a slash and its name, and the agent runs it."
+        },
+        {
+          "id": "l03",
+          "text": "Built-in ones run the session itself: /clear starts fresh, /compact summarizes,|/context shows what's loaded, and /model switches models.",
+          "say": "Built-in ones run the session itself: slash clear starts fresh, slash compact summarizes, slash context shows what's loaded, and slash model switches models."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l04",
+          "text": "Your own commands are now part of skills."
+        },
+        {
+          "id": "l05",
+          "text": "A file at .claude/commands/deploy.md and a skill at .claude/skills/deploy|both give you /deploy.",
+          "say": "A file at dot claude slash commands slash deploy dot M D, and a skill at dot claude slash skills slash deploy, both give you slash deploy."
+        },
+        {
+          "id": "l06",
+          "text": "Whatever you type after the name arrives as $ARGUMENTS,|so /deploy staging passes the word staging.",
+          "say": "Whatever you type after the name arrives as dollar arguments, so slash deploy staging passes the word staging."
+        },
+        {
+          "id": "l06b",
+          "text": "Put one in your home .claude folder instead, and it follows you into every project.",
+          "say": "Put one in your home dot claude folder instead, and it follows you into every project."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l07",
+          "text": "Here's that deploy command."
+        },
+        {
+          "id": "l08",
+          "text": "Its frontmatter sets disable-model-invocation to true,|so only you can trigger it.",
+          "say": "Its frontmatter sets disable model invocation to true, so only you can trigger it."
+        },
+        {
+          "id": "l08b",
+          "text": "Its body is just the steps, in plain words:|build, run the checks, then deploy to the environment you named."
+        },
+        {
+          "id": "l09",
+          "text": "You don't want an agent deciding to deploy because the code looks ready."
+        },
+        {
+          "id": "l10",
+          "text": "And until you run it, its description stays out of context entirely."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l11",
+          "text": "The signal to make one: you've typed the same opening prompt again."
+        },
+        {
+          "id": "l12",
+          "text": "Commit it to the project's .claude folder, and the whole team gets the same command.",
+          "say": "Commit it to the project's dot claude folder, and the whole team gets the same command."
+        },
+        {
+          "id": "l13",
+          "text": "Keep anything with side effects, like deploys and commits, manual."
+        },
+        {
+          "id": "l14",
+          "text": "Codex has its own built-ins, like /init, /review and /model.",
+          "say": "Codex has its own built-ins, like slash init, slash review and slash model."
+        },
+        {
+          "id": "l15",
+          "text": "Its custom prompts are deprecated,|so for your own commands in Codex, write a skill."
+        }
+      ]
+    }
+  ]
+}

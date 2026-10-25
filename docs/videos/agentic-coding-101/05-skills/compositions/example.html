@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>05-skills · example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-example { position: absolute; inset: 0; }
+
+        #e-title { left: 120px; top: 196px; }
+        #e-shot { left: 120px; top: 300px; width: 804px; }
+        #e-shot img { display: block; width: 800px; height: 450px; }
+        #e-cap { left: 120px; top: 780px; width: 804px; }
+        #e-rules { left: 1040px; top: 300px; width: 760px; }
+        #e-rules .k-row { display: block; height: auto; padding: 22px 0 22px 28px; }
+        #e-rules .k-dim { margin-top: 6px; }
+        #e-loaded { left: 1040px; top: 700px; width: 760px; }
+        #e-loaded .k-dim { margin-top: 12px; }
+        #e-also { left: 1040px; top: 850px; width: 760px; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="stage-example">
+          <div class="k-step">3 / 4 · Example</div>
+
+          <h2 id="e-title" class="k-abs k-title">Rules from a video skill</h2>
+          <div id="e-shot" class="k-abs k-file"><img src="assets/frame0-02-scopes.png" alt="The first frame of clip 02, showing its title" /></div>
+          <p id="e-cap" class="k-abs k-dim">Frame 0 of clip 02: the title is already on screen, because that frame is the thumbnail.</p>
+          <div id="e-rules" class="k-abs">
+            <div id="e-head" class="k-head"><span style="padding-left: 28px">Rules it carried</span></div>
+            <div id="e-r1" class="k-row"><span class="k-name">Frame 0 is the thumbnail</span><span class="k-dim">So the title shows from the first frame</span></div>
+            <div id="e-r2" class="k-row"><span class="k-name">No text under 28 px</span><span class="k-dim">Smaller text gets flagged by its check</span></div>
+          </div>
+          <div id="e-loaded" class="k-abs">
+            <div id="e-loaded-label" class="k-label">Not in any prompt</div>
+            <span id="e-loaded-dim" class="k-dim">The skill loaded it when the task needed it.</span>
+          </div>
+          <p id="e-also" class="k-abs k-dim">It also carried how to check and render each clip.</p>
+          <div class="k-source">Source: hyperframes.heygen.com (the video skill behind this series)</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "example")
+          const at = k.at
+
+          k.title("#e-title")
+          k.fade("#e-head", at("l08", "video skill"))
+          k.rise("#e-r1", at("l09", "the first frame"))
+          k.fade("#e-shot", at("l09", "the first frame"))
+          k.fade("#e-cap", at("l09", "thumbnail"))
+          k.rise("#e-r2", at("l09", "and text"))
+          k.slide("#e-loaded-label", at("l10"))
+          k.fade("#e-loaded-dim", at("l10", "The skill loaded"))
+          k.rise("#e-also", at("l10b"))
+          k.exit("#stage-example")
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>09-plugins · how</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-how { position: absolute; inset: 0; }
+
+        #h-title { left: 120px; top: 196px; }
+        #h-cmd { left: 120px; top: 290px; width: 1000px; }
+        #h-name { left: 1180px; top: 300px; width: 620px; }
+        #h-name .k-dim { margin-top: 14px; }
+        #h-scope { left: 120px; top: 560px; width: 1680px; }
+        #h-scope .k-row { height: 100px; padding-left: 28px; justify-content: flex-start; }
+        .h-who { display: block; width: 520px; }
+      </style>
+
+      <div id="root" data-composition-id="how" data-width="1920" data-height="1080">
+        <div id="stage-how">
+          <div class="k-step">2 / 4 · How it works</div>
+
+          <h2 id="h-title" class="k-abs k-title">Install, then use</h2>
+          <div id="h-cmd" class="k-abs k-file">
+            <div class="k-file-name">Prompt</div>
+            <pre class="k-code"><span>/plugin install <b>superpowers</b>@superpowers-marketplace</span></pre>
+          </div>
+          <div id="h-name" class="k-abs">
+            <span id="h-tag" class="k-tag">/superpowers:brainstorming</span>
+            <span id="h-tag-dim" class="k-dim">Its skills carry the plugin's name</span>
+          </div>
+          <div id="h-scope" class="k-abs">
+            <div id="h-scope-head" class="k-head"><span style="padding-left: 28px; width: 548px">Turned on for</span><span style="flex: 1">Recorded in</span></div>
+            <div id="h-s1" class="k-row"><span class="h-who k-name">You alone</span><span class="k-tag">~/.claude/settings.json</span></div>
+            <div id="h-s2" class="k-row"><span class="h-who k-name">Everyone in the repository</span><span class="k-tag">.claude/settings.json</span><span class="k-dim">committed</span></div>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/discover-plugins, /plugins</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "how")
+          const at = k.at
+
+          k.title("#h-title")
+          k.rise("#h-cmd", at("l03"))
+          k.pop("#h-tag", at("l04", "like slash"))
+          k.fade("#h-tag-dim", at("l04", "name in front"))
+          k.fade("#h-scope-head", at("l04b"))
+          k.rise("#h-s1", at("l04b", "for you alone"))
+          k.rise("#h-s2", at("l04b", "or for everyone"))
+          k.exit("#stage-how")
+          window.__timelines["how"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Agentic Coding 101 · 02 Scopes</title>
+    <!-- GSAP 3.14.2 from the npm tarball, sha512 checked against the registry; no CDN at render time. -->
+    <script src="assets/vendor/gsap-3.14.2.min.js"></script>
+    <!-- window.__vo: line and scene windows, generated from script.json by shared/voice.mjs. -->
+    <script src="assets/timing.js"></script>
+    <style>
+      @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+      @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+      @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+      /* Production Trace, light theme (DESIGN.md). Amber is live status only, so it is absent here. */
+      :root {
+        --paper: #f6f7f8;
+        --graphite: #15191f;
+        --graphite-soft: #4e5763;
+        --rule-strong: #87919d;
+        --cobalt: #164bc5;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--paper); font-family: "Plex Sans", sans-serif; color: var(--graphite); }
+
+      /* Shared shell: the commissioning rail names the chapter; the trace on it is clip progress. */
+      #shell { position: absolute; inset: 0; }
+      #rail { position: absolute; left: 120px; top: 58px; width: 1680px; display: flex; justify-content: space-between; border-top: 1px solid var(--rule-strong); padding-top: 18px; }
+      #rail span { font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--graphite-soft); }
+      #rail span.on { color: var(--cobalt); font-weight: 600; }
+      #trace { position: absolute; left: 120px; top: 56px; width: 1680px; height: 3px; background: var(--cobalt); transform-origin: 0 50%; }
+      #eyebrow { position: absolute; left: 120px; top: 136px; font: 600 28px/1 "Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cobalt); }
+      .scene { position: absolute; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="85.9" data-width="1920" data-height="1080">
+      <div id="shell">
+        <div id="rail">
+          <span>01</span><span class="on">02 Scopes</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span>
+        </div>
+        <div id="trace"></div>
+        <div id="eyebrow">Agentic Coding 101</div>
+      </div>
+
+
+      <div id="what" class="scene" data-composition-id="what" data-composition-src="compositions/what.html" data-start="0" data-duration="12.045" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="how" class="scene" data-composition-id="how" data-composition-src="compositions/how.html" data-start="12.045" data-duration="23.42" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="example" class="scene" data-composition-id="example" data-composition-src="compositions/example.html" data-start="35.465" data-duration="26.727" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="gotchas" class="scene" data-composition-id="gotchas" data-composition-src="compositions/gotchas.html" data-start="62.192" data-duration="23.708" data-track-index="1" data-width="1920" data-height="1080"></div>
+
+      <audio id="narration" src="assets/vo/mix.wav" data-start="0" data-duration="85.899" data-track-index="3" data-volume="1"></audio>
+    </div>
+    <script>
+      ;(() => {
+        const tl = gsap.timeline({ paused: true })
+        // The trace fills once over the whole clip, the way a commissioning run advances.
+        tl.fromTo("#trace", { scaleX: 0 }, { scaleX: 1, duration: 85.9, ease: "none" }, 0)
+        window.__timelines["main"] = tl
+      })()
+    </script>
+  </body>
+</html>

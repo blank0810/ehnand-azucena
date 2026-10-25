@@ -1,0 +1,76 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:05.784
+A hook is your own code that runs at a set point in the agent's lifecycle, every time.
+
+00:00:06.134 --> 00:00:08.175
+No model decides whether it runs.
+
+00:00:08.175 --> 00:00:11.019
+That makes hooks the only layer that enforces.
+
+00:00:11.369 --> 00:00:15.380
+Use them for what must always happen: blocking, formatting, logging.
+
+00:00:16.780 --> 00:00:20.511
+The lifecycle has points like session start, prompt submitted,
+
+00:00:20.511 --> 00:00:23.159
+before a tool runs, after it runs, and stop.
+
+00:00:23.509 --> 00:00:25.407
+Claude Code has thirty-three of them.
+
+00:00:25.757 --> 00:00:31.773
+A hook can be a shell command, an HTTP call, an MCP tool, a prompt, or another agent.
+
+00:00:32.123 --> 00:00:35.793
+Before a tool runs, a command that exits with code two blocks it.
+
+00:00:36.143 --> 00:00:40.857
+Each hook receives the event as JSON, like the exact command about to run.
+
+00:00:41.207 --> 00:00:45.197
+And hooks from every scope all fire. They add up; they don't override.
+
+00:00:45.547 --> 00:00:48.256
+Run /hooks to see every hook that's configured.
+
+00:00:49.656 --> 00:00:51.875
+This one runs before every shell command.
+
+00:00:52.225 --> 00:00:54.009
+If the command is a force push,
+
+00:00:54.009 --> 00:00:56.598
+it prints the reason and exits with code two.
+
+00:00:56.948 --> 00:00:58.319
+The push never happens,
+
+00:00:58.319 --> 00:01:01.300
+and the agent reads the reason and changes course.
+
+00:01:01.650 --> 00:01:04.406
+The same pattern can block edits to secrets,
+
+00:01:04.406 --> 00:01:06.599
+or format a file after every write.
+
+00:01:07.999 --> 00:01:10.967
+A rule that says never edit .env is a request.
+
+00:01:10.967 --> 00:01:13.354
+A hook that blocks it is a guarantee.
+
+00:01:13.704 --> 00:01:16.916
+But prove it fires. In the setup behind this series,
+
+00:01:16.916 --> 00:01:20.189
+the guard hooks sat in an example file and never ran.
+
+00:01:20.539 --> 00:01:23.313
+Hooks cost no context unless they print something.
+
+00:01:23.663 --> 00:01:28.164
+Codex has hooks too, in hooks.json, with a smaller set of events.

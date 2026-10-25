@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>06-hooks · how</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-how { position: absolute; inset: 0; }
+
+        #h-title { left: 120px; top: 196px; }
+        #h-count { right: 120px; top: 256px; }
+        #h-rail { left: 210px; top: 409px; width: 1500px; height: 2px; background: #87919d; }
+        .h-node { position: absolute; top: 396px; width: 28px; height: 28px; margin-left: -14px; background: #f6f7f8; border: 3px solid #87919d; }
+        .h-label { position: absolute; top: 444px; width: 290px; margin-left: -145px; text-align: center; }
+        .h-label .k-name { font-size: 32px; }
+        #h-gate { left: 810px; top: 352px; width: 290px; margin-left: -145px; text-align: center; }
+        #h-types { left: 120px; top: 640px; width: 900px; }
+        #h-tags { display: flex; gap: 16px; padding: 24px 0 0 28px; }
+        #h-merge { left: 120px; top: 840px; width: 1680px; }
+        #h-merge .k-dim { margin-top: 12px; }
+        #h-merge { width: 900px; }
+        #h-json { left: 1080px; top: 640px; width: 720px; }
+        #h-list { left: 1080px; top: 846px; width: 720px; }
+        #h-list .k-dim { margin-top: 10px; }
+      </style>
+
+      <div id="root" data-composition-id="how" data-width="1920" data-height="1080">
+        <div id="stage-how">
+          <div class="k-step">2 / 4 · How it works</div>
+
+          <h2 id="h-title" class="k-abs k-title">Points in the lifecycle</h2>
+          <div id="h-count" class="k-abs k-label">33 events in Claude Code</div>
+          <div id="h-rail" class="k-abs"></div>
+          <div id="h-n0" class="h-node" style="left: 210px"></div>
+          <div id="h-l0" class="h-label" style="left: 210px"><span class="k-name">Session start</span><span class="k-dim">SessionStart</span></div>
+          <div id="h-n1" class="h-node" style="left: 510px"></div>
+          <div id="h-l1" class="h-label" style="left: 510px"><span class="k-name">Prompt</span><span class="k-dim">UserPromptSubmit</span></div>
+          <div id="h-n2" class="h-node" style="left: 810px"></div>
+          <div id="h-l2" class="h-label" style="left: 810px"><span class="k-name">Before tool</span><span class="k-dim">PreToolUse</span></div>
+          <div id="h-n3" class="h-node" style="left: 1110px"></div>
+          <div id="h-l3" class="h-label" style="left: 1110px"><span class="k-name">Tool runs</span><span class="k-dim"></span></div>
+          <div id="h-n4" class="h-node" style="left: 1410px"></div>
+          <div id="h-l4" class="h-label" style="left: 1410px"><span class="k-name">After tool</span><span class="k-dim">PostToolUse</span></div>
+          <div id="h-n5" class="h-node" style="left: 1710px"></div>
+          <div id="h-l5" class="h-label" style="left: 1710px"><span class="k-name">Stop</span><span class="k-dim">Stop</span></div>
+          <div id="h-gate" class="k-abs k-label">Exit 2 blocks</div>
+          <div id="h-types" class="k-abs">
+            <div id="h-types-head" class="k-head"><span style="padding-left: 28px">A hook can be</span></div>
+            <div id="h-tags"><span id="h-t1" class="k-tag">command</span><span id="h-t2" class="k-tag">http</span><span id="h-t3" class="k-tag">mcp_tool</span><span id="h-t4" class="k-tag">prompt</span><span id="h-t5" class="k-tag">agent</span></div>
+          </div>
+          <div id="h-merge" class="k-abs">
+            <div id="h-merge-label" class="k-label">Every scope fires</div>
+            <span id="h-merge-dim" class="k-dim">Hooks from user, project and plugins add up. None overrides another.</span>
+          </div>
+          <div id="h-json" class="k-abs k-file">
+            <div class="k-file-name">What the hook receives</div>
+            <pre class="k-code"><span>"tool_input": {"command": "git push -f"}</span></pre>
+          </div>
+          <div id="h-list" class="k-abs">
+            <span id="h-list-tag" class="k-tag">/hooks</span>
+            <span id="h-list-dim" class="k-dim">Lists every configured hook</span>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/hooks</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "how")
+          const at = k.at
+
+          k.title("#h-title")
+          k.fade("#h-rail", at("l04"))
+          ;[["0", "session start"], ["1", "prompt submitted"], ["2", "before a tool"], ["3", "after it runs"], ["4", "after it runs"], ["5", "and stop"]].forEach(([i, w], n) => {
+            const t = at("l04", w) + (n === 4 ? 0.3 : 0)
+            tl.fromTo(`#h-n${i}`, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, t)
+            k.rise(`#h-l${i}`, t, 14)
+          })
+          k.slide("#h-count", at("l05"), 20)
+          k.fade("#h-types-head", at("l06"))
+          ;[["#h-t1", "shell command"], ["#h-t2", "H T T P"], ["#h-t3", "M C P"], ["#h-t4", "a prompt"], ["#h-t5", "another agent"]].forEach(([el, w]) => k.pop(el, at("l06", w)))
+          tl.to("#h-n2", { backgroundColor: "#164bc5", borderColor: "#164bc5", duration: 0.3 }, at("l07"))
+          k.rise("#h-gate", at("l07", "exits with code two"), 12)
+          k.slide("#h-merge-label", at("l08"))
+          k.fade("#h-merge-dim", at("l08", "They add up"))
+          k.rise("#h-json", at("l07b"))
+          k.pop("#h-list-tag", at("l08b", "slash hooks"))
+          k.fade("#h-list-dim", at("l08b", "to see"))
+          k.exit("#stage-how")
+          window.__timelines["how"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>01 What a coding agent is · scene 3, example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Same faces as the host; the paths resolve from index.html, where scenes are assembled. */
+        @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+        #root { position: absolute; inset: 0; font-family: "Plex Sans", sans-serif; color: #15191f; }
+        #ex-stage { position: absolute; inset: 0; }
+        #ex-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #ex-title { position: absolute; left: 120px; top: 196px; font-weight: 620; font-size: 60px; line-height: 1.1; letter-spacing: -0.025em; }
+        #ex-scale { position: absolute; right: 120px; top: 256px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+        #ex-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+
+        /* The context window as one bar, filled left to right in load order. Widths are illustrative. */
+        #ex-bar { position: absolute; left: 120px; top: 300px; width: 1680px; height: 94px; display: flex; gap: 2px; border: 2px solid #15191f; background: #ffffff; overflow: hidden; }
+        .ex-seg { display: block; height: 100%; flex: none; transform-origin: 0 50%; }
+        #ex-s1, .ex-c1 { background: rgba(22, 75, 197, 1); }
+        #ex-s2, .ex-c2 { background: rgba(22, 75, 197, 0.78); }
+        #ex-s3, .ex-c3 { background: rgba(22, 75, 197, 0.58); }
+        #ex-s4, .ex-c4 { background: rgba(22, 75, 197, 0.42); }
+        #ex-s5, .ex-c5 { background: rgba(22, 75, 197, 0.28); }
+        #ex-s6, .ex-c6 { background: #15191f; }
+        #ex-s7, .ex-c7 { background: #87919d; }
+        #ex-summary { position: absolute; left: 932px; top: 302px; width: 200px; height: 90px; display: flex; align-items: center; justify-content: center; background: #4e5763; font: 500 28px/1 "Plex Mono", monospace; color: #ffffff; }
+
+        .ex-legend { position: absolute; top: 440px; width: 800px; }
+        #ex-col1 { left: 120px; }
+        #ex-col2 { left: 1000px; }
+        .ex-row { display: flex; align-items: center; gap: 22px; height: 86px; border-bottom: 1px solid #d0d5db; }
+        .ex-sw { display: block; flex: none; width: 26px; height: 26px; }
+        .ex-sws { display: flex; gap: 4px; }
+        .ex-row strong { display: block; font-weight: 600; font-size: 32px; letter-spacing: -0.01em; }
+        .ex-row small { display: block; margin-top: 2px; font-size: 28px; line-height: 1.2; color: #4e5763; }
+        .ex-row code { font: 500 28px/1 "Plex Mono", monospace; color: #15191f; }
+
+        #ex-full { position: absolute; left: 120px; top: 760px; width: 1680px; }
+        #ex-full-head { padding-bottom: 14px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #ex-full-steps { display: flex; gap: 80px; height: 90px; align-items: center; }
+        .ex-n { display: flex; align-items: baseline; gap: 18px; font-size: 32px; }
+        .ex-n b { font: 600 30px/1 "Plex Mono", monospace; color: #164bc5; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="ex-stage">
+          <div id="ex-step">3 / 4 · Example</div>
+          <h2 id="ex-title">Filled before your first word</h2>
+          <div id="ex-scale">Illustrative, not to scale</div>
+
+          <div id="ex-bar">
+            <i id="ex-s1" class="ex-seg" style="width: 230px"></i>
+            <i id="ex-s2" class="ex-seg" style="width: 150px"></i>
+            <i id="ex-s3" class="ex-seg" style="width: 110px"></i>
+            <i id="ex-s4" class="ex-seg" style="width: 180px"></i>
+            <i id="ex-s5" class="ex-seg" style="width: 130px"></i>
+            <i id="ex-s6" class="ex-seg" style="width: 90px"></i>
+            <i id="ex-s7" class="ex-seg" style="width: 560px"></i>
+          </div>
+          <div id="ex-summary">Summary</div>
+
+          <div id="ex-col1" class="ex-legend">
+            <div id="ex-r1" class="ex-row"><i class="ex-sw ex-c1"></i><span><strong>System instructions</strong><small>Built into the agent</small></span></div>
+            <div id="ex-r2" class="ex-row"><i class="ex-sw ex-c2"></i><span><strong>Your rules file</strong><small><code>CLAUDE.md</code>, sent with every request</small></span></div>
+            <div id="ex-r3" class="ex-row"><i class="ex-sw ex-c3"></i><span><strong>Saved memory</strong><small>The start of <code>MEMORY.md</code>, up to 200 lines</small></span></div>
+          </div>
+          <div id="ex-col2" class="ex-legend">
+            <div id="ex-r4" class="ex-row"><i class="ex-sw ex-c4"></i><span><strong>Skill descriptions</strong><small>One short description per skill</small></span></div>
+            <div id="ex-r5" class="ex-row"><i class="ex-sw ex-c5"></i><span><strong>MCP tool names</strong><small>Full schemas load only when needed</small></span></div>
+            <div id="ex-r6" class="ex-row"><span class="ex-sws"><i class="ex-sw ex-c6"></i><i class="ex-sw ex-c7"></i></span><span><strong>Your prompt, then the work</strong><small>Files it reads, commands it runs</small></span></div>
+          </div>
+
+          <div id="ex-full">
+            <div id="ex-full-head">When it fills up</div>
+            <div id="ex-full-steps">
+              <span id="ex-f1" class="ex-n"><b>1</b>Old tool output is cleared first</span>
+              <span id="ex-f2" class="ex-n"><b>2</b>Then the conversation is summarized</span>
+            </div>
+          </div>
+
+          <div id="ex-source">Sources: code.claude.com/docs/en/how-claude-code-works, /context-window, /memory</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const V = window.__vo
+          const S = V.scenes.example[0]
+          // When a phrase is said: its share of the line's characters, from the line's exact start.
+          const at = (id, words) => {
+            const [s, e, say] = V.lines[id]
+            const i = words ? say.indexOf(words) : 0
+            if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+            return s - S + (i / say.length) * (e - s)
+          }
+          const tl = gsap.timeline({ paused: true })
+          const rise = { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }
+          const fill = { scaleX: 1, duration: 0.5, ease: "power2.out" }
+
+          tl.fromTo("#ex-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 0.05)
+          tl.fromTo("#ex-source", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.3)
+          tl.fromTo("#ex-bar", { opacity: 0 }, { opacity: 1, duration: 0.4 }, at("l08", "context window"))
+          tl.fromTo("#ex-scale", { opacity: 0 }, { opacity: 1, duration: 0.4 }, at("l08", "context window") + 0.3)
+          // The bar starts empty; segments are re-owned by several tweens below, so none renders early.
+          tl.set(".ex-seg", { scaleX: 0 }, 0)
+          tl.set("#ex-summary", { opacity: 0 }, 0)
+
+          // Each part fills its share of the bar as it is named, with its legend row.
+          ;[[1, "System instructions"], [2, "Your Claude dot M D"], [3, "Saved memory"], [4, "description of every skill"], [5, "names of your M C P"]].forEach(([k, words]) => {
+            tl.fromTo(`#ex-s${k}`, { scaleX: 0 }, { ...fill, immediateRender: false }, at("l09", words))
+            tl.fromTo(`#ex-r${k}`, { opacity: 0, y: 16 }, rise, at("l09", words))
+          })
+          tl.fromTo("#ex-s6", { scaleX: 0 }, { ...fill, immediateRender: false }, at("l10", "your prompt"))
+          tl.fromTo("#ex-r6", { opacity: 0, y: 16 }, rise, at("l10", "your prompt"))
+          tl.fromTo("#ex-s7", { scaleX: 0 }, { scaleX: 1, duration: 1.6, ease: "power1.inOut", immediateRender: false }, at("l10", "everything it reads"))
+
+          // "When the window gets full": the work fills the rest, then compaction gives space back.
+          tl.fromTo("#ex-s7", { scaleX: 1 }, { scaleX: 1.38, duration: 0.8, ease: "power2.in", immediateRender: false }, at("l11"))
+          tl.fromTo("#ex-full-head", { opacity: 0 }, { opacity: 1, duration: 0.4 }, at("l11"))
+          tl.fromTo("#ex-s7", { scaleX: 1.38 }, { scaleX: 0.45, duration: 0.6, ease: "power3.out", immediateRender: false }, at("l11", "old tool output"))
+          tl.fromTo("#ex-f1", { opacity: 0, y: 16 }, rise, at("l11", "old tool output"))
+          const summed = at("l11", "then the conversation")
+          tl.fromTo(["#ex-s6", "#ex-s7"], { opacity: 1 }, { opacity: 0, duration: 0.4, immediateRender: false }, summed)
+          tl.fromTo("#ex-summary", { opacity: 0, scaleX: 0.6, transformOrigin: "0% 50%" }, { opacity: 1, scaleX: 1, duration: 0.45, ease: "power3.out", immediateRender: false }, summed + 0.1)
+          tl.fromTo("#ex-f2", { opacity: 0, y: 16 }, rise, summed)
+
+          tl.to("#ex-stage", { opacity: 0, duration: 0.3, ease: "power1.in" }, V.scenes.example[1] - S - 0.3)
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

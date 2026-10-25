@@ -1,0 +1,102 @@
+{
+  "id": "07-subagents",
+  "chapter": 7,
+  "title": "Subagents",
+  "rail": "Subagents",
+  "sources": [
+    "https://code.claude.com/docs/en/sub-agents",
+    "https://developers.openai.com/codex/subagents"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "A subagent is a separate worker, with its own context, tools and instructions."
+        },
+        {
+          "id": "l02",
+          "text": "It does a side task and hands back only a summary."
+        }
+      ]
+    },
+    {
+      "id": "how",
+      "label": "How it works",
+      "lines": [
+        {
+          "id": "l03",
+          "text": "Say a question means reading forty files."
+        },
+        {
+          "id": "l04",
+          "text": "In the main conversation, all forty would fill your context."
+        },
+        {
+          "id": "l05",
+          "text": "Hand it to a subagent, and it reads them in its own window,|then returns ten lines."
+        },
+        {
+          "id": "l06",
+          "text": "It starts fresh, without your conversation's history, so your context barely moves."
+        },
+        {
+          "id": "l07",
+          "text": "Claude Code ships with Explore, Plan, and a general-purpose agent.|Your own go in .claude/agents.",
+          "say": "Claude Code ships with Explore, Plan, and a general purpose agent. Your own go in dot claude slash agents."
+        },
+        {
+          "id": "l07b",
+          "text": "You can also ask for one directly:|use a subagent to find every place the config is read."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "label": "Example",
+      "lines": [
+        {
+          "id": "l08",
+          "text": "This portfolio has one called article writer."
+        },
+        {
+          "id": "l09",
+          "text": "It's a Markdown file with a description, the tools it may use,|and the house rules for every article: the structure, the tone, and the checks."
+        },
+        {
+          "id": "l10",
+          "text": "Its description says when to hand off, so the main agent knows when to call it."
+        }
+      ]
+    },
+    {
+      "id": "gotchas",
+      "label": "Gotchas and other agents",
+      "lines": [
+        {
+          "id": "l11",
+          "text": "Summaries lose detail, and you only see what it chose to report."
+        },
+        {
+          "id": "l12",
+          "text": "It also spends more tokens overall, because each subagent builds its own context."
+        },
+        {
+          "id": "l12b",
+          "text": "It can't see what you've already read or decided, so give it a full brief."
+        },
+        {
+          "id": "l13",
+          "text": "So use one when a side task would flood the conversation, not by default.|The setup behind this series now defaults to the main session."
+        },
+        {
+          "id": "l14",
+          "text": "Codex supports custom agents too, defined in TOML.",
+          "say": "Codex supports custom agents too, defined in toml."
+        }
+      ]
+    }
+  ]
+}

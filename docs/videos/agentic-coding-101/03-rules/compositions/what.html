@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>03-rules · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 700px; }
+        #w-names { left: 900px; top: 252px; width: 900px; }
+        #w-names .k-row { height: 110px; padding-left: 28px; }
+        #w-names .k-dim { width: 420px; }
+        #w-what { left: 900px; top: 600px; width: 900px; }
+        #w-tags { display: flex; flex-wrap: wrap; gap: 16px; padding: 26px 0 0 28px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 4 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">Plain Markdown, read every session</h1>
+          <div id="w-names" class="k-abs">
+            <div id="w-head" class="k-head"><span style="padding-left: 28px">File</span><span style="width: 420px">Read by</span></div>
+            <div id="w-r1" class="k-row"><span class="k-tag">CLAUDE.md</span><span class="k-dim">Claude Code</span></div>
+            <div id="w-r2" class="k-row"><span class="k-tag">AGENTS.md</span><span class="k-dim">Codex and many other agents</span></div>
+          </div>
+          <div id="w-what" class="k-abs">
+            <div id="w-what-head" class="k-head"><span style="padding-left: 28px">What goes in it</span></div>
+            <div id="w-tags">
+              <span id="w-t1" class="k-tag">Build commands</span><span id="w-t2" class="k-tag">Conventions</span><span id="w-t3" class="k-tag">Where things live</span><span id="w-t4" class="k-tag">What never to do</span>
+            </div>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/memory</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.fade("#w-head", at("l02") - 0.2)
+          k.rise("#w-r1", at("l02", "Claude dot"))
+          k.rise("#w-r2", at("l02", "Codex"))
+          k.fade("#w-what-head", at("l03", "new teammate"))
+          k.pop("#w-t1", at("l03", "build commands"))
+          k.pop("#w-t2", at("l03", "conventions"))
+          k.pop("#w-t3", at("l03", "where things"))
+          k.pop("#w-t4", at("l03", "what never"))
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

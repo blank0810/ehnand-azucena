@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>01 What a coding agent is · scene 1, what it is</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Same faces as the host; the paths resolve from index.html, where scenes are assembled. */
+        @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+        #root { position: absolute; inset: 0; font-family: "Plex Sans", sans-serif; color: #15191f; }
+        #what-stage { position: absolute; inset: 0; }
+        /* Which of the four scenes is playing, so a viewer can find their place in the series. */
+        #what-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #what-title { position: absolute; left: 120px; top: 300px; width: 680px; font-weight: 620; font-size: 84px; line-height: 1.02; letter-spacing: -0.03em; }
+        #what-sub { position: absolute; left: 120px; top: 560px; width: 640px; font-size: 34px; line-height: 1.35; color: #4e5763; }
+        #what-tools { position: absolute; left: 120px; top: 700px; display: flex; gap: 16px; }
+        #what-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+        .what-tag { display: block; padding: 8px 16px; background: #e8ebef; font: 500 30px/1.2 "Plex Mono", monospace; color: #15191f; }
+
+        .what-group { position: absolute; left: 900px; width: 900px; }
+        .what-head { display: flex; justify-content: space-between; padding: 0 0 14px 28px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #what-kinds { top: 252px; }
+        .what-row { position: relative; display: flex; justify-content: space-between; align-items: center; height: 128px; padding-left: 28px; border-bottom: 1px solid #d0d5db; }
+        .what-name { position: relative; display: block; font-weight: 600; font-size: 40px; letter-spacing: -0.015em; }
+        .what-does { display: block; width: 400px; font-size: 30px; line-height: 1.3; color: #4e5763; }
+        /* "It isn't": a rule struck through the name. */
+        .what-strike { position: absolute; left: -4px; right: -4px; top: 52%; height: 3px; background: #4e5763; transform-origin: 0 50%; }
+        #what-agent .what-name { color: #164bc5; }
+        #what-agent .what-does { color: #15191f; }
+        #what-mark { position: absolute; left: 900px; top: 552px; width: 6px; height: 127px; background: #164bc5; }
+
+        #what-where { top: 760px; }
+        #what-where-tags { display: flex; gap: 16px; padding: 24px 0 0 28px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="what-stage">
+          <div id="what-step">1 / 4 · What it is</div>
+          <h1 id="what-title">A model using tools in a loop</h1>
+          <p id="what-sub">It picks its own tools, from your prompt and from what it learns along the way.</p>
+          <div id="what-tools">
+            <span class="what-tag">Read</span><span class="what-tag">Edit</span><span class="what-tag">Bash</span><span class="what-tag">WebSearch</span>
+          </div>
+
+          <div id="what-kinds" class="what-group">
+            <div id="what-kinds-head" class="what-head"><span>Kind of tool</span><span style="width: 400px">What it does</span></div>
+            <div id="what-auto" class="what-row">
+              <span class="what-name">Autocomplete<i class="what-strike"></i></span>
+              <span class="what-does">Suggests the next line</span>
+            </div>
+            <div id="what-chat" class="what-row">
+              <span class="what-name">Chatbot<i class="what-strike"></i></span>
+              <span class="what-does">Answers in a chat window</span>
+            </div>
+            <div id="what-agent" class="what-row">
+              <span class="what-name">Coding agent</span>
+              <span class="what-does">Reads files, runs commands, edits code</span>
+            </div>
+          </div>
+          <div id="what-mark"></div>
+
+          <div id="what-where" class="what-group">
+            <div id="what-where-head" class="what-head"><span>Runs in</span></div>
+            <div id="what-where-tags">
+              <span id="what-w1" class="what-tag">Terminal</span><span id="what-w2" class="what-tag">Editor</span><span id="what-w3" class="what-tag">Desktop app</span><span id="what-w4" class="what-tag">Web</span>
+            </div>
+          </div>
+
+          <div id="what-source">Source: code.claude.com/docs/en/how-claude-code-works</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const V = window.__vo
+          const S = V.scenes.what[0]
+          // When a phrase is said: its share of the line's characters, from the line's exact start.
+          const at = (id, words) => {
+            const [s, e, say] = V.lines[id]
+            const i = words ? say.indexOf(words) : 0
+            if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+            return s - S + (i / say.length) * (e - s)
+          }
+          const tl = gsap.timeline({ paused: true })
+          const rise = { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
+          const pop = { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.6)" }
+          const strike = { scaleX: 1, duration: 0.35, ease: "power2.out" }
+
+          // Frame 0 is the title alone; every other part waits for the words that name it.
+          tl.fromTo("#what-kinds-head", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, at("l02") - 0.2)
+          tl.fromTo("#what-auto", { opacity: 0, y: 24 }, rise, at("l02", "autocomplete") - 0.15)
+          tl.fromTo("#what-auto .what-strike", { scaleX: 0 }, strike, at("l02", "autocomplete") + 0.35)
+          tl.fromTo("#what-chat", { opacity: 0, y: 24 }, rise, at("l02", "chatbot") - 0.15)
+          tl.fromTo("#what-chat .what-strike", { scaleX: 0 }, strike, at("l02", "chatbot") + 0.3)
+
+          tl.fromTo("#what-agent", { opacity: 0, y: 24 }, rise, at("l03"))
+          tl.fromTo("#what-mark", { opacity: 0, scaleY: 0, transformOrigin: "50% 0%" }, { opacity: 1, scaleY: 1, duration: 0.4, ease: "power2.out" }, at("l03") + 0.2)
+          tl.fromTo("#what-where-head", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, at("l03", "from a terminal") - 0.2)
+          ;[["#what-w1", "terminal"], ["#what-w2", "editor"], ["#what-w3", "desktop"], ["#what-w4", "web"]].forEach(([el, word]) => {
+            tl.fromTo(el, { opacity: 0, scale: 0.9 }, pop, at("l03", word))
+          })
+          tl.fromTo("#what-source", { opacity: 0 }, { opacity: 1, duration: 0.5 }, at("l02"))
+
+          tl.fromTo("#what-sub", { opacity: 0, y: 20 }, rise, at("l03b"))
+          tl.fromTo("#what-tools .what-tag", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", stagger: 0.1 }, at("l03b", "from your prompt"))
+
+          tl.to("#what-stage", { opacity: 0, duration: 0.3, ease: "power1.in" }, V.scenes.what[1] - S - 0.3)
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

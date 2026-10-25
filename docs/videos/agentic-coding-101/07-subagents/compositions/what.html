@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>07-subagents · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 700px; }
+        #w-main { left: 900px; top: 252px; width: 900px; }
+        #w-sub { left: 1000px; top: 560px; width: 800px; }
+        #w-task { left: 920px; top: 470px; }
+        #w-back { left: 920px; top: 860px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 4 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">A worker with its own context</h1>
+          <div id="w-main" class="k-abs k-file">
+            <div class="k-file-name">Main session</div>
+            <pre class="k-code"><span>Your conversation, your context</span></pre>
+          </div>
+          <div id="w-task" class="k-abs k-label">Side task ↓</div>
+          <div id="w-sub" class="k-abs k-file">
+            <div class="k-file-name">Subagent</div>
+            <pre class="k-code"><span id="w-s1">Its own context</span><span id="w-s2">Its own tools</span><span id="w-s3">Its own instructions</span></pre>
+          </div>
+          <div id="w-back" class="k-abs k-label">↑ Only a summary comes back</div>
+          <div class="k-source">Source: code.claude.com/docs/en/sub-agents</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.fade("#w-main", at("l01") - 0.2)
+          k.rise("#w-sub", at("l01", "separate worker"))
+          k.lines("#w-s1", at("l01", "own context"))
+          k.lines("#w-s2", at("l01", "tools"))
+          k.lines("#w-s3", at("l01", "instructions"))
+          k.slide("#w-task", at("l02"))
+          k.slide("#w-back", at("l02", "hands back"))
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

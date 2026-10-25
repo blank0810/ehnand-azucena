@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>05-skills · gotchas</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-gotchas { position: absolute; inset: 0; }
+
+        #g-left { left: 120px; top: 196px; width: 860px; }
+        #g-left .k-row { height: 104px; padding-left: 28px; }
+        #g-left .k-dim { width: 330px; }
+        #g-right { left: 1060px; top: 196px; width: 740px; }
+        #g-right .k-row { height: 104px; padding-left: 28px; }
+        #g-right .k-dim { width: 340px; }
+        .g-head { margin-top: 30px; }
+      </style>
+
+      <div id="root" data-composition-id="gotchas" data-width="1920" data-height="1080">
+        <div id="stage-gotchas">
+          <div class="k-step">4 / 4 · Gotchas</div>
+
+          <div id="g-left" class="k-abs">
+            <h2 id="g-t1" class="k-title">Skills that trigger</h2>
+            <div id="g-h1" class="k-head g-head"><span style="padding-left: 28px">Rule</span><span style="width: 330px">Why</span></div>
+            <div id="g-r1" class="k-row"><span class="k-name">Start with "Use when"</span><span class="k-dim">The description is the trigger</span></div>
+            <div id="g-r2" class="k-row"><span class="k-name">Keep it short</span><span class="k-dim">Every description costs context</span></div>
+            <div id="g-r3" class="k-row"><span class="k-name">Same name? Yours wins</span><span class="k-dim">Personal beats project</span></div>
+            <div id="g-r4" class="k-row"><span class="k-name">Third paste</span><span class="k-dim">Make it a skill</span></div>
+            <div id="g-r5" class="k-row"><span class="k-name">Long procedure</span><span class="k-dim">Run it in its own subagent</span></div>
+          </div>
+          <div id="g-right" class="k-abs">
+            <h2 id="g-t2" class="k-title">Codex</h2>
+            <div id="g-h2" class="k-head g-head"><span style="padding-left: 28px">Skills</span></div>
+            <div id="g-c1" class="k-row"><span class="k-tag">.agents/skills/</span><span class="k-dim">Where it looks</span></div>
+            <div id="g-c2" class="k-row"><span class="k-tag">$skill-name</span><span class="k-dim">How you call one</span></div>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/skills, developers.openai.com/codex/build-skills</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "gotchas")
+          const at = k.at
+
+          k.title("#g-t1")
+          k.fade("#g-h1", at("l11") - 0.2)
+          k.rise("#g-r1", at("l11"))
+          k.rise("#g-r2", at("l12"))
+          k.rise("#g-r3", at("l13"))
+          k.rise("#g-r4", at("l14"))
+          k.rise("#g-r5", at("l14b"))
+          k.title("#g-t2", at("l15"))
+          k.fade("#g-h2", at("l15") + 0.3)
+          k.rise("#g-c1", at("l15", "dot agents"))
+          k.rise("#g-c2", at("l15", "dollar sign"))
+          window.__timelines["gotchas"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

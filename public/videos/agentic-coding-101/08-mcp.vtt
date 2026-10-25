@@ -1,0 +1,67 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:04.440
+MCP, the Model Context Protocol, is an open standard
+
+00:00:04.440 --> 00:00:08.280
+for plugging outside systems into an agent as tools.
+
+00:00:08.630 --> 00:00:11.595
+A browser, a database, your docs, a search engine.
+
+00:00:11.945 --> 00:00:15.337
+Claude Code, Codex, Cursor and many others support it.
+
+00:00:16.737 --> 00:00:21.089
+The agent talks to an MCP server, and the server talks to the system.
+
+00:00:21.439 --> 00:00:25.258
+Servers run on your machine, or remotely over HTTP.
+
+00:00:25.608 --> 00:00:27.854
+At the start, only tool names load.
+
+00:00:27.854 --> 00:00:33.693
+Full definitions load when a tool is needed, so adding servers barely touches your context.
+
+00:00:34.043 --> 00:00:35.970
+Servers have scopes too:
+
+00:00:35.970 --> 00:00:41.190
+local first, then the project's .mcp.json, then your user config.
+
+00:00:42.590 --> 00:00:45.897
+These clips were fact-checked with a web search and scraping server.
+
+00:00:46.247 --> 00:00:48.404
+It searched and fetched the official docs,
+
+00:00:48.404 --> 00:00:51.537
+and the agent compared the wording before a line was written.
+
+00:00:51.887 --> 00:00:54.430
+Every claim traces back to an official page,
+
+00:00:54.430 --> 00:00:56.858
+and each clip lists its sources on screen.
+
+00:00:57.208 --> 00:01:01.240
+Without it, the agent works from what it remembers, which can be out of date.
+
+00:01:02.640 --> 00:01:06.501
+Each server is a new set of permissions, so add only what you trust.
+
+00:01:06.851 --> 00:01:10.563
+Big tool results land in your context, and they count against it.
+
+00:01:10.913 --> 00:01:12.442
+Pair a server with a skill:
+
+00:01:12.442 --> 00:01:15.500
+the server gives access, the skill gives the know-how.
+
+00:01:15.850 --> 00:01:20.194
+Codex configures servers under mcp_servers in config.toml,
+
+00:01:20.194 --> 00:01:22.741
+and the same servers work in both.

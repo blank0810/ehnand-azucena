@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>02 Scopes · scene 2, how it works</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Same faces as the host; the paths resolve from index.html, where scenes are assembled. */
+        @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+        #root { position: absolute; inset: 0; font-family: "Plex Sans", sans-serif; color: #15191f; }
+        #how-stage { position: absolute; inset: 0; }
+        #how-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #how-title { position: absolute; left: 120px; top: 300px; width: 600px; font-weight: 620; font-size: 84px; line-height: 1.02; letter-spacing: -0.03em; }
+        #how-sub { position: absolute; left: 120px; top: 520px; width: 560px; font-size: 34px; line-height: 1.35; color: #4e5763; }
+        #how-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+
+        /* Ruled evidence records, highest precedence on top. */
+        #how-stack { position: absolute; left: 860px; top: 252px; width: 940px; }
+        .how-head { display: flex; justify-content: space-between; padding: 0 0 14px 28px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        .how-row { position: relative; display: flex; justify-content: space-between; align-items: center; height: 158px; padding-left: 28px; border-bottom: 1px solid #d0d5db; }
+        .how-name { font-weight: 600; font-size: 42px; letter-spacing: -0.015em; }
+        .how-file { display: inline-block; margin-top: 12px; padding: 4px 10px; background: #e8ebef; font: 500 28px/1.3 "Plex Mono", monospace; }
+        .how-who { width: 340px; font-size: 28px; line-height: 1.3; color: #4e5763; }
+        #how-mark { position: absolute; left: 860px; top: 0; width: 6px; height: 157px; background: #164bc5; }
+
+        /* Precedence rail beside the stack. */
+        #how-prec { position: absolute; left: 790px; top: 306px; width: 40px; height: 628px; }
+        #how-bar { position: absolute; left: 18px; top: 18px; width: 3px; bottom: 0; background: #164bc5; }
+        #how-arrow { position: absolute; left: 4px; top: 0; display: block; }
+        #how-prec-label { position: absolute; left: 520px; top: 262px; width: 310px; text-align: right; font: 600 28px/1 "Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #164bc5; }
+      </style>
+
+      <div id="root" data-composition-id="how" data-width="1920" data-height="1080">
+        <div id="how-stage">
+          <div id="how-step">2 / 4 · How it works</div>
+          <h2 id="how-title">Four settings scopes</h2>
+          <p id="how-sub">When two disagree, the more specific one wins.</p>
+          <div id="how-source">Source: code.claude.com/docs/en/settings</div>
+
+          <div id="how-prec-label">Overrides ↑</div>
+          <div id="how-prec">
+            <svg id="how-arrow" width="32" height="24" viewBox="0 0 32 24"><path d="M16 2 L30 22 L2 22 Z" fill="#164bc5" /></svg>
+            <div id="how-bar"></div>
+          </div>
+
+          <div id="how-stack">
+            <div id="how-head" class="how-head"><span>Scope · file</span><span style="width: 340px">Who it affects</span></div>
+            <div class="how-row" id="how-managed">
+              <div><div class="how-name">Managed</div><span class="how-file">managed-settings.json</span></div>
+              <div class="how-who">Everyone your organization deploys it to</div>
+            </div>
+            <div class="how-row" id="how-local">
+              <div><div class="how-name">Project local</div><span class="how-file">.claude/settings.local.json</span></div>
+              <div class="how-who">You, in this project only</div>
+            </div>
+            <div class="how-row" id="how-shared">
+              <div><div class="how-name">Shared project</div><span class="how-file">.claude/settings.json</span></div>
+              <div class="how-who">Everyone in the project, once committed</div>
+            </div>
+            <div class="how-row" id="how-user">
+              <div><div class="how-name">User</div><span class="how-file">~/.claude/settings.json</span></div>
+              <div class="how-who">You, in every project</div>
+            </div>
+          </div>
+          <div id="how-mark"></div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const V = window.__vo
+          const S = V.scenes.how[0]
+          // When a phrase is said: its share of the line's characters, from the line's exact start.
+          const at = (id, words) => {
+            const [s, e, say] = V.lines[id]
+            const i = words ? say.indexOf(words) : 0
+            if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+            return s - S + (i / say.length) * (e - s)
+          }
+          const tl = gsap.timeline({ paused: true })
+          const rise = { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
+          const fade = { opacity: 1, duration: 0.4 }
+          // Row tops on the frame (stack top + head), so the cobalt mark can move to the row being narrated.
+          const rowTop = (i) => 252 + 44 + i * 158
+          const move = (i, t) => tl.to("#how-mark", { y: rowTop(i), duration: 0.5, ease: "power2.inOut" }, t)
+          // A record lands bottom-up: the row, then its file, then who it affects, each on its words.
+          const land = (row, i, t, file, who) => {
+            tl.fromTo(row, { opacity: 0, y: 24 }, rise, t)
+            tl.fromTo(`${row} .how-file`, { opacity: 0 }, fade, file)
+            tl.fromTo(`${row} .how-who`, { opacity: 0 }, fade, who)
+            move(i, t)
+          }
+
+          tl.fromTo("#how-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 0.05)
+          tl.fromTo("#how-head", { opacity: 0 }, fade, at("l03", "four"))
+
+          tl.fromTo("#how-mark", { opacity: 0, y: rowTop(3) }, { opacity: 1, y: rowTop(3), duration: 0.3 }, at("l04"))
+          land("#how-user", 3, at("l04"), at("l04", "home dot claude"), at("l04", "follow you"))
+          land("#how-shared", 2, at("l05"), at("l05", "committed"), at("l05", "so the whole team"))
+          land("#how-local", 1, at("l06"), at("l06") + 0.5, at("l06", "yours alone"))
+
+          // "the more specific scope wins": the precedence rail draws upward.
+          const wins = at("l07", "the more specific")
+          tl.fromTo("#how-bar", { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 1.0, ease: "power2.inOut" }, wins)
+          tl.fromTo("#how-arrow", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, wins + 0.9)
+          tl.fromTo("#how-prec-label", { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, wins + 1.0)
+          tl.fromTo("#how-sub", { opacity: 0, y: 20 }, rise, wins)
+
+          // "and managed settings from your organization override them all"
+          land("#how-managed", 0, at("l07", "and managed"), at("l07", "and managed") + 0.4, at("l07", "from your organization"))
+          tl.fromTo("#how-source", { opacity: 0 }, { opacity: 1, duration: 0.5 }, at("l03", "four"))
+
+          tl.to("#how-stage", { opacity: 0, duration: 0.3, ease: "power1.in" }, V.scenes.how[1] - S - 0.3)
+          window.__timelines["how"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

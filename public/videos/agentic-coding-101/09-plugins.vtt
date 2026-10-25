@@ -1,0 +1,67 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:06.488
+A plugin bundles skills, commands, hooks, subagents and MCP servers into one install.
+
+00:00:06.838 --> 00:00:10.379
+You get them from marketplaces, which are catalogs of plugins.
+
+00:00:11.779 --> 00:00:16.857
+Install one with /plugin install, its name, an @, and the marketplace.
+
+00:00:17.207 --> 00:00:22.540
+Its skills arrive with the plugin's name in front, like /superpowers:brainstorming.
+
+00:00:22.890 --> 00:00:24.824
+A plugin can be on for you alone,
+
+00:00:24.824 --> 00:00:28.693
+or for everyone in the repository, through its committed settings.
+
+00:00:30.093 --> 00:00:32.567
+Four worth installing, each a different layer.
+
+00:00:32.917 --> 00:00:37.489
+Superpowers is skills: brainstorm, plan, test first, debug, verify.
+
+00:00:37.489 --> 00:00:41.173
+This article was planned with its brainstorming skill.
+
+00:00:41.523 --> 00:00:44.988
+Playwright is MCP: a real browser the agent drives,
+
+00:00:44.988 --> 00:00:49.609
+like opening your dev server at phone width and taking a screenshot.
+
+00:00:49.959 --> 00:00:54.586
+Security guidance is hooks: it warns about risky patterns as files change,
+
+00:00:54.586 --> 00:00:57.212
+and reviews the diff when the agent stops.
+
+00:00:57.562 --> 00:01:00.882
+Claude Code setup is a skill that reads your repository
+
+00:01:00.882 --> 00:01:04.986
+and recommends automations for each layer, without changing a thing.
+
+00:01:05.336 --> 00:01:10.771
+Run on this portfolio, it suggested a hook that enforces its Docker-only rule,
+
+00:01:10.771 --> 00:01:13.976
+and a /verify skill that runs all five checks.
+
+00:01:15.376 --> 00:01:19.397
+A plugin loads into every session and can run code on your machine,
+
+00:01:19.397 --> 00:01:21.797
+so read its hooks before you install it.
+
+00:01:22.147 --> 00:01:26.307
+Install only what you use: every skill description costs context.
+
+00:01:26.657 --> 00:01:31.031
+The signal to build your own: a second repository needs the same setup.
+
+00:01:31.381 --> 00:01:34.581
+Codex has plugins too, shared with ChatGPT.

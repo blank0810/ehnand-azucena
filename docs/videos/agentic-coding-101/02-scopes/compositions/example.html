@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>02 Scopes · scene 3, example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Same faces as the host; the paths resolve from index.html, where scenes are assembled. */
+        @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+        #root { position: absolute; inset: 0; font-family: "Plex Sans", sans-serif; color: #15191f; }
+        #ex-stage { position: absolute; inset: 0; }
+        #ex-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #ex-title { position: absolute; left: 120px; top: 196px; width: 1680px; font-weight: 620; font-size: 60px; line-height: 1.1; letter-spacing: -0.025em; }
+        #ex-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+
+        /* Layers down the side, scopes across the top: one ruled record per layer. */
+        #ex-grid { position: absolute; left: 120px; top: 290px; width: 1680px; }
+        .ex-line { display: grid; grid-template-columns: 260px 460px 480px 480px; align-items: center; }
+        #ex-head { height: 62px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+        #ex-head span { display: block; }
+        .ex-row { height: 100px; border-bottom: 1px solid #d0d5db; }
+        .ex-name { display: block; padding-left: 28px; font-weight: 600; font-size: 36px; letter-spacing: -0.015em; }
+        .ex-file { display: inline-block; padding: 4px 10px; background: #e8ebef; font: 500 28px/1.3 "Plex Mono", monospace; color: #15191f; }
+        .ex-none { display: block; font-size: 28px; color: #4e5763; }
+        .ex-cell { display: block; }
+        .ex-cell small { display: block; margin-top: 4px; font-size: 28px; line-height: 1.2; color: #4e5763; }
+        #ex-mark { position: absolute; left: 120px; top: 0; width: 6px; height: 99px; background: #164bc5; }
+
+        #ex-note { position: absolute; left: 120px; top: 896px; width: 1680px; display: flex; gap: 48px; font-size: 32px; line-height: 1.3; }
+        #ex-note span { display: block; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="ex-stage">
+          <div id="ex-step">3 / 4 · Example</div>
+          <h2 id="ex-title">The same split runs through every layer</h2>
+
+          <div id="ex-grid">
+            <div id="ex-head" class="ex-line">
+              <span></span><span id="ex-h1">You · every project</span><span id="ex-h2">Team · committed</span><span id="ex-h3">You · this project</span>
+            </div>
+            <div id="ex-settings" class="ex-row ex-line">
+              <span class="ex-name">Settings</span>
+              <span class="ex-cell c1"><span class="ex-file">~/.claude/settings.json</span></span>
+              <span class="ex-cell c2"><span class="ex-file">.claude/settings.json</span></span>
+              <span class="ex-cell c3"><span class="ex-file">.claude/settings.local.json</span></span>
+            </div>
+            <div id="ex-rules" class="ex-row ex-line">
+              <span class="ex-name">Rules</span>
+              <span class="ex-cell c1"><span class="ex-file">~/.claude/CLAUDE.md</span></span>
+              <span class="ex-cell c2"><span class="ex-file">CLAUDE.md</span></span>
+              <span class="ex-cell c3"><span class="ex-file">CLAUDE.local.md</span></span>
+            </div>
+            <div id="ex-skills" class="ex-row ex-line">
+              <span class="ex-name">Skills</span>
+              <span class="ex-cell c1"><span class="ex-file">~/.claude/skills/</span></span>
+              <span class="ex-cell c2"><span class="ex-file">.claude/skills/</span></span>
+              <span class="ex-cell c3"><span class="ex-none">None</span></span>
+            </div>
+            <div id="ex-agents" class="ex-row ex-line">
+              <span class="ex-name">Agents</span>
+              <span class="ex-cell c1"><span class="ex-file">~/.claude/agents/</span></span>
+              <span class="ex-cell c2"><span class="ex-file">.claude/agents/</span></span>
+              <span class="ex-cell c3"><span class="ex-none">None</span></span>
+            </div>
+            <div id="ex-mcp" class="ex-row ex-line">
+              <span class="ex-name">MCP servers</span>
+              <span class="ex-cell c1"><span class="ex-file">~/.claude.json</span></span>
+              <span class="ex-cell c2"><span class="ex-file">.mcp.json</span></span>
+              <span class="ex-cell c3"><span class="ex-file">~/.claude.json</span><small>under this project</small></span>
+            </div>
+          </div>
+          <div id="ex-mark"></div>
+
+          <div id="ex-note">
+            <span id="ex-n1">Rules files are combined, broadest first.</span>
+            <span id="ex-n2">Permission lists merge.</span>
+          </div>
+          <div id="ex-source">Sources: code.claude.com/docs/en/settings, /memory, /skills, /sub-agents, /mcp</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const V = window.__vo
+          const S = V.scenes.example[0]
+          // When a phrase is said: its share of the line's characters, from the line's exact start.
+          const at = (id, words) => {
+            const [s, e, say] = V.lines[id]
+            const i = words ? say.indexOf(words) : 0
+            if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+            return s - S + (i / say.length) * (e - s)
+          }
+          const tl = gsap.timeline({ paused: true })
+          const rise = { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }
+          const pop = { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.6)" }
+          // Row tops on the frame (grid top + head), so the cobalt mark can sit on the layer being narrated.
+          const rowTop = (i) => 290 + 64 + i * 100
+          const move = (i, t) => tl.to("#ex-mark", { y: rowTop(i), duration: 0.45, ease: "power2.inOut" }, t)
+          // A layer arrives as a whole row, rule included, so no empty rules wait on screen; its files follow on their words.
+          const name = (row, t) => tl.fromTo(row, { opacity: 0, y: 20 }, rise, t)
+          const cell = (row, c, t) => tl.fromTo(`${row} .${c}`, { opacity: 0, scale: 0.94, transformOrigin: "0% 50%" }, pop, t)
+
+          tl.fromTo("#ex-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 0.05)
+
+          // "The same split": the three scopes become columns.
+          ;["#ex-h1", "#ex-h2", "#ex-h3"].forEach((h, k) => tl.fromTo(h, { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, at("l08", "split") + k * 0.12))
+          tl.fromTo("#ex-head", { borderBottomColor: "rgba(21,25,31,0)" }, { borderBottomColor: "rgba(21,25,31,1)", duration: 0.4 }, at("l08", "split"))
+          // Settings, already known from the last scene, fills in at once.
+          const layer = at("l08", "every layer")
+          name("#ex-settings", layer)
+          ;["c1", "c2", "c3"].forEach((c, k) => cell("#ex-settings", c, layer + 0.15 + k * 0.1))
+          tl.fromTo("#ex-mark", { opacity: 0, y: rowTop(0) }, { opacity: 1, y: rowTop(0), duration: 0.3 }, layer)
+
+          name("#ex-rules", at("l09"))
+          move(1, at("l09"))
+          cell("#ex-rules", "c1", at("l09", "for you"))
+          cell("#ex-rules", "c2", at("l09", "for the project"))
+          cell("#ex-rules", "c3", at("l09", "a local one"))
+
+          name("#ex-skills", at("l10"))
+          move(2, at("l10"))
+          name("#ex-agents", at("l10", "agents"))
+          move(3, at("l10", "agents"))
+          ;["#ex-skills", "#ex-agents"].forEach((row, k) => {
+            cell(row, "c1", at("l10", "at home") + k * 0.1)
+            cell(row, "c2", at("l10", "in the project") + k * 0.1)
+            cell(row, "c3", at("l10", "in the project") + 0.5 + k * 0.1)
+          })
+
+          name("#ex-mcp", at("l11"))
+          move(4, at("l11"))
+          cell("#ex-mcp", "c1", at("l11", "your user config"))
+          cell("#ex-mcp", "c3", at("l11", "your user config") + 0.15)
+          cell("#ex-mcp", "c2", at("l11", "dot M C P dot JSON"))
+
+          // "Rules files don't replace each other": every rules file stays, in cobalt.
+          move(1, at("l12"))
+          tl.to("#ex-rules .ex-file", { color: "#164bc5", duration: 0.4 }, at("l12") + 0.2)
+          tl.fromTo("#ex-n1", { opacity: 0, y: 16 }, rise, at("l12", "they all load"))
+          // "Permission lists merge too": the settings files combine their lists.
+          move(0, at("l12", "Permission"))
+          tl.to("#ex-settings .ex-file", { color: "#164bc5", duration: 0.4 }, at("l12", "Permission") + 0.2)
+          tl.fromTo("#ex-n2", { opacity: 0, y: 16 }, rise, at("l12", "Permission"))
+          tl.fromTo("#ex-source", { opacity: 0 }, { opacity: 1, duration: 0.5 }, at("l08", "every layer"))
+
+          tl.to("#ex-stage", { opacity: 0, duration: 0.3, ease: "power1.in" }, V.scenes.example[1] - S - 0.3)
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>08-mcp · example</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-example { position: absolute; inset: 0; }
+
+        #e-title { left: 120px; top: 196px; }
+        #e-call { left: 120px; top: 290px; width: 980px; }
+        #e-became { left: 1160px; top: 290px; width: 640px; }
+        #e-became .k-code { white-space: pre-wrap; }
+        #e-trace { left: 1160px; top: 640px; width: 640px; }
+        #e-trace .k-dim { margin-top: 12px; }
+        #e-memory { left: 120px; top: 860px; width: 980px; }
+      </style>
+
+      <div id="root" data-composition-id="example" data-width="1920" data-height="1080">
+        <div id="stage-example">
+          <div class="k-step">3 / 4 · Example</div>
+
+          <h2 id="e-title" class="k-abs k-title">How these clips were checked</h2>
+          <div id="e-call" class="k-abs k-file">
+            <div class="k-file-name">Tool call: firecrawl_search</div>
+            <pre class="k-code"><span class="e-q">query: "Codex AGENTS.md</span><span class="e-q">        project_doc_max_bytes"</span><span class="e-q"> </span><span class="e-r"><i>returned, from developers.openai.com:</i></span><span class="e-r">"...stops adding files once the combined</span><span class="e-r"> size reaches the limit defined by</span><span class="e-r"> project_doc_max_bytes (<b>32 KiB by default</b>)."</span></pre>
+          </div>
+          <div id="e-became" class="k-abs k-file">
+            <div class="k-file-name">Became, in clip 03</div>
+            <pre class="k-code"><span>"Codex reads AGENTS.md, and stops adding files at thirty-two kilobytes by default."</span></pre>
+          </div>
+          <div id="e-trace" class="k-abs">
+            <div id="e-trace-label" class="k-label">Every claim has a source</div>
+            <span id="e-trace-dim" class="k-dim">Each clip lists its sources on screen.</span>
+          </div>
+          <p id="e-memory" class="k-abs k-dim">Without it, the agent works from memory, which can be out of date.</p>
+          <div class="k-source">Sources: Firecrawl MCP search; developers.openai.com/codex/agent-configuration/agents-md</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "example")
+          const at = k.at
+
+          k.title("#e-title")
+          k.fade("#e-call", at("l08"))
+          k.lines("#e-call .e-q", at("l08", "web search"), 0.15)
+          k.lines("#e-call .e-r", at("l09"), 0.2)
+          k.rise("#e-became", at("l09", "and the agent compared"))
+          k.slide("#e-trace-label", at("l09b"))
+          k.fade("#e-trace-dim", at("l09b", "and each clip"))
+          k.rise("#e-memory", at("l10"))
+          k.exit("#stage-example")
+          window.__timelines["example"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

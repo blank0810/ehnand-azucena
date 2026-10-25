@@ -1,0 +1,113 @@
+{
+  "id": "10-features",
+  "chapter": 10,
+  "title": "Feature highlights",
+  "rail": "Features",
+  "sources": [
+    "https://code.claude.com/docs/en/permission-modes",
+    "https://code.claude.com/docs/en/checkpointing",
+    "https://code.claude.com/docs/en/commands",
+    "https://code.claude.com/docs/en/worktrees",
+    "https://code.claude.com/docs/en/agent-view",
+    "https://code.claude.com/docs/en/agent-teams",
+    "https://developers.openai.com/codex/cli/slash-commands"
+  ],
+  "scenes": [
+    {
+      "id": "what",
+      "label": "What it is",
+      "lines": [
+        {
+          "id": "l01",
+          "text": "The layers shape the agent. A few features shape each session."
+        },
+        {
+          "id": "l02",
+          "text": "Four worth knowing on day one: steer, undo, inspect, and run in parallel."
+        }
+      ]
+    },
+    {
+      "id": "steer",
+      "label": "Steer",
+      "lines": [
+        {
+          "id": "l03",
+          "text": "Shift+Tab cycles the permission modes: auto, manual, accept edits, and plan.",
+          "say": "Shift tab cycles the permission modes: auto, manual, accept edits, and plan."
+        },
+        {
+          "id": "l04",
+          "text": "Auto is the default in the terminal:|a classifier blocks risky actions instead of asking."
+        },
+        {
+          "id": "l05",
+          "text": "Plan mode explores and writes a plan,|without touching your source files until you approve it."
+        }
+      ]
+    },
+    {
+      "id": "undo",
+      "label": "Undo",
+      "lines": [
+        {
+          "id": "l06",
+          "text": "Press Escape twice, or type /rewind,|to restore the code, the conversation, or both.",
+          "say": "Press escape twice, or type slash rewind, to restore the code, the conversation, or both."
+        },
+        {
+          "id": "l07",
+          "text": "It won't undo files that only shell commands changed,|and it's no replacement for git."
+        },
+        {
+          "id": "l07b",
+          "text": "Checkpoints are saved with the conversation, so rewind still works after you resume."
+        }
+      ]
+    },
+    {
+      "id": "inspect",
+      "label": "Inspect",
+      "lines": [
+        {
+          "id": "l08",
+          "text": "/context shows what loaded, and what each part costs.",
+          "say": "Slash context shows what loaded, and what each part costs."
+        },
+        {
+          "id": "l08b",
+          "text": "It also suggests what to trim when a tool or a memory file gets heavy."
+        },
+        {
+          "id": "l09",
+          "text": "/doctor runs a checkup of your installation, settings and rules files.",
+          "say": "Slash doctor runs a checkup of your installation, settings and rules files."
+        },
+        {
+          "id": "l10",
+          "text": "Check both before you blame the model."
+        }
+      ]
+    },
+    {
+      "id": "parallel",
+      "label": "Parallel",
+      "lines": [
+        {
+          "id": "l11",
+          "text": "Start with --worktree, and each session gets its own checkout,|so parallel work doesn't collide.",
+          "say": "Start with dash dash worktree, and each session gets its own checkout, so parallel work doesn't collide."
+        },
+        {
+          "id": "l12",
+          "text": "Then subagents for side tasks, agent view to watch background sessions,|and agent teams, still experimental, for agents that coordinate."
+        },
+        {
+          "id": "l13",
+          "text": "Codex has the same ideas:|/permissions for approvals and the sandbox, and /review for a second look at your changes.",
+          "say": "Codex has the same ideas: slash permissions for approvals and the sandbox, and slash review for a second look at your changes."
+        }
+      ]
+    }
+  ]
+}

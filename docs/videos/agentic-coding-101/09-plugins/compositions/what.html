@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>09-plugins · what</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-what { position: absolute; inset: 0; }
+
+        #w-title { left: 120px; top: 300px; width: 620px; }
+        #w-tree { left: 900px; top: 252px; width: 900px; }
+        #w-market { left: 900px; top: 760px; width: 900px; }
+        #w-market .k-dim { margin-top: 12px; }
+      </style>
+
+      <div id="root" data-composition-id="what" data-width="1920" data-height="1080">
+        <div id="stage-what">
+          <div class="k-step">1 / 4 · What it is</div>
+
+          <h1 id="w-title" class="k-abs k-title-xl">One install, every layer</h1>
+          <div id="w-tree" class="k-abs k-file">
+            <div class="k-file-name">A plugin</div>
+            <pre class="k-code"><span id="w-l0">my-plugin/</span><span id="w-l1">  skills/</span><span id="w-l2">  commands/</span><span id="w-l3">  hooks/hooks.json</span><span id="w-l4">  agents/</span><span id="w-l5">  .mcp.json</span><span id="w-l6">  .claude-plugin/<b>plugin.json</b></span></pre>
+          </div>
+          <div id="w-market" class="k-abs">
+            <div id="w-market-label" class="k-label">From a marketplace</div>
+            <span id="w-market-dim" class="k-dim">A catalog of plugins, added once, then browsed with /plugin</span>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/plugins</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "what")
+          const at = k.at
+
+          k.fade("#w-tree", at("l01") - 0.2)
+          k.lines("#w-l0", at("l01", "plugin bundles"))
+          ;[["#w-l1", "skills"], ["#w-l2", "commands"], ["#w-l3", "hooks"], ["#w-l4", "subagents"], ["#w-l5", "M C P"], ["#w-l6", "one install"]].forEach(([el, w]) => k.lines(el, at("l01", w)))
+          k.slide("#w-market-label", at("l02"))
+          k.fade("#w-market-dim", at("l02") + 0.3)
+          k.exit("#stage-what")
+          window.__timelines["what"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

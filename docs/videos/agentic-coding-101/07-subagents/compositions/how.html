@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>07-subagents · how</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-how { position: absolute; inset: 0; }
+
+        #h-title { left: 120px; top: 196px; }
+        #h-scale { right: 120px; top: 256px; }
+        .h-row { position: absolute; left: 120px; width: 1680px; }
+        .h-row .k-dim { margin-bottom: 10px; }
+        .h-bar { display: block; height: 40px; transform-origin: 0 50%; }
+        #h-a { top: 300px; }
+        #h-b { top: 420px; }
+        #h-c { top: 540px; }
+        #h-ab { width: 1300px; background: rgba(22, 75, 197, 0.45); }
+        #h-bb { width: 70px; background: #164bc5; }
+        #h-cb { width: 1300px; background: #87919d; }
+        #h-note { left: 120px; top: 660px; width: 1680px; }
+        #h-built { left: 120px; top: 760px; width: 800px; }
+        #h-tags { display: flex; flex-wrap: wrap; gap: 14px; padding-top: 22px; }
+        #h-ask { left: 980px; top: 760px; width: 820px; }
+      </style>
+
+      <div id="root" data-composition-id="how" data-width="1920" data-height="1080">
+        <div id="stage-how">
+          <div class="k-step">2 / 4 · How it works</div>
+
+          <h2 id="h-title" class="k-abs k-title">Forty files, ten lines</h2>
+          <div id="h-scale" class="k-abs k-dim">Illustrative, not to scale</div>
+          <div id="h-a" class="h-row"><span class="k-dim">Your context, if the main session reads all forty files</span><i id="h-ab" class="h-bar"></i></div>
+          <div id="h-b" class="h-row"><span class="k-dim">Your context, if a subagent reads them and returns ten lines</span><i id="h-bb" class="h-bar"></i></div>
+          <div id="h-c" class="h-row"><span class="k-dim">The subagent's own window, discarded after</span><i id="h-cb" class="h-bar"></i></div>
+          <div id="h-note" class="k-abs k-label">It starts fresh: no history of your conversation</div>
+          <div id="h-built" class="k-abs">
+            <div id="h-built-head" class="k-head"><span>Built in, and your own</span></div>
+            <div id="h-tags"><span id="h-t1" class="k-tag">Explore</span><span id="h-t2" class="k-tag">Plan</span><span id="h-t3" class="k-tag">general-purpose</span><span id="h-t4" class="k-tag">.claude/agents/</span></div>
+          </div>
+          <div id="h-ask" class="k-abs k-file">
+            <div class="k-file-name">Or ask for one</div>
+            <pre class="k-code"><span>Use a subagent to find every</span><span>place the config is read.</span></pre>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/sub-agents</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "how")
+          const at = k.at
+
+          k.title("#h-title")
+          k.fade("#h-scale", at("l03") + 0.3)
+          k.fade("#h-a .k-dim", at("l04"))
+          k.draw("#h-ab", at("l04", "all forty"), 1.2)
+          k.fade("#h-b .k-dim", at("l05"))
+          k.fade("#h-c .k-dim", at("l05", "in its own window"))
+          k.draw("#h-cb", at("l05", "in its own window"), 1.0)
+          k.draw("#h-bb", at("l05", "then returns"), 0.4)
+          k.slide("#h-note", at("l06"))
+          k.fade("#h-built-head", at("l07"))
+          k.pop("#h-t1", at("l07", "Explore"))
+          k.pop("#h-t2", at("l07", "Plan"))
+          k.pop("#h-t3", at("l07", "general purpose"))
+          k.pop("#h-t4", at("l07", "Your own"))
+          k.rise("#h-ask", at("l07b"))
+          k.exit("#stage-how")
+          window.__timelines["how"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

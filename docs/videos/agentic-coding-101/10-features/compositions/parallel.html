@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>10-features · parallel</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-parallel { position: absolute; inset: 0; }
+
+        #p-title { left: 120px; top: 196px; }
+        #p-cmd { left: 120px; top: 290px; width: 760px; }
+        #p-note { left: 940px; top: 316px; width: 860px; }
+        #p-ladder { left: 120px; top: 470px; width: 1680px; }
+        #p-ladder .k-row { justify-content: flex-start; height: 88px; padding-left: 28px; }
+        .p-what { display: block; width: 460px; }
+        #p-codex { left: 120px; top: 830px; width: 1680px; display: flex; align-items: center; gap: 18px; }
+      </style>
+
+      <div id="root" data-composition-id="parallel" data-width="1920" data-height="1080">
+        <div id="stage-parallel">
+          <div class="k-step">5 / 5 · Parallel</div>
+
+          <h2 id="p-title" class="k-abs k-title">Run in parallel</h2>
+          <div id="p-cmd" class="k-abs k-file">
+            <div class="k-file-name">Terminal</div>
+            <pre class="k-code"><span>claude <b>--worktree</b> feature-auth</span></pre>
+          </div>
+          <p id="p-note" class="k-abs k-dim">Each session gets its own checkout under .claude/worktrees/, so parallel work doesn't collide.</p>
+          <div id="p-ladder" class="k-abs">
+            <div id="p-head" class="k-head"><span style="padding-left: 28px; width: 488px">Then</span><span style="flex: 1">For</span></div>
+            <div id="p-r1" class="k-row"><span class="p-what k-name">Subagents</span><span class="k-dim">Side tasks</span></div>
+            <div id="p-r2" class="k-row"><span class="p-what k-name">Agent view</span><span class="k-dim">Watching background sessions</span></div>
+            <div id="p-r3" class="k-row"><span class="p-what k-name">Agent teams</span><span class="k-dim">Agents that coordinate (experimental)</span></div>
+          </div>
+          <div id="p-codex" class="k-abs"><span id="p-cx" class="k-label">Codex</span><span id="p-c1" class="k-tag">/permissions</span><span id="p-c1d" class="k-dim" style="display: inline">approvals and the sandbox</span><span id="p-c2" class="k-tag">/review</span><span id="p-c2d" class="k-dim" style="display: inline">a second look at your changes</span></div>
+          <div class="k-source">Sources: code.claude.com/docs/en/worktrees, /agent-view, /agent-teams; developers.openai.com/codex</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "parallel")
+          const at = k.at
+
+          k.title("#p-title")
+          k.rise("#p-cmd", at("l11", "dash dash"))
+          k.fade("#p-note", at("l11", "and each session"))
+          k.fade("#p-head", at("l12"))
+          k.rise("#p-r1", at("l12", "subagents"))
+          k.rise("#p-r2", at("l12", "agent view"))
+          k.rise("#p-r3", at("l12", "and agent teams"))
+          k.slide("#p-cx", at("l13"))
+          k.pop("#p-c1", at("l13", "slash permissions"))
+          k.fade("#p-c1d", at("l13", "for approvals"))
+          k.pop("#p-c2", at("l13", "slash review"))
+          k.fade("#p-c2d", at("l13", "for a second"))
+          window.__timelines["parallel"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

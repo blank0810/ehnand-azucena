@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>06-hooks · gotchas</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-gotchas { position: absolute; inset: 0; }
+
+        #g-left { left: 120px; top: 196px; width: 860px; }
+        #g-left .k-row { height: 104px; padding-left: 28px; }
+        #g-left .k-dim { width: 300px; }
+        #g-proof { left: 120px; top: 610px; width: 860px; }
+        #g-proof .k-body { margin-top: 14px; }
+        #g-cost { left: 120px; top: 830px; width: 860px; }
+        #g-cost .k-row { height: 96px; padding-left: 28px; border-top: 1px solid #d0d5db; }
+        #g-cost .k-dim { width: 300px; }
+        #g-right { left: 1060px; top: 196px; width: 740px; }
+        #g-right .k-row { height: 104px; padding-left: 28px; }
+        #g-right .k-dim { width: 360px; }
+        .g-head { margin-top: 30px; }
+      </style>
+
+      <div id="root" data-composition-id="gotchas" data-width="1920" data-height="1080">
+        <div id="stage-gotchas">
+          <div class="k-step">4 / 4 · Gotchas</div>
+
+          <div id="g-left" class="k-abs">
+            <h2 id="g-t1" class="k-title">Request or guarantee</h2>
+            <div id="g-h1" class="k-head g-head"><span style="padding-left: 28px">"Never edit .env"</span><span style="width: 300px">Is</span></div>
+            <div id="g-r1" class="k-row"><span class="k-name">In a rules file</span><span class="k-dim">A request</span></div>
+            <div id="g-r2" class="k-row"><span class="k-name">In a hook that blocks it</span><span class="k-dim k-cobalt">A guarantee</span></div>
+          </div>
+          <div id="g-proof" class="k-abs">
+            <div id="g-proof-label" class="k-label">Prove it fires</div>
+            <p id="g-proof-body" class="k-body">In the setup behind this series, the guard hooks sat in an example file and never ran.</p>
+          </div>
+          <div id="g-cost" class="k-abs">
+            <div id="g-c0" class="k-row"><span class="k-name">Context cost</span><span class="k-dim">None, unless it prints</span></div>
+          </div>
+          <div id="g-right" class="k-abs">
+            <h2 id="g-t2" class="k-title">Codex</h2>
+            <div id="g-h2" class="k-head g-head"><span style="padding-left: 28px">Hooks</span></div>
+            <div id="g-c1" class="k-row"><span class="k-tag">hooks.json</span><span class="k-dim">A smaller set of events</span></div>
+          </div>
+          <div class="k-source">Sources: code.claude.com/docs/en/hooks, developers.openai.com/codex/hooks</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "gotchas")
+          const at = k.at
+
+          k.title("#g-t1")
+          k.fade("#g-h1", at("l12") - 0.2)
+          k.rise("#g-r1", at("l12", "a request"))
+          k.rise("#g-r2", at("l12", "A hook that"))
+          k.slide("#g-proof-label", at("l13"))
+          k.rise("#g-proof-body", at("l13", "In the setup"))
+          k.rise("#g-c0", at("l14"))
+          k.title("#g-t2", at("l15"))
+          k.fade("#g-h2", at("l15") + 0.3)
+          k.rise("#g-c1", at("l15", "hooks dot"))
+          window.__timelines["gotchas"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>

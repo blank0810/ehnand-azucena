@@ -1,0 +1,67 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:04.099
+The layers shape the agent. A few features shape each session.
+
+00:00:04.449 --> 00:00:09.163
+Four worth knowing on day one: steer, undo, inspect, and run in parallel.
+
+00:00:10.563 --> 00:00:15.427
+Shift+Tab cycles the permission modes: auto, manual, accept edits, and plan.
+
+00:00:15.777 --> 00:00:18.116
+Auto is the default in the terminal:
+
+00:00:18.116 --> 00:00:21.495
+a classifier blocks risky actions instead of asking.
+
+00:00:21.845 --> 00:00:23.916
+Plan mode explores and writes a plan,
+
+00:00:23.916 --> 00:00:27.050
+without touching your source files until you approve it.
+
+00:00:28.450 --> 00:00:30.773
+Press Escape twice, or type /rewind,
+
+00:00:30.773 --> 00:00:33.805
+to restore the code, the conversation, or both.
+
+00:00:34.155 --> 00:00:37.308
+It won't undo files that only shell commands changed,
+
+00:00:37.308 --> 00:00:39.211
+and it's no replacement for git.
+
+00:00:39.561 --> 00:00:44.382
+Checkpoints are saved with the conversation, so rewind still works after you resume.
+
+00:00:45.782 --> 00:00:49.238
+/context shows what loaded, and what each part costs.
+
+00:00:49.588 --> 00:00:54.047
+It also suggests what to trim when a tool or a memory file gets heavy.
+
+00:00:54.397 --> 00:00:58.663
+/doctor runs a checkup of your installation, settings and rules files.
+
+00:00:59.013 --> 00:01:00.955
+Check both before you blame the model.
+
+00:01:02.355 --> 00:01:06.378
+Start with --worktree, and each session gets its own checkout,
+
+00:01:06.378 --> 00:01:08.520
+so parallel work doesn't collide.
+
+00:01:08.870 --> 00:01:13.571
+Then subagents for side tasks, agent view to watch background sessions,
+
+00:01:13.571 --> 00:01:17.809
+and agent teams, still experimental, for agents that coordinate.
+
+00:01:18.159 --> 00:01:19.842
+Codex has the same ideas:
+
+00:01:19.842 --> 00:01:25.903
+/permissions for approvals and the sandbox, and /review for a second look at your changes.

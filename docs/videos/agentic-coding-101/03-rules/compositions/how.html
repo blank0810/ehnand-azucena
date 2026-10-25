@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>03-rules · how</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; color: #15191f; }
+        #stage-how { position: absolute; inset: 0; }
+
+        #h-title { left: 120px; top: 196px; }
+        #h-order { left: 120px; top: 300px; width: 900px; }
+        #h-order .k-row { justify-content: flex-start; height: 100px; }
+        .h-n { display: block; width: 64px; padding-left: 20px; }
+        .h-who { display: block; width: 300px; }
+        #h-ctx { left: 1100px; top: 300px; width: 700px; }
+        #h-sent { left: 1100px; top: 740px; width: 700px; }
+        #h-sent .k-dim { margin-top: 12px; }
+      </style>
+
+      <div id="root" data-composition-id="how" data-width="1920" data-height="1080">
+        <div id="stage-how">
+          <div class="k-step">2 / 4 · How it works</div>
+
+          <h2 id="h-title" class="k-abs k-title">Broad to specific</h2>
+          <div id="h-order" class="k-abs">
+            <div id="h-head" class="k-head"><span style="padding-left: 20px">Load order</span><span style="width: 470px">File</span></div>
+            <div id="h-r1" class="k-row"><b class="h-n k-num">1</b><span class="h-who k-name">Organization</span><span class="k-tag">/etc/claude-code/CLAUDE.md</span></div>
+            <div id="h-r2" class="k-row"><b class="h-n k-num">2</b><span class="h-who k-name">You</span><span class="k-tag">~/.claude/CLAUDE.md</span></div>
+            <div id="h-r3" class="k-row"><b class="h-n k-num">3</b><span class="h-who k-name">Project</span><span class="k-tag">./CLAUDE.md</span></div>
+            <div id="h-r4" class="k-row"><b class="h-n k-num">4</b><span class="h-who k-name">A folder</span><span class="k-tag">src/api/CLAUDE.md</span></div>
+          </div>
+          <div id="h-ctx" class="k-abs k-file">
+            <div class="k-file-name">What the agent receives</div>
+            <pre class="k-code"><span id="h-c1"><i># organization rules</i></span><span id="h-c2"><i># your rules</i></span><span id="h-c3"><i># project rules</i></span><span id="h-c4"><b># src/api rules, read last</b></span></pre>
+          </div>
+          <div id="h-sent" class="k-abs">
+            <div id="h-sent-label" class="k-label">Sent with every request</div>
+            <span id="h-sent-dim" class="k-dim">Every line costs context, every time.</span>
+          </div>
+          <div class="k-source">Source: code.claude.com/docs/en/memory</div>
+        </div>
+      </div>
+
+      <script>
+        ;(() => {
+          const tl = gsap.timeline({ paused: true })
+          const k = window.__kit(tl, "how")
+          const at = k.at
+
+          k.title("#h-title")
+          k.fade("#h-head", at("l04", "broad"))
+          k.rise("#h-r1", at("l05"))
+          k.rise("#h-r2", at("l05", "then yours"))
+          k.rise("#h-r3", at("l05", "then the project"))
+          k.rise("#h-r4", at("l05", "then any folder"))
+          k.fade("#h-ctx", at("l06"))
+          k.lines("#h-c1, #h-c2, #h-c3, #h-c4", at("l06", "combined"), 0.25)
+          k.slide("#h-sent-label", at("l07"))
+          k.fade("#h-sent-dim", at("l07", "so every line"))
+          k.exit("#stage-how")
+          window.__timelines["how"] = tl
+        })()
+      </script>
+    </template>
+  </body>
+</html>
