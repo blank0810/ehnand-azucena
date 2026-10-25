@@ -9,6 +9,39 @@
     <script src="assets/vendor/gsap-3.14.2.min.js"></script>
     <!-- window.__vo: line and scene windows, generated from script.json by shared/voice.mjs. -->
     <script src="assets/timing.js"></script>
+    <script>
+      // Scene kit for clips 03 to 10, inlined into each clip's index.html by shell.mjs.
+      // A scene creates its own paused timeline, asks the kit for helpers bound to it
+      // (window.__kit(tl, sceneId)), then registers the timeline under its own scene id.
+      // Example: k.rise("#row", k.at("l04", "user settings")) raises #row as the
+      // narration reaches "user settings" in line l04.
+      // Every tween states both ends (fromTo), so any frame renders from its time alone.
+      window.__kit = (tl, scene) => {
+        const V = window.__vo
+        const [S, E] = V.scenes[scene]
+        // When a phrase is said: its share of the line's characters, from the line's exact start.
+        const at = (id, words) => {
+          const [s, e, say] = V.lines[id]
+          const i = words ? say.indexOf(words) : 0
+          if (i < 0) throw new Error(`"${words}" is not in ${id}`)
+          return s - S + (i / say.length) * (e - s)
+        }
+        return {
+          at,
+          end: E - S,
+          title: (el, t = 0.05) => tl.fromTo(el, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, t),
+          rise: (el, t, y = 20) => tl.fromTo(el, { opacity: 0, y }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, t),
+          slide: (el, t, x = -20) => tl.fromTo(el, { opacity: 0, x }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, t),
+          fade: (el, t, d = 0.4) => tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: d }, t),
+          pop: (el, t) => tl.fromTo(el, { opacity: 0, scale: 0.92, transformOrigin: "0% 50%" }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.6)" }, t),
+          draw: (el, t, d = 0.6) => tl.fromTo(el, { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: d, ease: "power2.inOut" }, t),
+          // Lines of a file appear one after another, like the file being written.
+          lines: (sel, t, stagger = 0.12) => tl.fromTo(sel, { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out", stagger }, t),
+          tint: (el, t, color = "#164bc5") => tl.to(el, { color, duration: 0.4 }, t),
+          exit: (el) => tl.to(el, { opacity: 0, duration: 0.3, ease: "power1.in" }, E - S - 0.3),
+        }
+      }
+    </script>
     <style>
       @font-face { font-family: "Plex Sans"; src: url("assets/fonts/ibm-plex-sans-latin-wght-normal.woff2") format("woff2"); font-weight: 100 700; }
       @font-face { font-family: "Plex Mono"; src: url("assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
@@ -34,10 +67,37 @@
       #trace { position: absolute; left: 120px; top: 56px; width: 1680px; height: 3px; background: var(--cobalt); transform-origin: 0 50%; }
       #eyebrow { position: absolute; left: 120px; top: 136px; font: 600 28px/1 "Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cobalt); }
       .scene { position: absolute; inset: 0; }
+
+      /* Scene kit for clips 03 to 10: shared type and record styles, inlined into each
+         clip's index.html by shell.mjs. Scenes add only positions, so every clip reads
+         as one system (Production Trace tokens, IBM Plex, 28 px floor). */
+      .k-step { position: absolute; right: 120px; top: 136px; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+      .k-source { position: absolute; left: 120px; top: 990px; font: 400 28px/1 "Plex Mono", monospace; color: #4e5763; }
+      .k-abs { position: absolute; }
+      .k-title-xl { font-weight: 620; font-size: 84px; line-height: 1.02; letter-spacing: -0.03em; }
+      .k-title { font-weight: 620; font-size: 60px; line-height: 1.1; letter-spacing: -0.025em; }
+      .k-sub { font-size: 34px; line-height: 1.35; color: #4e5763; }
+      .k-body { font-size: 32px; line-height: 1.35; }
+      .k-head { display: flex; justify-content: space-between; padding-bottom: 14px; border-bottom: 2px solid #15191f; font: 500 28px/1 "Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #4e5763; }
+      .k-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #d0d5db; }
+      .k-name { display: block; font-weight: 600; font-size: 36px; letter-spacing: -0.015em; }
+      .k-dim { display: block; font-size: 28px; line-height: 1.3; color: #4e5763; }
+      .k-tag { display: inline-block; padding: 4px 12px; background: #e8ebef; font: 500 28px/1.3 "Plex Mono", monospace; color: #15191f; }
+      .k-label { font: 600 28px/1 "Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #164bc5; }
+      .k-cobalt { color: #164bc5; }
+      .k-mark { position: absolute; width: 6px; background: #164bc5; }
+      /* A real file on screen: name bar, then the text exactly as it would be on disk. */
+      .k-file { background: #ffffff; border: 2px solid #d0d5db; }
+      .k-file-name { padding: 12px 24px; border-bottom: 2px solid #d0d5db; font: 500 28px/1.2 "Plex Mono", monospace; color: #4e5763; }
+      .k-code { margin: 0; padding: 18px 24px; white-space: pre; font: 400 28px/1.5 "Plex Mono", monospace; color: #15191f; }
+      .k-code b { font-weight: 600; color: #164bc5; }
+      .k-code i { font-style: normal; color: #4e5763; }
+      .k-code span { display: block; }
+      .k-num { font: 600 30px/1 "Plex Mono", monospace; color: #164bc5; }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="86.646" data-width="1920" data-height="1080">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="82.813" data-width="1920" data-height="1080">
       <div id="shell">
         <div id="rail">
           <span class="on">01 The agent</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span>
@@ -46,19 +106,19 @@
         <div id="eyebrow">Agentic Coding 101</div>
       </div>
 
-      <div id="what" class="scene" data-composition-id="what" data-composition-src="compositions/what.html" data-start="0" data-duration="18.463" data-track-index="1" data-width="1920" data-height="1080"></div>
-      <div id="how" class="scene" data-composition-id="how" data-composition-src="compositions/how.html" data-start="18.463" data-duration="23.155" data-track-index="1" data-width="1920" data-height="1080"></div>
-      <div id="example" class="scene" data-composition-id="example" data-composition-src="compositions/example.html" data-start="41.618" data-duration="23.113" data-track-index="1" data-width="1920" data-height="1080"></div>
-      <div id="gotchas" class="scene" data-composition-id="gotchas" data-composition-src="compositions/gotchas.html" data-start="64.731" data-duration="21.915" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="what" class="scene" data-composition-id="what" data-composition-src="compositions/what.html" data-start="0" data-duration="18.088" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="how" class="scene" data-composition-id="how" data-composition-src="compositions/how.html" data-start="18.088" data-duration="22.013" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="example" class="scene" data-composition-id="example" data-composition-src="compositions/example.html" data-start="40.101" data-duration="22.162" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="gotchas" class="scene" data-composition-id="gotchas" data-composition-src="compositions/gotchas.html" data-start="62.263" data-duration="20.55" data-track-index="1" data-width="1920" data-height="1080"></div>
 
       <!-- Narration with the music bed ducked under it, from shared/mix.mjs. -->
-      <audio id="soundtrack" src="assets/vo/mix.wav" data-start="0" data-duration="86.646" data-track-index="3" data-volume="1"></audio>
+      <audio id="soundtrack" src="assets/vo/mix.wav" data-start="0" data-duration="82.813" data-track-index="3" data-volume="1"></audio>
     </div>
     <script>
       ;(() => {
         const tl = gsap.timeline({ paused: true })
         // The trace fills once over the whole clip, the way a commissioning run advances.
-        tl.fromTo("#trace", { scaleX: 0 }, { scaleX: 1, duration: 86.646, ease: "none" }, 0)
+        tl.fromTo("#trace", { scaleX: 0 }, { scaleX: 1, duration: 82.813, ease: "none" }, 0)
         window.__timelines["main"] = tl
       })()
     </script>

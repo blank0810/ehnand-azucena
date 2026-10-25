@@ -1,73 +1,73 @@
 WEBVTT
 
-00:00:00.600 --> 00:00:05.293
+00:00:00.600 --> 00:00:04.760
 A rules file is plain Markdown the agent reads at the start of every session.
 
-00:00:05.643 --> 00:00:08.031
+00:00:05.110 --> 00:00:07.429
 Claude Code calls it CLAUDE.md.
 
-00:00:08.031 --> 00:00:11.574
+00:00:07.429 --> 00:00:10.870
 Codex and many other agents call it AGENTS.md.
 
-00:00:11.924 --> 00:00:14.214
+00:00:11.220 --> 00:00:13.319
 Put in it what you'd tell a new teammate:
 
-00:00:14.214 --> 00:00:18.068
+00:00:13.319 --> 00:00:16.852
 build commands, conventions, where things live, and what never to do.
 
-00:00:19.468 --> 00:00:21.601
+00:00:18.252 --> 00:00:20.492
 Rules load from broad to specific.
 
-00:00:21.951 --> 00:00:25.301
+00:00:20.842 --> 00:00:24.048
 Your organization's file, then yours, then the project's,
 
-00:00:25.301 --> 00:00:28.415
+00:00:24.048 --> 00:00:27.029
 then any folder below it, once the agent works there.
 
-00:00:28.765 --> 00:00:32.584
+00:00:27.379 --> 00:00:31.027
 They're combined, not replaced, and the closest one is read last.
 
-00:00:32.934 --> 00:00:35.292
+00:00:31.377 --> 00:00:33.632
 All of it is sent with every request,
 
-00:00:35.292 --> 00:00:37.841
+00:00:33.632 --> 00:00:36.070
 so every line costs context, every time.
 
-00:00:39.241 --> 00:00:40.371
+00:00:37.470 --> 00:00:38.793
 Here's a short one.
 
-00:00:40.721 --> 00:00:45.521
+00:00:39.143 --> 00:00:43.388
 It says: use pnpm, not npm, and run the tests before committing.
 
-00:00:45.871 --> 00:00:48.266
+00:00:43.738 --> 00:00:46.063
 An @ import pulls in another file,
 
-00:00:48.266 --> 00:00:51.717
+00:00:46.063 --> 00:00:49.413
 like the AGENTS.md your other tools already read.
 
-00:00:52.067 --> 00:00:55.592
+00:00:49.763 --> 00:00:52.987
 And a rule in .claude/rules can carry a paths field,
 
-00:00:55.592 --> 00:00:59.320
+00:00:52.987 --> 00:00:56.397
 so it loads only when the agent touches matching files.
 
-00:01:00.720 --> 00:01:02.736
+00:00:57.797 --> 00:00:59.678
 Keep it under two hundred lines.
 
-00:01:02.736 --> 00:01:06.139
+00:00:59.678 --> 00:01:02.853
 Longer files cost more context, and get followed less.
 
-00:01:06.489 --> 00:01:11.075
+00:01:03.203 --> 00:01:07.577
 Imports organize a file, but they don't shrink it: imported files load too.
 
-00:01:11.425 --> 00:01:15.648
+00:01:07.927 --> 00:01:11.936
 If two rules contradict each other, the agent may pick one arbitrarily,
 
-00:01:15.648 --> 00:01:16.481
+00:01:11.936 --> 00:01:12.727
 so prune them.
 
-00:01:16.831 --> 00:01:18.415
+00:01:13.077 --> 00:01:14.567
 Codex reads AGENTS.md,
 
-00:01:18.415 --> 00:01:22.591
+00:01:14.567 --> 00:01:18.495
 and stops adding files at thirty-two kilobytes by default.

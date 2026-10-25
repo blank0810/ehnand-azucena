@@ -1,6 +1,6 @@
-// Voices a clip's script.json with Kokoro af_heart, one line at a time, so
+// Voices a clip's script.json with Kokoro bf_emma, one line at a time, so
 // every line's start is exact. Writes, inside the clip folder:
-//   assets/vo/narration.wav   one track, lines joined with fixed gaps, -16 LUFS
+//   assets/vo/narration.wav   one track, lines joined with fixed gaps, -21 LUFS
 //   assets/timing.js          window.__vo: line and scene windows, in seconds
 //   captions.vtt              cues from the same times; "|" in a line's text
 //                             splits it into cues, timed by share of characters
@@ -15,7 +15,8 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
-const VOICE = "af_heart"
+// bf_emma replaced af_heart on 2026-10-25: the owner heard static in af_heart.
+const VOICE = "bf_emma"
 const SPEED = Number(process.env.SPEED || 1)
 const LEAD = 0.6 // silence before the first line
 const LINE_GAP = 0.35 // between lines in a scene
@@ -75,13 +76,20 @@ const inputs = ["-f", "lavfi", "-t", String(LEAD), "-i", "anullsrc=r=24000:cl=mo
 const pads = lines.map((l, k) => `[${k + 1}]aresample=24000,aformat=channel_layouts=mono,apad=pad_dur=${l.gap}[a${k}]`).join(";")
 const chain = `[0]${lines.map((_, k) => `[a${k}]`).join("")}concat=n=${lines.length + 1}:v=0:a=1[out]`
 execFileSync("ffmpeg", ["-v", "error", "-y", ...inputs, "-filter_complex", `${pads};${chain}`, "-map", "[out]", raw])
-const target = "I=-16:TP=-1.5:LRA=11"
-// loudnorm reports its measurement as JSON on stderr.
-const loudness = (path) =>
-  JSON.parse(spawnSync("ffmpeg", ["-hide_banner", "-i", path, "-af", `loudnorm=${target}:print_format=json`, "-f", "null", "-"]).stderr.toString().match(/\{[\s\S]*\}/)[0])
-const measured = loudness(raw)
-const second = `loudnorm=${target}:measured_I=${measured.input_i}:measured_TP=${measured.input_tp}:measured_LRA=${measured.input_lra}:measured_thresh=${measured.input_thresh}:offset=${measured.target_offset}:linear=true`
-execFileSync("ffmpeg", ["-v", "error", "-y", "-i", raw, "-af", second, "-ar", "48000", "-ac", "1", join(vo, "narration.wav")])
+// The voice gets one fixed gain and nothing else. Every automatic level stage
+// tried (click removal, limiting, loudnorm's dynamic mode, ducking) was heard as
+// static, so the target is set low enough that Kokoro's sharp peaks fit under
+// -1 dBTP without one: -21 LUFS, or quieter if a clip's peaks demand it.
+const VOICE_LUFS = -21
+const PEAK_CEILING = -1
+const measure = (path) =>
+  JSON.parse(spawnSync("ffmpeg", ["-hide_banner", "-i", path, "-af", "loudnorm=print_format=json", "-f", "null", "-"]).stderr.toString().match(/\{[\s\S]*\}/)[0])
+const resampled = join(cache, "narration-48k.wav")
+execFileSync("ffmpeg", ["-v", "error", "-y", "-i", raw, "-af", "aresample=48000:resampler=soxr:precision=28", "-c:a", "pcm_f32le", resampled])
+const before = measure(resampled)
+const gain = Math.min(VOICE_LUFS - Number(before.input_i), PEAK_CEILING - Number(before.input_tp))
+if (gain < VOICE_LUFS - Number(before.input_i)) console.warn(`note: peaks hold this clip at ${(Number(before.input_i) + gain).toFixed(1)} LUFS`)
+execFileSync("ffmpeg", ["-v", "error", "-y", "-i", resampled, "-af", `volume=${gain.toFixed(2)}dB`, "-ac", "1", "-c:a", "pcm_s16le", join(vo, "narration.wav")])
 
 // 4. Timing for the compositions.
 const timing = {
@@ -114,7 +122,7 @@ for (const line of lines) {
 }
 writeFileSync(join(clip, "captions.vtt"), `WEBVTT\n\n${cues.join("\n\n")}\n`)
 
-const out = loudness(join(vo, "narration.wav"))
+const out = measure(join(vo, "narration.wav"))
 const words = lines.reduce((n, l) => n + l.text.replaceAll("|", " ").split(/\s+/).length, 0)
 console.log(`${script.id}: ${total.toFixed(1)}s, ${lines.length} lines, ${words} words, ${out.input_i} LUFS`)
 for (const s of scenes) console.log(`  ${s.id.padEnd(8)} ${s.start.toFixed(2)} to ${s.end.toFixed(2)} (${(s.end - s.start).toFixed(1)}s)`)

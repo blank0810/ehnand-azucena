@@ -1,70 +1,70 @@
 WEBVTT
 
-00:00:00.600 --> 00:00:05.144
+00:00:00.600 --> 00:00:04.909
 Every setting, rule, skill and agent in your coding setup lives at a scope.
 
-00:00:05.494 --> 00:00:07.735
+00:00:05.259 --> 00:00:07.304
 The scope decides who it applies to:
 
-00:00:07.735 --> 00:00:11.595
+00:00:07.304 --> 00:00:10.827
 just you, everyone on the project, or your whole organization.
 
-00:00:12.495 --> 00:00:14.437
+00:00:12.227 --> 00:00:14.339
 Claude Code has four settings scopes.
 
-00:00:14.787 --> 00:00:19.373
+00:00:14.689 --> 00:00:18.999
 User settings, in your home .claude folder, follow you into every project.
 
-00:00:19.723 --> 00:00:22.866
+00:00:19.349 --> 00:00:22.264
 Shared project settings are committed to the repository,
 
-00:00:22.866 --> 00:00:24.438
+00:00:22.264 --> 00:00:23.722
 so the whole team gets them.
 
-00:00:24.788 --> 00:00:28.223
+00:00:24.072 --> 00:00:27.357
 Project local settings are yours alone, in one project.
 
-00:00:28.573 --> 00:00:31.384
+00:00:27.707 --> 00:00:30.426
 When two disagree, the more specific scope wins,
 
-00:00:31.384 --> 00:00:35.015
+00:00:30.426 --> 00:00:33.937
 and managed settings from your organization override them all.
 
-00:00:35.915 --> 00:00:38.049
+00:00:35.337 --> 00:00:37.513
 The same split runs through every layer.
 
-00:00:38.399 --> 00:00:41.617
+00:00:37.863 --> 00:00:40.642
 Rules: a CLAUDE.md for you, one for the project,
 
-00:00:41.617 --> 00:00:44.500
+00:00:40.642 --> 00:00:43.132
 and a local one that stays on your machine.
 
-00:00:44.850 --> 00:00:49.437
+00:00:43.482 --> 00:00:47.621
 Skills and agents: a folder in .claude, at home or in the project.
 
-00:00:49.787 --> 00:00:55.696
+00:00:47.971 --> 00:00:53.389
 MCP servers: your user config, or a .mcp.json the team commits.
 
-00:00:56.046 --> 00:01:00.123
+00:00:53.739 --> 00:00:57.649
 Rules files don't replace each other: they all load, broadest first.
 
-00:01:00.123 --> 00:01:01.742
+00:00:57.649 --> 00:00:59.201
 Permission lists merge too.
 
-00:01:02.642 --> 00:01:06.403
+00:01:00.601 --> 00:01:04.088
 Rule of thumb: if it's true in every repo, put it in user scope.
 
-00:01:06.403 --> 00:01:09.106
+00:01:04.088 --> 00:01:06.595
 If a teammate needs it, put it in the project.
 
-00:01:09.456 --> 00:01:14.280
+00:01:06.945 --> 00:01:11.351
 One trap: a local settings file you make by hand isn't ignored by git.
 
-00:01:14.280 --> 00:01:16.347
+00:01:11.351 --> 00:01:13.239
 Add it to .gitignore yourself.
 
-00:01:16.697 --> 00:01:20.830
+00:01:13.589 --> 00:01:17.484
 Codex keeps the same split, with .codex at home and in the project,
 
-00:01:20.830 --> 00:01:24.099
+00:01:17.484 --> 00:01:20.565
 and it skips the project's folder until you trust it.

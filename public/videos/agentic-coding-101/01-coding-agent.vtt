@@ -1,76 +1,76 @@
 WEBVTT
 
-00:00:00.600 --> 00:00:03.971
+00:00:00.600 --> 00:00:03.651
 A coding agent is a model that uses tools in a loop.
 
-00:00:04.321 --> 00:00:07.009
+00:00:04.001 --> 00:00:06.646
 It isn't autocomplete, and it isn't a chatbot.
 
-00:00:07.359 --> 00:00:10.141
+00:00:06.996 --> 00:00:09.641
 It reads files, runs commands and edits code,
 
-00:00:10.141 --> 00:00:13.417
+00:00:09.641 --> 00:00:12.756
 from a terminal, an editor, a desktop app or the web.
 
-00:00:13.767 --> 00:00:16.069
+00:00:13.106 --> 00:00:15.292
 It picks which tools to use from your prompt,
 
-00:00:16.069 --> 00:00:18.013
+00:00:15.292 --> 00:00:17.138
 and from what it learns along the way.
 
-00:00:18.913 --> 00:00:21.451
+00:00:18.538 --> 00:00:21.034
 Give it a task, and it works in three phases.
 
-00:00:21.801 --> 00:00:25.553
+00:00:21.384 --> 00:00:24.805
 It gathers context, takes action, then verifies the result,
 
-00:00:25.553 --> 00:00:28.351
+00:00:24.805 --> 00:00:27.357
 and goes round again until the task is done.
 
-00:00:28.701 --> 00:00:30.447
+00:00:27.707 --> 00:00:29.302
 You can step in at any point.
 
-00:00:30.447 --> 00:00:34.119
+00:00:29.302 --> 00:00:32.657
 Press Escape to stop it, or type a correction and it adjusts.
 
-00:00:34.469 --> 00:00:37.074
+00:00:33.007 --> 00:00:35.396
 Risky actions are checked before they run:
 
-00:00:37.074 --> 00:00:41.168
+00:00:35.396 --> 00:00:39.151
 in manual mode it asks you, in auto mode a classifier blocks them.
 
-00:00:42.068 --> 00:00:45.524
+00:00:40.551 --> 00:00:43.879
 Before you type a word, its context window is already filling.
 
-00:00:45.874 --> 00:00:49.682
+00:00:44.229 --> 00:00:47.654
 System instructions. Your CLAUDE.md. Saved memory.
 
-00:00:49.682 --> 00:00:54.557
+00:00:47.654 --> 00:00:52.037
 A short description of every skill. The names of your MCP tools.
 
-00:00:54.907 --> 00:00:58.320
+00:00:52.387 --> 00:00:55.565
 Then your prompt, and everything it reads and runs after that.
 
-00:00:58.670 --> 00:01:02.177
+00:00:55.915 --> 00:00:59.289
 When the window gets full, old tool output is cleared first,
 
-00:01:02.177 --> 00:01:04.281
+00:00:59.289 --> 00:01:01.313
 then the conversation is summarized.
 
-00:01:05.181 --> 00:01:09.805
+00:01:02.713 --> 00:01:06.980
 So context is a budget, and every layer in this series spends some of it.
 
-00:01:09.805 --> 00:01:13.479
+00:01:06.980 --> 00:01:10.371
 Slash context shows what loaded, and what each part costs.
 
-00:01:13.829 --> 00:01:17.702
+00:01:10.721 --> 00:01:14.266
 Codex, Cursor, Gemini CLI and Copilot run the same loop,
 
-00:01:17.702 --> 00:01:20.123
+00:01:14.266 --> 00:01:16.481
 with their own names for the parts.
 
-00:01:20.473 --> 00:01:22.281
+00:01:16.831 --> 00:01:18.560
 Everyone rents the same models.
 
-00:01:22.281 --> 00:01:24.846
+00:01:18.560 --> 00:01:21.013
 The setup around them is the part you build.

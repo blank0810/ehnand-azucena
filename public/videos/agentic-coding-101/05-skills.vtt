@@ -1,82 +1,82 @@
 WEBVTT
 
-00:00:00.600 --> 00:00:03.617
+00:00:00.600 --> 00:00:03.341
 A skill is a folder with a SKILL.md inside:
 
-00:00:03.617 --> 00:00:06.424
+00:00:03.341 --> 00:00:05.891
 a name, a description, and instructions.
 
-00:00:06.774 --> 00:00:09.014
+00:00:06.241 --> 00:00:08.609
 It can carry scripts and reference files too.
 
-00:00:09.364 --> 00:00:11.340
+00:00:08.959 --> 00:00:10.823
 Skills follow an open standard,
 
-00:00:11.340 --> 00:00:14.271
+00:00:10.823 --> 00:00:13.588
 so Claude Code and Codex read the same format.
 
-00:00:15.671 --> 00:00:17.207
+00:00:14.988 --> 00:00:16.652
 Skills load in stages.
 
-00:00:17.557 --> 00:00:21.354
+00:00:17.002 --> 00:00:20.650
 At the start, only each skill's name and description are in context.
 
-00:00:21.704 --> 00:00:25.455
+00:00:21.000 --> 00:00:24.451
 When a task matches the description, or you type its slash name,
 
-00:00:25.455 --> 00:00:27.037
+00:00:24.451 --> 00:00:25.907
 the full instructions load.
 
-00:00:27.387 --> 00:00:31.642
+00:00:26.257 --> 00:00:30.073
 Scripts and reference files load only when the instructions need them,
 
-00:00:31.642 --> 00:00:35.046
+00:00:30.073 --> 00:00:33.126
 so a long list of skills costs little until one is used.
 
-00:00:36.446 --> 00:00:38.494
+00:00:34.526 --> 00:00:36.574
 These clips were built with a video skill.
 
-00:00:38.844 --> 00:00:41.049
+00:00:36.924 --> 00:00:38.954
 It carried rules that weren't obvious:
 
-00:00:41.049 --> 00:00:46.097
+00:00:38.954 --> 00:00:43.601
 the first frame becomes the thumbnail, and text under twenty-eight pixels gets flagged.
 
-00:00:46.447 --> 00:00:48.040
+00:00:43.951 --> 00:00:45.494
 None of that was in a prompt.
 
-00:00:48.040 --> 00:00:50.458
+00:00:45.494 --> 00:00:47.834
 The skill loaded it when the task needed it.
 
-00:00:50.808 --> 00:00:53.458
+00:00:48.184 --> 00:00:50.738
 It also knew how to check and render each clip,
 
-00:00:53.458 --> 00:00:55.544
+00:00:50.738 --> 00:00:52.749
 so that part never needed explaining.
 
-00:00:56.944 --> 00:00:58.681
+00:00:54.149 --> 00:00:55.833
 The description is the trigger,
 
-00:00:58.681 --> 00:01:01.147
+00:00:55.833 --> 00:00:58.224
 so write it as "Use when" and the situation.
 
-00:01:01.497 --> 00:01:05.593
+00:00:58.574 --> 00:01:02.499
 Every description costs context on every request, so keep them short.
 
-00:01:05.943 --> 00:01:10.103
+00:01:02.849 --> 00:01:06.988
 If a personal skill and a project skill share a name, the personal one wins.
 
-00:01:10.453 --> 00:01:13.589
+00:01:07.338 --> 00:01:10.367
 When you paste the same playbook a third time, make it a skill.
 
-00:01:13.939 --> 00:01:16.495
+00:01:10.717 --> 00:01:13.250
 A long procedure can run in its own subagent,
 
-00:01:16.495 --> 00:01:18.653
+00:01:13.250 --> 00:01:15.389
 so it doesn't flood your conversation.
 
-00:01:19.003 --> 00:01:21.723
+00:01:15.739 --> 00:01:18.253
 Codex reads skills from .agents/skills,
 
-00:01:21.723 --> 00:01:25.489
+00:01:18.253 --> 00:01:21.734
 and you call one by typing a dollar sign and its name.

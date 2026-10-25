@@ -1,67 +1,67 @@
 WEBVTT
 
-00:00:00.600 --> 00:00:04.099
+00:00:00.600 --> 00:00:04.013
 The layers shape the agent. A few features shape each session.
 
-00:00:04.449 --> 00:00:09.163
+00:00:04.363 --> 00:00:08.523
 Four worth knowing on day one: steer, undo, inspect, and run in parallel.
 
-00:00:10.563 --> 00:00:15.427
+00:00:09.923 --> 00:00:14.531
 Shift+Tab cycles the permission modes: auto, manual, accept edits, and plan.
 
-00:00:15.777 --> 00:00:18.116
+00:00:14.881 --> 00:00:17.072
 Auto is the default in the terminal:
 
-00:00:18.116 --> 00:00:21.495
+00:00:17.072 --> 00:00:20.236
 a classifier blocks risky actions instead of asking.
 
-00:00:21.845 --> 00:00:23.916
+00:00:20.586 --> 00:00:22.606
 Plan mode explores and writes a plan,
 
-00:00:23.916 --> 00:00:27.050
+00:00:22.606 --> 00:00:25.663
 without touching your source files until you approve it.
 
-00:00:28.450 --> 00:00:30.773
+00:00:27.063 --> 00:00:29.247
 Press Escape twice, or type /rewind,
 
-00:00:30.773 --> 00:00:33.805
+00:00:29.247 --> 00:00:32.098
 to restore the code, the conversation, or both.
 
-00:00:34.155 --> 00:00:37.308
+00:00:32.448 --> 00:00:35.494
 It won't undo files that only shell commands changed,
 
-00:00:37.308 --> 00:00:39.211
+00:00:35.494 --> 00:00:37.333
 and it's no replacement for git.
 
-00:00:39.561 --> 00:00:44.382
+00:00:37.683 --> 00:00:42.398
 Checkpoints are saved with the conversation, so rewind still works after you resume.
 
-00:00:45.782 --> 00:00:49.238
+00:00:43.798 --> 00:00:47.190
 /context shows what loaded, and what each part costs.
 
-00:00:49.588 --> 00:00:54.047
+00:00:47.540 --> 00:00:51.359
 It also suggests what to trim when a tool or a memory file gets heavy.
 
-00:00:54.397 --> 00:00:58.663
+00:00:51.709 --> 00:00:55.911
 /doctor runs a checkup of your installation, settings and rules files.
 
-00:00:59.013 --> 00:01:00.955
+00:00:56.261 --> 00:00:58.181
 Check both before you blame the model.
 
-00:01:02.355 --> 00:01:06.378
+00:00:59.581 --> 00:01:03.313
 Start with --worktree, and each session gets its own checkout,
 
-00:01:06.378 --> 00:01:08.520
+00:01:03.313 --> 00:01:05.299
 so parallel work doesn't collide.
 
-00:01:08.870 --> 00:01:13.571
+00:01:05.649 --> 00:01:09.935
 Then subagents for side tasks, agent view to watch background sessions,
 
-00:01:13.571 --> 00:01:17.809
+00:01:09.935 --> 00:01:13.798
 and agent teams, still experimental, for agents that coordinate.
 
-00:01:18.159 --> 00:01:19.842
+00:01:14.148 --> 00:01:15.688
 Codex has the same ideas:
 
-00:01:19.842 --> 00:01:25.903
+00:01:15.688 --> 00:01:21.231
 /permissions for approvals and the sandbox, and /review for a second look at your changes.

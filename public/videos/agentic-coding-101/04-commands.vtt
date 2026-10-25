@@ -1,70 +1,70 @@
 WEBVTT
 
-00:00:00.600 --> 00:00:03.181
+00:00:00.600 --> 00:00:03.139
 A command is a saved prompt behind a slash.
 
-00:00:03.531 --> 00:00:06.454
+00:00:03.489 --> 00:00:06.369
 Type a slash and its name, and the agent runs it.
 
-00:00:06.804 --> 00:00:12.715
+00:00:06.719 --> 00:00:12.134
 Built-in ones run the session itself: /clear starts fresh, /compact summarizes,
 
-00:00:12.715 --> 00:00:16.980
+00:00:12.134 --> 00:00:16.041
 /context shows what's loaded, and /model switches models.
 
-00:00:18.380 --> 00:00:20.599
+00:00:17.441 --> 00:00:19.639
 Your own commands are now part of skills.
 
-00:00:20.949 --> 00:00:27.850
+00:00:19.989 --> 00:00:26.169
 A file at .claude/commands/deploy.md and a skill at .claude/skills/deploy
 
-00:00:27.850 --> 00:00:29.930
+00:00:26.169 --> 00:00:28.031
 both give you /deploy.
 
-00:00:30.280 --> 00:00:34.267
+00:00:28.381 --> 00:00:32.057
 Whatever you type after the name arrives as $ARGUMENTS,
 
-00:00:34.267 --> 00:00:37.384
+00:00:32.057 --> 00:00:34.931
 so /deploy staging passes the word staging.
 
-00:00:37.734 --> 00:00:42.641
+00:00:35.281 --> 00:00:39.995
 Put one in your home .claude folder instead, and it follows you into every project.
 
-00:00:44.041 --> 00:00:45.555
+00:00:41.395 --> 00:00:43.145
 Here's that deploy command.
 
-00:00:45.905 --> 00:00:49.120
+00:00:43.495 --> 00:00:46.709
 Its frontmatter sets disable-model-invocation to true,
 
-00:00:49.120 --> 00:00:50.727
+00:00:46.709 --> 00:00:48.316
 so only you can trigger it.
 
-00:00:51.077 --> 00:00:53.769
+00:00:48.666 --> 00:00:51.041
 Its body is just the steps, in plain words:
 
-00:00:53.769 --> 00:00:57.775
+00:00:51.041 --> 00:00:54.575
 build, run the checks, then deploy to the environment you named.
 
-00:00:58.125 --> 00:01:02.115
+00:00:54.925 --> 00:00:58.509
 You don't want an agent deciding to deploy because the code looks ready.
 
-00:01:02.465 --> 00:01:06.454
+00:00:58.859 --> 00:01:02.657
 And until you run it, its description stays out of context entirely.
 
-00:01:07.854 --> 00:01:11.587
+00:01:04.057 --> 00:01:07.705
 The signal to make one: you've typed the same opening prompt again.
 
-00:01:11.937 --> 00:01:16.716
+00:01:08.055 --> 00:01:12.641
 Commit it to the project's .claude folder, and the whole team gets the same command.
 
-00:01:17.066 --> 00:01:20.906
+00:01:12.991 --> 00:01:16.511
 Keep anything with side effects, like deploys and commits, manual.
 
-00:01:21.256 --> 00:01:25.864
+00:01:16.861 --> 00:01:21.128
 Codex has its own built-ins, like /init, /review and /model.
 
-00:01:26.214 --> 00:01:28.198
+00:01:21.478 --> 00:01:23.400
 Its custom prompts are deprecated,
 
-00:01:28.198 --> 00:01:31.057
+00:01:23.400 --> 00:01:26.171
 so for your own commands in Codex, write a skill.

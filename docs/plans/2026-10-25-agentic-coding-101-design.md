@@ -15,7 +15,7 @@ Publish an explainer article, *Agentic Coding 101*, with one narrated clip per s
 | Spine | "Build up a setup": thirteen sections in three parts |
 | Delivery | One clip per section for sections 01 to 10, each about 1:30, embedded under its heading; 00, 11 and 12 are text only |
 | Playback | Press to play, never autoplay; captions on by default |
-| Voice | Kokoro `af_heart` (Apache 2.0, local), chosen from a six-voice listening test |
+| Voice | Kokoro `bf_emma` (Apache 2.0, local). `af_heart` won the first listening test but was replaced on 2026-10-25, after publishing, because the owner heard static in it |
 | Hosting | Self-hosted static assets, routed through the Worker with Workers Caching so range requests work |
 | Plugins recommended | superpowers, playwright, security-guidance, claude-code-setup, each with an example of it in use |
 
@@ -144,9 +144,9 @@ Production Trace tokens and IBM Plex, light theme only. Chapter rail 01 to 10 wi
 ### Per clip
 
 1. Script of about 220 words, split into lines. The narration says everything important that is on screen, so no separate audio description is needed (WCAG 1.2.5).
-2. Kokoro `af_heart` voices each line separately; exact line starts drive the timeline so reveals land on the words that name them.
+2. Kokoro `bf_emma` voices each line separately; exact line starts drive the timeline so reveals land on the words that name them.
 3. Captions (WebVTT) from the exact line times, at most two lines per cue.
-4. Render 1920x1080 at 30 fps, h264 with `+faststart`; mono AAC voice; loudness -16 LUFS. Expect 3 to 4 MB per clip, well under the 25 MiB asset limit.
+4. Render 1920x1080 at 30 fps, h264 with `+faststart`; AAC; voice at -21 LUFS with one fixed gain, the music on a scripted curve under it, and no automatic level processing (heard as static). Expect 3 to 4 MB per clip, well under the 25 MiB asset limit.
 5. Done only when: `hyperframes check` passes (lint, layout, contrast, craft), a listening pass is clean, every claim maps to a source URL in the clip's sources list, and captions are in sync.
 
 ### Order

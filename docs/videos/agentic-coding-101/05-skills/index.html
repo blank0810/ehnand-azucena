@@ -11,12 +11,10 @@
     <script src="assets/timing.js"></script>
     <script>
       // Scene kit for clips 03 to 10, inlined into each clip's index.html by shell.mjs.
-      // A scene creates its own paused timeline, asks the kit for helpers bound to it,
-      // and registers the timeline itself:
-      //   const tl = gsap.timeline({ paused: true })
-      //   const k = window.__kit(tl, "how")
-      //   k.rise("#row", k.at("l04", "user settings"))
-      //   window.__timelines["how"] = tl
+      // A scene creates its own paused timeline, asks the kit for helpers bound to it
+      // (window.__kit(tl, sceneId)), then registers the timeline under its own scene id.
+      // Example: k.rise("#row", k.at("l04", "user settings")) raises #row as the
+      // narration reaches "user settings" in line l04.
       // Every tween states both ends (fromTo), so any frame renders from its time alone.
       window.__kit = (tl, scene) => {
         const V = window.__vo
@@ -99,7 +97,7 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="87.289" data-width="1920" data-height="1080">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="83.534" data-width="1920" data-height="1080">
       <div id="shell">
         <div id="rail">
           <span>01</span><span>02</span><span>03</span><span>04</span><span class="on">05 Skills</span><span>06</span><span>07</span><span>08</span><span>09</span><span>10</span>
@@ -108,19 +106,19 @@
         <div id="eyebrow">Agentic Coding 101</div>
       </div>
 
-      <div id="what" class="scene" data-composition-id="what" data-composition-src="compositions/what.html" data-start="0" data-duration="15.221" data-track-index="1" data-width="1920" data-height="1080"></div>
-      <div id="how" class="scene" data-composition-id="how" data-composition-src="compositions/how.html" data-start="15.221" data-duration="20.775" data-track-index="1" data-width="1920" data-height="1080"></div>
-      <div id="example" class="scene" data-composition-id="example" data-composition-src="compositions/example.html" data-start="35.996" data-duration="20.498" data-track-index="1" data-width="1920" data-height="1080"></div>
-      <div id="gotchas" class="scene" data-composition-id="gotchas" data-composition-src="compositions/gotchas.html" data-start="56.494" data-duration="30.795" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="what" class="scene" data-composition-id="what" data-composition-src="compositions/what.html" data-start="0" data-duration="14.538" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="how" class="scene" data-composition-id="how" data-composition-src="compositions/how.html" data-start="14.538" data-duration="19.538" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="example" class="scene" data-composition-id="example" data-composition-src="compositions/example.html" data-start="34.076" data-duration="19.623" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div id="gotchas" class="scene" data-composition-id="gotchas" data-composition-src="compositions/gotchas.html" data-start="53.699" data-duration="29.835" data-track-index="1" data-width="1920" data-height="1080"></div>
 
       <!-- Narration with the music bed ducked under it, from shared/mix.mjs. -->
-      <audio id="soundtrack" src="assets/vo/mix.wav" data-start="0" data-duration="87.289" data-track-index="3" data-volume="1"></audio>
+      <audio id="soundtrack" src="assets/vo/mix.wav" data-start="0" data-duration="83.534" data-track-index="3" data-volume="1"></audio>
     </div>
     <script>
       ;(() => {
         const tl = gsap.timeline({ paused: true })
         // The trace fills once over the whole clip, the way a commissioning run advances.
-        tl.fromTo("#trace", { scaleX: 0 }, { scaleX: 1, duration: 87.289, ease: "none" }, 0)
+        tl.fromTo("#trace", { scaleX: 0 }, { scaleX: 1, duration: 83.534, ease: "none" }, 0)
         window.__timelines["main"] = tl
       })()
     </script>
