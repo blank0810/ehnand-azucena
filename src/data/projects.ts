@@ -41,6 +41,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "two-way-google-sheets-sync-overwrites-edits",
     "self-host-trigger-dev-vs-cloud-cost",
     "deploy-stops-halfway-make-state-valid",
+    "timeout-every-run-design-nobody-chose",
   ],
   repsshield: [
     "working-function-proves-only-paths-reached",
@@ -65,6 +66,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "implementer-sandbox-verification-boundary",
     "lookalike-instrument-correlated-error",
     "agentic-coding-101",
+    "laravel-route-redirect-every-verb-query-string",
     "late-penalty-part-paid-bill-base",
     "deploy-stops-halfway-make-state-valid",
     "php-memory-limit-ignored-artisan-test",

@@ -1,0 +1,151 @@
+---
+title: "Laravel Route::redirect Matches Every HTTP Verb and Drops the Query String"
+seoTitle: "Laravel Route::redirect: POST Lost, Query String Gone"
+date: 2026-11-09
+category: "Engineering Practice & Reliability"
+tags: [laravel, routing, php, http-redirects, testing]
+summary: "Laravel's Route::redirect registers through any(), so it answers POST as well as GET and can silently replace a form's save route, and it never forwards the query string. Measured on Laravel 13.40.0, with the small controller that fixes both."
+---
+
+I was moving a settings page in a Laravel water billing system. The page's old URL also had a `POST` route that saved the form, and old links to it needed to open the new location. The obvious line is `Route::redirect`.
+
+I read the framework source before using it, and that line would have taken the form's save route with it. Depending on which of two lines came first, the form either kept saving or stopped saving, with no error either way. Five days later it turned out `Route::redirect` also discards the query string, on pages whose old URLs were stored in notifications.
+
+Neither behaviour is in the [redirect routes documentation](https://laravel.com/docs/13.x/routing#redirect-routes), which calls the method "a convenient shortcut". Both are visible in about ten lines of framework code.
+
+**`Route::redirect` is not a GET redirect. It claims every HTTP verb on that URI and forwards only path parameters, so use it only where nothing else lives on the URI and no query string matters.**
+
+## Does Route::redirect work for POST requests?
+
+Yes, `Route::redirect` answers POST, and that is the problem. It registers through `any()`, so it answers every HTTP verb on that URI, including DELETE, and can replace a form's save route. This is `Router.php` on Laravel 13.40.0:
+
+```php
+public function redirect($uri, $destination, $status = 302)
+{
+    return $this->any($uri, '\Illuminate\Routing\RedirectController')
+        ->defaults('destination', $destination)
+        ->defaults('status', $status);
+}
+```
+
+Asking the route object directly shows the difference:
+
+| Route | Verbs it answers |
+|---|---|
+| `Route::redirect('/old', '/new')` | `GET`, `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`, `QUERY` |
+| `Route::get('/old', ...)` | `GET`, `HEAD` |
+
+So a `DELETE /old` gets a redirect too, not a `405`.
+
+## What happens when a redirect shares a URI with a POST route?
+
+The later registration wins for that verb, with no warning. Laravel's route collection is keyed by method and URI, so a second route with the same key replaces the first. Here is the same pair of routes in both orders, on a fresh 13.40.0 install:
+
+| Order in the routes file | `POST` response | Did the save handler run? |
+|---|---|---|
+| `Route::post(...)`, then `Route::redirect(...)` | `302` to the new page | **No** |
+| `Route::redirect(...)`, then `Route::post(...)` | `200` | Yes |
+
+The first row is the quiet failure. A browser follows a `302` from a form post with a `GET`, so the user lands on a working page, sees no error, and their change was never saved.
+
+The second row works, but only because of the order of two lines, and nothing in the file says the order matters. A reformat, a merge or someone tidying the routes can flip it.
+
+`route:list` will not raise the alarm either. It prints both routes with no warning. The rows follow registration order and the lower one wins for `POST`, which is easy to miss:
+
+```text
+POST       settings-a ..................................... routes/web.php:9
+ANY        settings-a .............. Illuminate\Routing › RedirectController
+```
+
+## Does Route::redirect keep the query string?
+
+No. `RedirectController` builds the new URL from the route's path parameters only, and it never reads the request's query:
+
+```php
+$parameters = $parameters->only(
+    $route->getCompiled()->getPathVariables()
+)->all();
+
+$url = $url->toRoute($route, $parameters, false);
+```
+
+Measured on 13.40.0:
+
+| Route | Request | `Location` |
+|---|---|---|
+| `Route::redirect('/old', '/new')` | `/old?type=transfer` | `/new` |
+| `Route::permanentRedirect('/old-perm', '/new')` | `/old-perm?a=1` | `/new` (301) |
+| `Route::redirect('/old-item/{id}', '/new-item/{id}')` | `/old-item/7?tab=2` | `/new-item/7` |
+| `Route::redirect('/old/{id}', '/unified?connection={id}')` | `/old/7` | `/unified?connection=7` |
+
+The last row surprised me. My own notes said a redirect could not turn a path parameter into a query parameter, based on reading the source. Running it shows that it can. The incoming query string is what gets lost.
+
+That matters most for links you no longer control. In my case, in-app notifications had already stored the old URLs. Bookmarks, emails and shared links behave the same way, and each one arrives at the new page without the filter or record it was pointing at.
+
+## The fix: a GET route and a small controller
+
+Register a plain `Route::get` to a controller that performs the redirect. `Route::get` claims only `GET` and `HEAD`, so it cannot collide with the `POST`, and the controller can carry the query string across. This is the controller that system uses:
+
+```php
+class MovedPageController extends Controller
+{
+    public function __invoke(Request $request): RedirectResponse
+    {
+        $route = $request->route();
+        $target = $route->defaults['to'];
+
+        foreach ($route->parameters() as $name => $value) {
+            if ($name !== 'to') {
+                $target = str_replace('{'.$name.'}', rawurlencode((string) $value), $target);
+            }
+        }
+
+        $query = $request->getQueryString();
+
+        return redirect()->to($target.($query ? (str_contains($target, '?') ? '&' : '?').$query : ''), 301);
+    }
+}
+```
+
+The target goes in a route default, so each move is one line:
+
+```php
+Route::get('/connection/{id}', MovedPageController::class)
+    ->defaults('to', '/unified?connection={id}');
+```
+
+I ran this against the same 13.40.0 install:
+
+| Request | Response |
+|---|---|
+| `GET /old-form?type=transfer` | `301` to `/new-form?type=transfer` |
+| `POST /old-form` (with its own `Route::post`) | `200`, the save handler ran |
+| `GET /connection/7` | `301` to `/unified?connection=7` |
+| `GET /connection/7?tab=2` | `301` to `/unified?connection=7&tab=2` |
+
+## When is Route::redirect still fine?
+
+When the URI has no other routes and the query string carries nothing you need. A retired marketing path going to its replacement is the case the shortcut was made for. It is a good method with a broader contract than its name suggests.
+
+## What this does not claim
+
+I measured this on Laravel 13.40.0 with PHP 8.5, and read the same code on 13.33.0 when the issue came up. I did not test older major versions, so check `Router.php` on yours. In this system the source was read before the redirect shipped, so no production form was lost to it, and the failure row above comes from a controlled test rather than an outage.
+
+## What to actually do
+
+1. **Search your routes for `Route::redirect` and `permanentRedirect`.** For each one, ask whether anything else is registered on that URI.
+2. **Use `Route::get` to a controller when the URI also has a `POST`.** Do not rely on the order of two lines, or on a comment asking people to preserve it.
+3. **Keep the query string deliberately.** Any redirect for a page that takes filters or IDs needs to forward `getQueryString()`.
+4. **Find the links you cannot change.** Stored notifications, emails and bookmarks are why old URLs need to keep working in full.
+5. **Test the verb that is not the redirect.** One feature test that `POST`s to the old URI and asserts the handler's side effect, not merely that a redirect came back.
+6. **Read `route:list --path=` with the verbs in mind.** An `ANY` next to a `POST` on the same URI is the sign to go and look.
+
+## The takeaway
+
+The method's name describes the common case and its signature hides the rest. Nothing fails when you use it wrong: the form appears to work, the link appears to work, and what is missing is a saved record or a filter nobody reports. The cost is lost data that looks like user error.
+
+> **`Route::redirect` takes every verb on the URI and leaves the query string behind. If either of those matters, write the one-line `Route::get`.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This came from the [water billing system](https://ehnand.com/projects/water-billing-system) I lead, which runs on Laravel. For another Laravel behaviour that only shows when you read what the framework actually does, see [Scheduling Jobs on a Machine That Is Off at Night](https://ehnand.com/articles/laravel-scheduler-catch-up-office-hours). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

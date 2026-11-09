@@ -1,0 +1,88 @@
+---
+title: "A Timeout That Fires Every Run Is a Design Nobody Chose"
+seoTitle: "A Timeout on Every Run Is a Design Nobody Chose"
+date: 2026-11-09
+category: "Engineering Practice & Reliability"
+tags: [reliability, timeouts, postgresql, background-jobs, observability]
+summary: "A 90-second timeout fired on 14 of 14 production runs, the job carried on using stale data, and the work it had given up on kept writing in the background. Why a timeout ends the wait and not the work, and how 20,112 single-row statements at 7.5 ms each became a sync that takes 8 seconds."
+---
+
+A scheduled matching job in [Adam AI](https://ehnand.com/projects/adam-ai) refreshes a mirror of its source data before it starts, with a 90-second limit on that step. In October 2026 I looked at the timing of every run since the 14th. That step had taken at least 90.6 seconds on **14 runs out of 14**.
+
+The timeout was not catching an occasional slow day. It fired every time, the job logged `pre-match sync failed/timed out; matching on existing mirror`, and it went ahead with data from before the sync. Meanwhile the sync it had stopped waiting for carried on writing in the background, so new data reached the results only on the following run.
+
+Nobody had decided the job should work like that. It had just become what the system did.
+
+**A timeout ends the wait, not the work. When one fires, the outcome is unknown, and when one fires on every run, it has quietly become your design.**
+
+## Does a timeout mean the work failed?
+
+No. The outcome is unknown: the caller stopped waiting, and the work may be finished, half-finished or still running.
+
+Reading "timed out" as "did not happen" fails in two ways. A retry can repeat work that did happen. And anything that reads next acts on a state that is about to change.
+
+The log line above shows how that reading gets built in. "Failed/timed out" puts two different situations under one label: the sync broke, or the sync is still running. In this job it was always the second.
+
+The better wording was already in another system of mine, a price-control panel for fuel stations. When a request to set station prices times out, the panel reports **"outcome unknown"**, because the station's agent may still apply the change after the panel gives up, and then it lets a person retry only the items that reported failure. That path has been exercised in a local test with a dropped request. I have no production timeout to show you on it, and the design is the point.
+
+## Why was the step so slow?
+
+Because it sent about 20,000 statements, one at a time, across a network.
+
+It was not the fetch, which took a few seconds at most, or the matching. The write used one statement per row inside a transaction, and every statement paid the round trip from the job platform to the database, about 7.5 milliseconds:
+
+| Feed on 21 October | Statements |
+|---|---|
+| Legal entities | 1,070 |
+| Documents (one upsert each) | 6,089 |
+| Delete old details (one per document) | 6,089 |
+| Details | 6,864 |
+| **Total** | **20,112** |
+
+Duration divided by statements matched the round trip on every day I checked: 7.3, 7.8, 7.2 and 7.6 milliseconds. The sync grew as the data grew, which is how it passed 90 seconds without anyone changing the code.
+
+## How much did chunked writes save?
+
+The sync went from about 150 seconds to about 8, by sending rows in chunks with upserts that take their values from `excluded`.
+
+| | Before | After |
+|---|---|---|
+| Whole sync, 21 October against 22 October | 152.3 s | 8.3 s |
+| Database write | Nearly all of it | 5.8 s |
+| Sync step inside a full run | At least 90.6 s, always cut off | 6.3 to 8.8 s |
+| Statements for a 200-document test feed | 813 | Under 40 |
+
+The behaviour stayed the same on purpose: the tenant ownership check, the full replacement of each document's details, and the pruning. There is a test that fails if the row-by-row write comes back.
+
+Both full runs the next day finished the step, in 8.8 and 6.3 seconds, so the job was matching on current data for the first time since at least the 14th.
+
+## Why did nobody have to act?
+
+Because the job succeeded, on every run.
+
+Each run finished green and produced results. It was just using data one sync behind. An investigation on 13 October had seen the step hit its cap, and the follow-up was still open a week later. The other outward sign was a parallel comparison job that could never line up its results with the old job's, because the old job read its inputs before the sync landed and the comparison read them after. It kept skipping runs as "inputs changed", and tracing that is what led to the timing data.
+
+A failure you can see gets fixed. A timeout that fires routinely gets logged, and then it gets read past.
+
+## What this does not claim
+
+It does not claim that matching on slightly older data was wrong for this business. That was never decided, which is the point, but the harm was limited to results arriving one run late. The 14 of 14 covers runs with a recorded sync from 14 October, and I do not know how long before that it started. A chunked write is the right fix for this particular cause, and your slow step may have a different one, so measure duration against statement count first.
+
+## What to actually do
+
+1. **Decide what the caller reports when a timeout fires.** Say "unknown" unless the timeout also cancels the work.
+2. **Either cancel the work or record that it continues.** A background writer nobody knows about is how reads go stale.
+3. **Check the far side before retrying.** Read the state the work would have changed, or make the operation safe to repeat.
+4. **Count how often each timeout fires.** Above a few percent it is no longer protecting you from an outlier, and it deserves a decision.
+5. **Divide duration by statement count.** If the answer looks like your network round trip, you do not have a slow query, you have too many of them.
+6. **Keep "failed" and "timed out" as separate words in your logs.** They need different responses.
+
+## The takeaway
+
+A timeout is usually added as a safety net, and then nobody reviews it again. If the thing it guards grows past the limit, the system does not fail. It changes behaviour, keeps reporting success, and hands you a slightly wrong answer on schedule. The cost is a decision about data freshness that was made by a constant.
+
+> **If a timeout fires on every run, it is no longer a safety net. It is your architecture, and someone should choose it.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This job runs in [Adam AI](https://ehnand.com/projects/adam-ai), where I am the lead developer. For what happens when the thing being waited for is a person, see [A Gate Built for a Person Waits Forever Where No Person Is](https://ehnand.com/articles/person-gates-hang-unattended-jobs). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*
