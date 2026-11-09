@@ -1,0 +1,164 @@
+---
+title: "react-pdf Only Looks Like CSS: Why lineHeight Ignored the Inherited Font Size, a Footer Jumped a Page, and a URL Grew a Hyphen"
+seoTitle: "react-pdf lineHeight Too Big? Why It Multiplies by 18"
+date: 2026-11-09
+category: "Engineering Practice & Reliability"
+tags: [react-pdf, pdf-generation, typescript, verification, testing]
+summary: "In react-pdf, a unitless lineHeight multiplies the fontSize in its own style object, or 18 if that style sets none, so 10pt text inherited from the page came out 24.3pt apart. Measured on three versions, with the two other layouts a browser never shows you: a footer that jumps a page and a URL that grows a hyphen."
+---
+
+On 30 October 2026 I worked on two invoice templates in two unrelated products, both built on `@react-pdf/renderer`. One used `lineHeight: 1.5` on 9pt text and looked right. The other used `lineHeight: 1.35` on 10pt address lines and printed them about 24pt apart.
+
+The same day produced a footer that moved alone to page 2 and a URL printed with a hyphen in the middle of it. None of the three showed in the JSX, and none showed in a test that reads the PDF's text.
+
+At the time I removed the property and moved on, and my notes record the line height as unexplained. For this article I rendered it again on three versions to find out why. The answer is one line of source.
+
+**react-pdf borrows CSS's property names, not its rules. A unitless `lineHeight` multiplies the font size declared in its own style object, or 18 if there is none. Put `fontSize` and `lineHeight` in the same style object, and look at a rendered worst-case page.**
+
+## Why is react-pdf lineHeight bigger than in a browser?
+
+Because a unitless `lineHeight` resolves against the `fontSize` in the same style object and falls back to 18 when that object has none. The inherited font size is never consulted.
+
+A browser does the opposite. [MDN defines the unitless value](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/line-height) as "multiplied by the element's own font size", which includes a size it inherited. This is the code in `@react-pdf/stylesheet` 6.3.2:
+
+```js
+const DEFAULT_FONT_SIZE = 18
+
+// processLineHeight
+const fontSize = transformUnit(container, styles.fontSize || DEFAULT_FONT_SIZE)
+const lineHeight = transformUnit(container, value)
+// ...
+return isNaN(Number(value)) ? lineHeight : lineHeight * fontSize
+```
+
+`styles` is the single style being processed. I measured what that does with `pdftotext -bbox`, for 10pt text:
+
+| Where the styles are set | Distance between lines |
+|---|---|
+| `fontSize: 10` on the `Page`, `lineHeight: 1.35` on the `Text` | **24.3pt** (1.35 × 18) |
+| `fontSize: 10` on a parent `View`, `lineHeight: 1.35` on the `Text` | **24.3pt** |
+| `lineHeight: 1.35` on the `Page`, `fontSize: 10` on the `Text` | **24.3pt** |
+| `{ fontSize: 10, lineHeight: 1.35 }` together on the `Text` | 13.5pt |
+| `[{ fontSize: 10 }, { lineHeight: 1.35 }]` as an array on the `Text` | 13.5pt |
+| Both on the `Page`, nothing on the `Text` | 13.5pt |
+| `fontSize: 10` on the `Page`, `lineHeight: "13.5pt"` on the `Text` | 13.5pt |
+| `fontSize: 10` on the `Page`, no `lineHeight` | 11.0pt |
+
+Every row was identical on versions 4.3.2, 4.5.1 and 4.9.0. Changing the page's font size to 8pt or to 20pt left the first row at exactly 24.3pt, because the page's font size plays no part. At 20pt that means lines closer together than a browser's 27pt, so the same mistake can read as too loose or too tight depending on the text size.
+
+This also explains why one template was fine and the other was not. Every `lineHeight` in the personal finance invoice sits in a style that also sets `fontSize`, such as `{ fontSize: 9, lineHeight: 1.5 }`. On the other invoice, the page set the size. I measured 27 pixels between lines at 80 dpi that day, which is 24.3pt. That draft style was never committed, so I cannot show you the object, but the number matches 1.35 × 18 exactly.
+
+The fix is to keep the two properties together, in one style object or one array.
+
+## Why does a react-pdf footer jump to page 2?
+
+Because `position: "absolute"` places an element but does not take it out of pagination. A footer sitting in the page's bottom padding gets moved to the next page once the content is long enough. The `fixed` prop is what takes it out.
+
+My case was an invoice whose footer sat at `bottom: 26`, inside 48pt of padding. Two line items stayed on one page. Fifteen sent the footer to page 2 by itself. To isolate it, I rendered A4 pages with the same footer and a varying number of 12pt rows:
+
+| Rows | `position: "absolute"` only | `position: "absolute"` and `fixed` |
+|---|---|---|
+| 2 | 1 page, footer on page 1 | 1 page, footer on page 1 |
+| 40 | 1 page, footer on page 1 | 1 page, footer on page 1 |
+| 48 | **2 pages, page 2 is only the footer** | 1 page, footer on page 1 |
+| 49 | **2 pages, page 2 is only the footer** | 1 page, footer on page 1 |
+| 50 | 2 pages, footer on page 2 only | 2 pages, footer on both |
+
+All 48 rows fit on one page, and the `absolute` version still produces a second page holding nothing but the footer. On 4.9.0 the change happens between 47 and 48 rows, with the last row ending at 775.7pt, short of the 794pt content edge. I did not trace the rule that picks that point, so treat the row count as specific to this layout.
+
+The [page wrapping docs](https://react-pdf.org/docs/v4/advanced/page-wrapping) describe `fixed` as what makes a component "placed repeatedly throughout all pages", and suggest it for footers. Combine it with the absolute position:
+
+```tsx
+<Text style={{ position: "absolute", left: 48, right: 48, bottom: 26 }} fixed>
+  Payable within 30 days
+</Text>
+```
+
+## Why does react-pdf put a hyphen inside a URL?
+
+Because a break inside a word is drawn with a hyphen glyph, and react-pdf [hyphenates by default](https://react-pdf.org/docs/v4/advanced/hyphenation). In a sentence that is correct typography. In a URL, someone types the hyphen.
+
+I rendered an 88-character URL at 8.5pt in a 170pt column, whose right edge is at 218pt:
+
+| Approach | What printed | Text's right edge |
+|---|---|---|
+| Default | `.../invoices/acmestu-` then `dio-settlement-refer-` then `ence-000123...` | 208.6pt |
+| `hyphenationCallback={(word) => [word]}` alone | One unbroken line | **385.9pt**, 168pt outside the column |
+| Pre-split with `\n`, plus that callback | Three clean lines | 184.3pt |
+
+The documented way to turn hyphenation off also removes every break point, so the string runs straight through whatever sits beside it. On the invoice, that was the totals. Inserting zero-width spaces did not help either.
+
+What worked was splitting the string myself and keeping the real URL in the link. This is the helper from the invoice:
+
+```tsx
+const URL_LINE_CHARS = 34
+const URL_SEPARATORS = ["/", "?", "&", "=", ".", "-", "#"]
+
+function urlLines(url: string): string {
+  const lines: string[] = []
+  let rest = url
+  while (rest.length > URL_LINE_CHARS) {
+    const head = rest.slice(0, URL_LINE_CHARS)
+    const cut = Math.max(...URL_SEPARATORS.map((c) => head.lastIndexOf(c)))
+    const end = cut >= URL_LINE_CHARS / 2 ? cut + 1 : URL_LINE_CHARS
+    lines.push(rest.slice(0, end))
+    rest = rest.slice(end)
+  }
+  lines.push(rest)
+  return lines.join("\n")
+}
+
+// <Text hyphenationCallback={(word) => [word]}>
+//   <Link src={url}>{urlLines(url)}</Link>
+// </Text>
+```
+
+Thirty-four characters suits 8.5pt in that column. Yours will differ, and only a render will tell you.
+
+## Why did tests and code review miss all three?
+
+Because the line-height, footer and hyphen defects are all layout geometry, and every cheap check throws geometry away.
+
+Reading the JSX shows what you meant, and `lineHeight: 1.35` looks correct. The PDF tests on that invoice asserted extracted text, and extracted text is identical at 13.5pt and 24.3pt. A hyphen would show up in extraction only if a test compared the exact string, and a footer on the wrong page would pass any test that does not ask which page. It is the same weakness as a [measuring script that shares the system's assumptions](https://ehnand.com/articles/lookalike-instrument-correlated-error): the check is blind in exactly the direction the defect lies.
+
+Each trap also needed a particular input:
+
+| Trap | Input that passes | Input that reveals it |
+|---|---|---|
+| Line height | One-line address | Two or more stacked lines with inherited size |
+| Footer | Two line items | A nearly full page |
+| Hyphen or overflow | A URL shorter than its column | The longest URL the field accepts |
+
+Sample data sized like a demo hides every one of them. These commands read the file itself, and they are how I took the numbers above:
+
+```bash
+pdfinfo invoice.pdf | grep Pages          # did the page count change?
+pdftotext -layout -f 2 -l 2 invoice.pdf - # what landed on page 2?
+pdftotext -bbox invoice.pdf - | head -40  # where is each word, in points?
+pdftoppm -r 80 -png invoice.pdf page      # now look at it
+```
+
+## What this does not claim
+
+These renders used the built-in Helvetica on A4 under Node, on 4.3.2, 4.5.1 and 4.9.0, the newest when I ran them on 9 November 2026. I did not test custom fonts, where [line metrics have their own reported problems](https://github.com/diegomura/react-pdf/issues/3424), or versions before 4.3.2, and [a public report](https://github.com/diegomura/react-pdf/issues/2988) describes `lineHeight` changing between 4.1.2 and 4.1.3.
+
+None of this is a complaint about the library. It has its own layout engine and is entitled to its own rules, and `fixed` is documented. The trap is that the rules arrive wearing CSS's names.
+
+## What to actually do
+
+1. **Declare `fontSize` in every style that has a unitless `lineHeight`.** Or set both on the same ancestor. Never rely on an inherited size to reach the multiplier.
+2. **Mark anything in the page margin `fixed`.** A footer, a header or a page number. Absolute position alone does not exempt it from pagination.
+3. **Pre-split every long unbroken string.** URLs, IBANs, references, wallet addresses. Keep the clean value in `<Link src>`.
+4. **Build a worst-case fixture.** The longest value each field accepts, the maximum line count, a multi-line address, and every currency symbol the document prints, since a display font may not contain `₱`.
+5. **Render it and read the file.** Page count, per-page text, word positions, then your eyes on a PNG.
+6. **Pin the version and re-render on every upgrade.** Layout behaviour is not part of a type signature, so nothing else will flag a change.
+
+## The takeaway
+
+CSS names make browser intuition feel safe, and the intuition fails on exactly the properties nobody thinks to check. Reading the code or the extracted text will not catch it, and a two-line demo invoice will not either. The cost is finding it on a customer's PDF.
+
+> **In react-pdf, `lineHeight` only knows the `fontSize` sitting next to it. Put them together, then render the fullest page you can produce and look at it.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These invoices come from [Adam AI](https://ehnand.com/projects/adam-ai), where I am the lead developer, and my [personal finance manager](https://ehnand.com/projects/personal-budget-finance-manager), which I built solo. For another check that passes while the real output is wrong, see [A Working Function Proves Only the Code Paths It Reached](https://ehnand.com/articles/working-function-proves-only-paths-reached). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

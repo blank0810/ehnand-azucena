@@ -1,0 +1,180 @@
+---
+title: "Cloudflare Workers Static Assets Ignore Range Requests, and the Fix for Safari Video Can Cut Off Your Other Routes"
+seoTitle: "Safari Video on Workers: 206s and run_worker_first"
+date: 2026-11-09
+category: "SaaS, Cloud & Security"
+tags: [cloudflare, cloudflare-workers, range-requests, configuration, testing]
+summary: "Cloudflare Workers Static Assets answer a Range request with the whole file and a 200, and Safari needs 206 responses to play video. A small Worker on only the video paths fixes it, but my first version of that one routing line cut the contact form off from the Worker, and only an integration test noticed."
+---
+
+Before publishing ten narrated clips on this site, I asked it for the first hundred bytes of a file. It sent back the whole file with a `200`, on a cache miss and on a cache hit.
+
+This site is an Astro build on Cloudflare Workers Static Assets, and that response meant plain MP4 files were unlikely to play in Safari. Apple's [documentation for video on iOS](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/CreatingVideoforSafarioniPhone/CreatingVideoforSafarioniPhone.html#//apple_ref/doc/uid/TP40006514-SW6) says it directly: "HTTP servers hosting media files for iOS must support byte-range requests."
+
+Answering range requests took one small Worker module. Getting those requests to it took one `run_worker_first` line, and my first version of that line disconnected the contact form from the Worker. The config was valid, and unit tests could not see the problem. An integration test running the real routing layer caught it before deploy.
+
+**Static assets will not slice a file for you, so video needs a Worker route. And once `run_worker_first` is a list, it stops adding a route and starts defining all of them: any Worker path you leave off stops reaching the Worker.**
+
+## Do Workers Static Assets support range requests for Safari video?
+
+No. A `Range` request to a static asset returns `200` and the whole file, with no `Content-Range` header. Cloudflare [documents this as a limitation](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/#range-requests) and names Safari video as a case that needs ranges.
+
+It is also legal HTTP. [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110.html#section-14.2) says "A server MAY ignore the Range header field", and for an image or a stylesheet nobody notices. Video is where it matters.
+
+This is the site today, measured on 9 November 2026 with `curl`:
+
+| Request to `ehnand.com` | Status | Bytes returned | `Content-Range` |
+|---|---|---|---|
+| Static image, no `Range` | 200 | 70,798 | none |
+| Static image, `bytes=0-1` | 200 | 70,798 | none |
+| Clip through the Worker, `bytes=0-1` | 206 | 2 | `bytes 0-1/3158221` |
+| Clip, `bytes=1000-1999` | 206 | 1,000 | `bytes 1000-1999/3158221` |
+| Clip, last 500 bytes, `bytes=-500` | 206 | 500 | `bytes 3157721-3158220/3158221` |
+| Clip, past the end, `bytes=99999999-` | 416 | 0 | `bytes */3158221` |
+| Clip, two ranges, `bytes=0-1,5-6` | 200 | 3,158,221 | none |
+
+The first two rows are the platform default: asked for 2 bytes, it sent 70,798. The rest are the Worker.
+
+To test your own site:
+
+```bash
+curl -s -o /dev/null -w '%{http_code} %{size_download}\n' \
+  -H 'Range: bytes=0-1' https://your-site.example/your-video.mp4
+```
+
+`206 2` means ranges work. `200` and the full file size means they do not.
+
+## Why not turn on Workers Caching?
+
+Because it fixes ten files by metering every static request on the site. Workers Caching does handle ranges: Cloudflare [fetches the full response and slices it](https://developers.cloudflare.com/workers/cache/configuration/#range-requests), so the Worker writes no range code. But its [pricing](https://developers.cloudflare.com/workers/cache/#pricing) says that with caching on, "every request to your Worker is charged at the standard Workers request rate, including requests that are normally free: static asset requests".
+
+| Option | Who slices the bytes | What counts against the Workers request limit |
+|---|---|---|
+| Static assets alone | Nobody, always a `200` | Nothing: static requests are free and unlimited |
+| Workers Caching | Cloudflare | Every request, static assets included |
+| `run_worker_first` on the video path | My Worker | Only the listed paths |
+
+I took the third row. For ten short clips it cost about 80 lines of code, comments included, and left every page, image and stylesheet free.
+
+If you do choose Workers Caching, remove your own slicing: Cloudflare treats a `206` returned by your Worker as uncacheable.
+
+## The Worker: ask for the whole file, then slice it
+
+The Worker fetches the complete clip from the assets binding and returns only the bytes the client asked for. This is the handler from the site's `worker/video.ts`:
+
+```ts
+export async function serveVideo(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response(null, { status: 405, headers: { allow: "GET, HEAD" } })
+  }
+
+  // Ask for the whole file, without the client's Range or validators.
+  const asset = await env.ASSETS.fetch(new Request(request.url))
+  if (!asset.ok) return asset
+
+  const body = await asset.arrayBuffer()
+  const size = body.byteLength
+  const headers = new Headers(asset.headers)
+  headers.set("accept-ranges", "bytes")
+  headers.set("cache-control", CACHE_CONTROL)
+
+  const range = parseRange(request.headers.get("range"), size)
+  if (range === "unsatisfiable") {
+    return new Response(null, { status: 416, headers: { "content-range": `bytes */${size}` } })
+  }
+
+  const head = request.method === "HEAD"
+  if (!range) {
+    headers.set("content-length", String(size))
+    return new Response(head ? null : body, { status: 200, headers })
+  }
+
+  headers.set("content-range", `bytes ${range.start}-${range.end}/${size}`)
+  headers.set("content-length", String(range.end - range.start + 1))
+  return new Response(head ? null : body.slice(range.start, range.end + 1), { status: 206, headers })
+}
+```
+
+`parseRange` reads the three single-range forms (`0-99`, `90-` and `-10`), clamps an end past the file, and reports a start past the file as unsatisfiable. Four details are easy to get wrong:
+
+- **Send the binding a fresh request.** Forward the client's request and its headers go with it. The assets layer answers `If-None-Match` with a `304` and no body (measured: `304`, 0 bytes), which leaves nothing to slice, and a client's `HEAD` would come back with no body to measure.
+- **Set your own `Cache-Control`.** Static files here go out with `public, max-age=0, must-revalidate`. The Worker sends `public, max-age=86400`. One day is deliberate: I re-voiced and re-rendered all ten clips the evening they went live, under the same file names, and a long cache would keep old audio in returning browsers.
+- **Buffering the file is a size decision.** Every range request reads the whole clip into memory. At 2.5 to 3.2 MB that is simple and keeps `Content-Length` exact. Static asset files are [capped at 25 MiB and a Worker at 128 MB of memory](https://developers.cloudflare.com/workers/platform/limits/), so any single file fits.
+- **Two ranges at once get the whole file.** That row in the table is a choice, and RFC 9110 allows it.
+
+## What happens to your other routes when run_worker_first becomes a list?
+
+Every path not on the list stops reaching the Worker, even when no static file matches it.
+
+My contact form posts to `/api/contact`. No file exists at that path, and with `run_worker_first` unset, a request that matches no asset falls through to the Worker. That had worked since August. To reach the video code, I added this:
+
+```json
+"run_worker_first": ["/videos/*"]
+```
+
+It looks like an addition. It replaced the fall-through for every path not listed, and the assets layer started answering the contact route itself:
+
+| Request | Correct response | With only `/videos/*` listed |
+|---|---|---|
+| `GET /api/contact` | `405` from the Worker | `404` from the assets layer |
+| `POST /api/contact` | `303`, `200` or `400` from the Worker | `405` from the assets layer |
+
+Cloudflare's [selective routing example](https://developers.cloudflare.com/workers/static-assets/routing/worker-script/) states this in a code comment: "All other requests either serve an asset that matches or serve the index.html fallback, without ever hitting this code." My site uses a 404 page rather than an `index.html` fallback, so the form's requests landed there.
+
+The fix is to list every Worker route:
+
+```json
+"run_worker_first": ["/api/*", "/videos/*"]
+```
+
+`GET /api/contact` on the live site returns `405` today, which means the Worker answered it.
+
+## Why unit tests could not catch it
+
+A unit test could not catch the dead contact form, because the failure sat in the join between the routing config and the Worker, and a unit test never crosses that join.
+
+A unit test calls `serveVideo` directly. All ten of the range unit tests would pass with the contact form dead, because none of them goes through the routing layer. It is the shape I described in [A System Can Be Correct at Every Node and Broken at Every Edge](https://ehnand.com/articles/node-coverage-is-not-edge-coverage).
+
+What caught it was an integration test for a route I was not changing, running against a real `wrangler dev`:
+
+```js
+test("the contact endpoint only answers POST", async () => {
+  const response = await fetch(baseUrl + ENDPOINT, { redirect: "manual" })
+  assert.equal(response.status, 405)
+  assert.equal(response.headers.get("allow"), "POST")
+})
+```
+
+It expected `405` and got `404`.
+
+## What does a Worker route cost on the request limit?
+
+Every request to a listed path counts, and all listed paths share one quota. The Workers free plan allows [100,000 requests a day](https://developers.cloudflare.com/workers/platform/limits/), and past that, [listed paths return a `429`](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/) "instead of falling back to static asset serving". Two consequences follow:
+
+- **The pages keep working and the listed routes do not.** Static requests are free and unlimited, so HTML and images still load. Video would return `429`, and so would any other Worker route sharing that quota.
+- **`preload="none"` does not make a page view free.** It holds back the MP4, but this site's posters and caption files sit under the same `/videos/*` path and go through the Worker too, so a page view still spends Worker requests on them before anyone presses play.
+
+## What this does not claim
+
+This article does not claim that these clips have been watched on a physical iPhone. Everything above is the server's side of the contract, measured in status codes, headers and byte counts. Safari's need for ranges comes from Apple's and Cloudflare's documentation, and I have not recorded a playback test on a device.
+
+The Worker also does not implement `If-Range`, so a client resuming a download across a re-rendered file could splice old and new bytes. And it is sized for ten clips of about three megabytes: reading a whole file per request is the wrong design for long video or heavy traffic, which I have not measured here. Platform behaviour is as of the dates given, so run the `curl` before relying on it.
+
+## What to actually do
+
+1. **Run the `curl` before you ship video on any static host.** Expect `206` and exactly the byte count you asked for.
+2. **Route only what needs ranges through the Worker.** Static requests stay free, and listed paths count against the limit.
+3. **When `run_worker_first` becomes a list, list every Worker route.** Treat it as the complete inventory of what your Worker serves, because it is.
+4. **Fetch the asset with a fresh request.** Never forward the client's `Range`, `If-None-Match` or method to the binding.
+5. **Answer the whole contract.** `206` with an exact `Content-Range` and `Content-Length`, `416` with `bytes */size`, `Accept-Ranges` on the full response, headers only for `HEAD`, and your own `Cache-Control`.
+6. **Keep one integration test per Worker route, through the real routing layer.** Run it under `wrangler dev`, and include the routes you are not changing.
+
+## The takeaway
+
+The range handling is the documented half: Cloudflare says what to do, and the code is short. The other half is a config line that reads like an addition and changes routing for everything you did not mention, with no error at deploy. Here it cost one failed test. Without that test, it would have reached production and taken the contact form with it.
+
+> **The first pattern you add to `run_worker_first` starts the complete list of what your Worker serves. Write all of it.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This site is the system described here, and the clips that forced the change are in [Agentic Coding 101](https://ehnand.com/articles/agentic-coding-101). I was the backend developer on [REPSShield](https://ehnand.com/projects/repsshield), whose stack also runs Cloudflare Workers for edge functions. For another case of health that only covers the paths it exercised, see [A Working Function Proves Only the Code Paths It Reached](https://ehnand.com/articles/working-function-proves-only-paths-reached). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

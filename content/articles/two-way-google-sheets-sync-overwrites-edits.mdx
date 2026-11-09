@@ -1,0 +1,113 @@
+---
+title: "Why a Two-Way Google Sheets Sync Deletes What People Type"
+seoTitle: "Why Two-Way Google Sheets Sync Overwrites User Edits"
+date: 2026-11-09
+category: "Business Systems & Data Integrity"
+tags: [google-sheets, integrations, data-integrity, concurrency, typescript]
+summary: "A Google Sheet your system repaints is shared memory with no lock, so every full redraw can erase what someone is typing. How typed IDs and ticks kept vanishing in a production two-way Google Sheets sync, what closed the gaps, and how a timestamp inside a hash caused 8 to 11 redraws in four quiet hours where one was needed."
+---
+
+On 20 October 2026, someone working in a spreadsheet my system maintains reported that the IDs they typed and the boxes they ticked "keep deleting", sometimes three or four times before one held. Comments in the same rows were fine.
+
+That last detail was the diagnosis. The spreadsheet is the working surface of a matching job in [Adam AI](https://ehnand.com/projects/adam-ai): staff review and correct results in Google Sheets, the system reads their edits, and it repaints the sheet with the new state. It is a two-way sync, where a redraw can overwrite user edits, and comments survived because they were the one thing the redraw had always been careful with.
+
+**A spreadsheet your system repaints is shared memory with no lock. Every full redraw is a write against whoever is typing, so save what people typed before you draw, re-read right before you clear, and draw less often.**
+
+## Why does a Google Sheets sync overwrite user edits?
+
+Because a full redraw reads the sheet, spends a long time computing, and then clears and rewrites the cells, and anything typed after the read is gone.
+
+The sheet does not know a redraw is running, and there is no row lock to take, so the person typing gets no warning. On this system a redraw took about 150 seconds. Building the rows was 47 to 58 seconds of that. Two tabs had to be written, one after the other, and each stage opened a different gap.
+
+## The three ways an edit was lost
+
+An edit was lost in three places: a tick on the operator tab during the redraw, any edit on the operator tab in the last 15 to 35 seconds, and an ID typed on either tab.
+
+| What was typed | Where it was lost | Did comments survive this gap? |
+|---|---|---|
+| A tick on the operator tab, any time during the redraw | The late check re-read both tabs, but rescued checkboxes from the main tab only | Yes, comments were rescued on both tabs |
+| Any edit on the operator tab in the last 15 to 35 seconds | That tab was read before the main tab's write and formatting, and cleared after them | No, comments were lost here too |
+| A typed ID, on either tab | IDs were saved only by a separate job, so any redraw that ran first repainted the column from the database | Yes, comments had their own save |
+
+The first and third rows are the pattern in the report: ticks and IDs vanish while comments stay. The 15 to 35 seconds in the second row is measurable from production: the main tab's write took 4.9 to 8.3 seconds and its formatting another 11.3 to 25.0.
+
+I am confident in the code path. I am less sure each of the reported losses was one of these three, because I never had revision history for those exact cells. A redraw from one of these gaps explains the symptom, and that is as far as the evidence goes.
+
+## What closed the gaps?
+
+Three changes closed them: save typed values before loading what you paint, check every editable column on every tab in the last read, and re-read the tab immediately before clearing it.
+
+1. **Save typed values before loading what you paint.** The redraw now merges the typed ID columns of both tabs against the stored values and saves real differences first, so the render reads the person's edit instead of overwriting it. If nothing was typed, it makes no call.
+2. **Check every editable column on every tab in the last-second read.** Checkboxes are now compared on both tabs. Where the tabs disagree, ticked wins, which is the rule the system's earlier merge already used.
+3. **Re-read the tab immediately before clearing it.** The operator tab now gets one final read right before its own write, carrying comments, IDs and ticks made since the earlier read. That closes the 15 to 35 seconds.
+
+The gap cannot reach zero. On the main tab, 1 to 2 seconds remain between the last read and the clear.
+
+The third change has a subtle rule. Values carried in that final read are not marked as acknowledged. By that point the main tab is already written, so acknowledging a late value would make the next merge read the older main-tab value as a fresh edit, and write it back over the person's change.
+
+## Should the redraw save every edit it finds?
+
+No. A value that is only data can be saved first, and a value that triggers an action needs a single owner.
+
+| Edit | What it does | What the redraw does with it |
+|---|---|---|
+| Comment, typed ID | Stores data | Saves it first |
+| "Send" tick | Queues a document to an external system | Carries it through and never saves it |
+
+Saving a send tick is what queues the outbound push, and that job runs in one transaction with its blocking checks. If the redraw saved ticks like comments, there would be a second code path able to send something outside the company. So the redraw makes sure the screen never drops the tick and leaves the sending to the one place that is allowed to do it.
+
+It would have been simpler to treat every column the same. It would also have been wrong in the one place where a mistake leaves the building.
+
+## How many redraws does a sync actually need?
+
+Far fewer than this one ran: in four quiet hours it needed 1 full redraw and was running 8 to 11. Every redraw is a gap for someone's edit and a line on the bill.
+
+Six days after that fix, a cost review found the sheet being repainted around the clock with nothing to change. Over one weekend with nobody working there were 101 full redraws, and every run that triggered one reported `changesApplied: 0`. Each was a real 144 to 152 second job.
+
+The cause was one field in a hash. The system fingerprints the inputs of each automatic decision, and a changed fingerprint requests a repaint. For decisions in other currencies, the fingerprint included the whole exchange rate quote, including `retrievedAt`, the moment that process happened to fetch the feed. So every 15-minute sweep saw a "changed" decision. In outline:
+
+```ts
+// Before: includes when we happened to fetch the rate
+hash({ ...inputs, fxQuote })
+
+// After: only what decides the result
+hash({ ...inputs, fxQuote: { source: fxQuote.source, factor: fxQuote.factor } })
+```
+
+Removing the field alone would have caused a new bug. A decision's validity window comes from the quote's time, so a frozen fingerprint would have aged good decisions out after a day. The fix also carries a later expiry into unchanged evidence quietly, with no history row and no repaint request.
+
+The result, for the same four quiet hours:
+
+| Four quiet hours | 20 to 25 October | 26 October, after the fix |
+|---|---|---|
+| Full redraws | 8 to 11 | 1 |
+| Redraws started by the backstop job | 6 to 8 | 1 |
+| Follow-up arbiter runs | 34 to 72 | 6 |
+| Cost of those runs | $0.048 to $0.050 (24 and 25 October) | $0.016 |
+
+The one that remained was real: a record's business date rolled over at midnight in its own time zone, which changed a reason code.
+
+## What this does not claim
+
+The saving is about $5 a month, extrapolated from one quiet window. The fix was worth doing, and it did not move the overall bill much.
+
+It also does not prove fewer lost edits. Nobody is typing in the quiet hours, so those numbers show a redraw that had no reason to run going away. As of 22 October, the log lines that record a rescue had not fired on a real edit, because they fire only when an edit lands in a gap.
+
+## What to actually do
+
+1. **List every column people can type in, and name what saves each one.** A column with no answer is a column a redraw will erase.
+2. **Save data edits before loading what you paint.** Pass only the cells that differ from stored values, so a redraw with no edits makes no writes.
+3. **Re-read immediately before every clear, per tab, for every editable column.** A read taken before a slow write is already stale.
+4. **Give action-triggering cells one owner.** A redraw may carry a send tick. It must never be a second way to send.
+5. **Fingerprint only what decides the result.** Fetch times, retrieval IDs and run timestamps make every run look like a change.
+6. **Log every rescue and count the redraws that change nothing.** Both numbers are invisible until you ask for them, and they tell you whether the sheet is safe and whether the loop is real.
+
+## The takeaway
+
+From the database's side, nothing failed in any of this. Each redraw was correct for the state it had read, and the person lost their work anyway. The cost lands on the user as a system that seems to ignore them, and they stop trusting it long before anyone opens a log.
+
+> **If people type into something your system repaints, the redraw is the concurrent writer. Treat it like one.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This is part of [Adam AI](https://ehnand.com/projects/adam-ai), where I am the lead developer, and the same matching job is the subject of [Cutting a Matching Job's Cost in Four Phases](https://ehnand.com/articles/shadow-run-before-the-switch). If your team works in spreadsheets that a system also writes to, I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

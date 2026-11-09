@@ -37,6 +37,8 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "removing-a-gate-is-a-first-execution",
     "implementer-sandbox-verification-boundary",
     "lookalike-instrument-correlated-error",
+    "react-pdf-only-looks-like-css",
+    "two-way-google-sheets-sync-overwrites-edits",
   ],
   repsshield: [
     "working-function-proves-only-paths-reached",
@@ -44,6 +46,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "llm-provider-failover",
     "config-pointing-outside-your-repo",
     "pairing-vs-prompt-injection",
+    "cloudflare-workers-static-assets-range-requests",
   ],
   "water-billing-system": [
     "offline-first-laravel",
@@ -72,6 +75,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "authorization-testing-least-privilege",
     "reconcilers-not-single-source-of-truth",
     "config-pointing-outside-your-repo",
+    "react-pdf-only-looks-like-css",
   ],
   "niko-kuechenbau": ["fabrication-is-the-claim-not-the-technique"],
   "niko-immobilienmakler": ["fabrication-is-the-claim-not-the-technique"],
