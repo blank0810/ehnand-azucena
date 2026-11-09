@@ -2,6 +2,7 @@
 title: "Designing a Double-Entry Ledger for Utility Billing: Arrears, Partial Payments, and Rate Schedules"
 seoTitle: "Double-Entry Ledgers for Utility Billing"
 date: 2026-07-11
+updated: 2026-11-09
 category: "Business Systems & Data Integrity"
 tags: [database-design, laravel, accounting, billing, mysql]
 summary: "Most billing systems store a balance column and slowly corrupt it. Here is the double-entry model I used for a municipal water utility, and why arrears and partial payments force your hand."
@@ -66,6 +67,25 @@ With a balance column, you subtract 500 and move on. But now: *which bill did th
 With a ledger, a payment is an entry, and **allocation is a separate concern**: the ₱500 credit is applied against outstanding bills according to an explicit policy. Oldest-first is the usual rule for utilities, since it minimizes the arrears that trigger disconnection.
 
 The allocation itself is recorded — which bill absorbed how much of which payment — so a partially-paid bill knows exactly what it is still owed and why.
+
+## Why must a reversal entry move with its payment?
+
+A double-entry ledger that sums every row goes wrong when a cancelled payment's credit is moved to a new connection and its reversal debit is left behind. That happened here in October 2026.
+
+An application fee is paid before the customer has a water connection, so its ledger rows have no connection yet. If an admin cancels that payment, the original credit stays, marked cancelled, and a reversal debit is added beside it. That is the append-only model working as designed. The customer then pays again, the connection is installed, and the code moves the application's ledger rows onto the new connection.
+
+The move took the payment credits, including the cancelled one, and left the reversal debit behind with no connection. The connection's sum now had a credit with nothing offsetting it:
+
+| Connection's ledger rows | Before the fix | After the fix |
+|---|---|---|
+| Cancelled payment, credit | Moved | Moved |
+| Its reversal, debit | Left behind | Moved |
+| Replacement payment, credit | Moved | Moved |
+| Net against the application fee | −₱550 | ₱0 |
+
+The −₱550 is a false credit: the connection appears to be owed ₱550 with nothing behind it. That amount comes from the test that reproduced it, and I have not measured how many real accounts it touched. The fix moves reversal debits with their payment credits. It is deliberately limited to debits, because the same table has a different kind of reversal, a credit against a charge, whose line number is always 1. Without that filter, moving allocation 1 would also have dragged in an unrelated charge reversal, and there is a test that fails if the filter is removed.
+
+The general rule: **when you re-parent ledger rows, move each reversal with the payment it reverses, and limit the match so it cannot pull in an unrelated reversal.** An append-only ledger makes the history trustworthy. It does nothing to protect a query that moves half of it.
 
 ## Rate schedules must be versioned, not edited
 
