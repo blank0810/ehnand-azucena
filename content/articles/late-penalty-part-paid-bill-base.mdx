@@ -1,0 +1,120 @@
+---
+title: "Late Penalty on a Part-Paid Bill: Which Amount Should the Code Charge It On?"
+seoTitle: "Late Penalty on a Partial Payment: Which Amount?"
+date: 2026-11-09
+category: "Business Systems & Data Integrity"
+tags: [billing, laravel, accounting, business-rules, data-integrity]
+summary: "A ₱200 water bill with ₱150 paid on time was charged a ₱20 late penalty when ₱5 was owed, because the code priced the penalty from the bill total and never read payments. Why the penalty base has to be an explicit rule in one function, and the edge cases that rule has to answer."
+---
+
+Take the test that reproduced this: a ₱200 water bill with a partial payment of ₱150 made before the due date. The system charged a ₱20 late penalty, which is 10% of the whole bill.
+
+Under the rule set for this system when the bug was found, the penalty was ₱5: 10% of the ₱50 still owed at the due date. That is four times the correct penalty, for being late on a quarter of the bill.
+
+Nothing crashed, and the arithmetic was correct. `10% × bill total` is exactly what the code said. The code priced the penalty from the bill and never looked at payments, because at some point "10% penalty" had been treated as a complete description of the rule. It is not, since a percentage of what is the entire question.
+
+**A late penalty is a percentage of something, and the code must name what. Define the base once, read it from the payments, and decide in advance which date makes a payment on time.**
+
+## Is a late penalty charged on the full bill or the unpaid balance?
+
+Either the whole bill or the amount still unpaid at the due date, depending on policy. This system charges on the unpaid amount: 10% on a ₱200 bill with ₱150 paid on time is ₱5, not ₱20.
+
+Public utility policy goes both ways. [The University of Tennessee's municipal advisory service](https://www.mtas.tennessee.edu/reference/collections-penalties-and-past-due-accounts) describes a penalty as "commonly a percentage of the unpaid balance". [Xenia, Ohio's code](https://codelibrary.amlegal.com/codes/xenia/latest/xenia_oh/0-0-0-14901) says "Any utility bill not paid on or before the due date shall be assessed a five percent (5%) penalty", which leaves the part-paid case for the implementation to decide.
+
+That gap is where this kind of bug lives. On a fully unpaid bill the two readings give the same number, so tests built on the common case pass under either one, and the difference appears only when somebody pays part of a bill on time.
+
+| ₱200 bill, 10% penalty | Base: whole bill | Base: unpaid at due date |
+|---|---|---|
+| Nothing paid | ₱20 | ₱20 |
+| ₱150 paid before the due date | **₱20** | **₱5** |
+| ₱150 paid after the due date | ₱20 | ₱20 |
+| ₱200 paid before the due date | ₱20 | ₱0 |
+
+The rule here is the third column: the penalty applies to what remained unpaid when the due date passed. A payment made after the due date was already late, so it does not lower the penalty.
+
+## The rule as one function
+
+The fix puts the base in a single function that reads payments:
+
+```php
+private function getPenaltyBase(WaterBillHistory $bill, ?float $billTotal = null, ?float $paidByDueDate = null): float
+{
+    $paidByDueDate ??= $this->getPaidByDueDate(collect([$bill]))[$bill->bill_id] ?? 0.0;
+
+    return max(0.0, ($billTotal ?? $this->getEffectiveBillTotal($bill)) - $paidByDueDate);
+}
+```
+
+The query behind it is where the actual policy sits:
+
+```php
+return DB::table('PaymentAllocation as pa')
+    ->join('Payment as p', 'p.payment_id', '=', 'pa.payment_id')
+    ->join('water_bill_history as b', 'b.bill_id', '=', 'pa.target_id')
+    ->where('pa.target_type', 'BILL')
+    ->whereIn('pa.target_id', $bills->pluck('bill_id'))
+    ->whereColumn('p.payment_date', '<=', 'b.due_date')
+    ->whereNotIn('pa.stat_id', $voided)
+    ->whereNotIn('p.stat_id', $voided)
+    ->groupBy('pa.target_id')
+    ->selectRaw('pa.target_id, SUM(pa.amount_applied) as paid')
+    ->pluck('paid', 'target_id')
+    ->map(fn ($paid) => (float) $paid)
+    ->toArray();
+```
+
+It reads the [ledger's payment allocations](https://ehnand.com/articles/utility-billing-ledger), not a paid flag, so a part-payment has an exact amount against an exact bill.
+
+## Which questions does the base have to answer?
+
+The base has to answer six questions: which date counts as on time, whether a late payment reduces it, whether voided payments count, whether it can go below zero, what the total is after adjustments, and what happens when the bill is corrected.
+
+| Question | Decision here |
+|---|---|
+| Which date makes a payment on time? | The official receipt's date, on or before the due date |
+| Does a payment after the due date reduce the penalty? | No |
+| Does a cancelled or voided payment count? | No, so cancelling one raises the base again |
+| Can the base go below zero? | No, it stops at ₱0 |
+| What is the bill total, if the bill was adjusted? | The water amount plus adjustments |
+| What happens if the bill is corrected later? | The penalty is recalculated on the corrected total, less what was paid on time |
+
+A rule that stops at "10% of the balance" leaves all six to whoever writes the query. Each of them changes what a customer pays.
+
+The date question is the one to get in writing. A receipt can be entered into the system later than the day the money was received, so the payment's date and the record's creation date can sit on opposite sides of the due date. Pick the one the policy means, and be aware that entering a back-dated receipt after a penalty has already been charged is its own case to decide.
+
+## Why one function matters more than the formula
+
+Four places price a penalty (the 09:00 job and Apply button, recalculation after a correction, the correction preview, and the penalty page estimate), and all four now call `getPenaltyBase`.
+
+The confirmation dialog's wording changed too, from "on each overdue bill's total amount" to "on what each overdue bill still owed at its due date". If the screen and the calculation describe different rules, staff will explain the wrong one to the customer at the counter.
+
+The batch case is why the function accepts an already-loaded `$paidByDueDate`. Running that query once per bill on a page listing every overdue account would be its own problem.
+
+## How the change was tested
+
+Eight new feature tests cover payments before, on and after the due date, a cashier's cancel, a void and realign, the estimate, a bill correction and the correction preview. Five of them failed on the old code for the expected reason, and all eight pass now.
+
+The full suite, 3,115 tests, passed before the commit, and the release went to production on 29 October 2026.
+
+## What this does not claim
+
+This describes one system's rule, which was a decision about this billing system and not a statement of what any law requires. Check your own ordinance or tariff. The fix changes how penalties are priced from that release onward.
+
+## What to actually do
+
+1. **Write down what the percentage is a percentage of.** Whole bill, unpaid balance at the due date, or unpaid balance at the time of charging. These are three different policies.
+2. **Add a part-paid case to your test data.** Fully unpaid bills pass under every reading, so they prove nothing about the base.
+3. **Choose the date that decides "on time".** Receipt date, posting date or record creation date, and put it in the code's name or comment.
+4. **Exclude cancelled and voided payments in the query itself.** A cancellation should raise the base without anyone remembering to.
+5. **Price it in one function.** Scheduled jobs, previews, estimates and corrections all have to call the same code.
+6. **Make the screen state the rule.** The confirmation text is what staff will repeat to customers, so it has to match the calculation.
+
+## The takeaway
+
+A billing rule usually gets written down as the easy case, and the code matches it perfectly. The failure surfaces at the counter, as a customer who paid most of their bill on time holding a penalty on all of it, and a member of staff with no way to explain why.
+
+> **"10% penalty" is half a rule. Until the code names the base, the date and what doesn't count, someone is being overcharged correctly.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This is from the [water billing system](https://ehnand.com/projects/water-billing-system) I lead, which runs on Laravel and MySQL with a double-entry ledger. For why that ledger exists, see [Designing a Double-Entry Ledger for Utility Billing](https://ehnand.com/articles/utility-billing-ledger). If your billing rules live in someone's head, I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

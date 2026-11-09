@@ -1,0 +1,100 @@
+---
+title: "A Deploy Can Stop Halfway, So Make the Halfway State Valid"
+seoTitle: "Half-Deployed Laravel App? Make That State Valid"
+date: 2026-11-09
+category: "Engineering Practice & Reliability"
+tags: [deployment, migrations, laravel, php, reliability]
+summary: "A Laravel deploy stopped between its pull and its restart and left production half-deployed for 4 hours 37 minutes: new Blade views, old cached PHP, a pending migration, and a print page failing with 500s while the login and home pages answered 200. On the same day another release went out in two steps and nothing changed for its users until the second."
+---
+
+On 29 October 2026 a production deploy of a Laravel water billing system pulled its new code at 08:53 and then stopped. It was finished at 13:30, 4 hours and 37 minutes later.
+
+In between, the login page and the home page answered `200` and nothing looked wrong. From 10:30 onward, a page that prints service contracts returned a `500` eight times, with `Undefined variable $reference`. The code was correct, and so was the migration. Production was simply half-deployed: half of one release and half of the one before.
+
+The same day, on a different system, I shipped a change that also had two parts that needed to agree. It went out as two releases about 35 minutes apart, and at no point in between was anything broken.
+
+**A deploy is a sequence, and a sequence can stop at any step. Every release has a halfway state, so the only choice is whether you designed it.**
+
+## How can a deploy leave an application half-deployed?
+
+Because the parts of a release do not all change at the same moment, and any step in between can stop the sequence.
+
+This deploy script ran in this order:
+
+| Step | What changes | Ran on the first attempt? |
+|---|---|---|
+| `git pull`, install, build | Files on disk | Yes |
+| Privilege check for the migration | Nothing | **Stopped here** |
+| `migrate` | Database schema | No |
+| `view:cache` and restart PHP-FPM | What PHP is actually running | No |
+
+The migration dropped something, so it needed a privilege the deploy user did not normally hold, and the script checked for it first. The check stopped the deploy, correctly.
+
+The step that would have granted the privilege was refused by the permission rules on my AI coding assistant, which is what those rules are for, and it waited for me. That took time, and meanwhile the server stayed exactly where the script had left it.
+
+## Why did only one page break?
+
+Because the new Blade view took effect as soon as it was pulled, while PHP kept serving the previous release's cached service class, so the view expected a variable the old class never supplied.
+
+Production runs OPcache with `validate_timestamps` off. [PHP's documentation](https://www.php.net/manual/en/opcache.configuration.php) says that when this is disabled "you must reset OPcache manually" or restart for "changes to the filesystem to take effect". So PHP kept serving the previous release's compiled classes.
+
+Blade views are different, because a view that has been pulled compiles when it is next read. So on that server:
+
+| Part | Which release it was running |
+|---|---|
+| Blade view for the contract print | New: it expected `$reference` from the service |
+| PHP service class that fills the view | Old: still cached by OPcache, did not supply it |
+| Database schema | Old: migration pending |
+
+The new release had moved two variables out of the view and into the service. A new view meeting an old service is a combination that never existed in development or in any test, because no developer's machine has one cache from each release.
+
+## Why did the health checks pass?
+
+Because they checked pages the release did not change.
+
+`/login` and `/` returned `200`, and nothing had been logged at the time they were checked. Only the path the release actually touched was broken, and only when someone used it. I have seen the same thing on a [serverless ERP backend](https://ehnand.com/projects/serverless-erp-backend), where code shipped ten migrations ahead of its database and every new endpoint returned `404` while health stayed green.
+
+A deploy that stopped is not "up". It is unfinished, whatever the health check says.
+
+## What deploy order avoids a broken halfway state?
+
+Split it so that each release is valid against the other side's old version. Readers go first and writers go second.
+
+That was the other release that day, on [Adam AI](https://ehnand.com/projects/adam-ai). Approved payloads carry a version number, and readers checked for an exact match. The change needed version 8:
+
+| | Release A | Release B |
+|---|---|---|
+| Readers | Accept 7 and 8 (`=== 7` became `>= 7`) | Unchanged |
+| Writer's version constant | Still 7 | 7 becomes 8 |
+| Halfway state | Readers that understand more than anyone is writing | Nothing left halfway |
+
+Between the two, production wrote version 7 and could read 7 or 8, which is valid at every moment. The gap was about 35 minutes, because the second release waited for a go-ahead, and it could safely have waited a week. If release A had stopped halfway, nothing would have needed to agree yet.
+
+## What rule came out of it?
+
+**A release's migrations only add, never drop.** Adding a column leaves old code valid on the new schema, so migrating first is safe, and the deploy no longer needs a destructive privilege at all. That removes the step that stopped this one. The retired column or table stays, unused, until a later release that has nothing reading it.
+
+Some changes cannot be made valid halfway, like dropping something live code reads. Then the fallback is a short window: apply the two back to back, and finish the same day.
+
+## What this does not claim
+
+The 500 count covers that day's error log for that route, and I did not measure how many people opened the page and gave up. The two systems are different stacks with different deploy tools, and the reader-first release has not been tested against a failure of its own second step. The remaining steps were run by hand in the script's order.
+
+## What to actually do
+
+1. **List the parts that must agree before you ship.** App, worker, schema, compiled views, stored versions. If some order leaves a broken state, split the change.
+2. **Ship readers first and flip the writer in a later release.** Each release then only has to be valid against what is already live.
+3. **Make migrations additive.** Keep drops for a later release, with nothing reading the column.
+4. **Know which caches refresh on which trigger.** On PHP with timestamps off, code goes live at restart and a Blade view goes live on read.
+5. **After a stopped deploy, finish the remaining steps in the script's order, then check the paths the release changed.** `/login` tells you nothing.
+6. **Say out loud that the box is half-deployed.** Write down which steps ran, and finish or roll back the same day.
+
+## The takeaway
+
+Most deploy advice is about making the sequence succeed. Sequences stop anyway, because of a permission, a failed build, a dropped connection, or someone saying "not yet". The cost of not designing for that is hours of a production system in a state nobody ever tested, reporting that it is fine.
+
+> **Before you ship, ask what production looks like if this stops after step two. If the answer is "broken", split the release.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. These releases are from the [water billing system](https://ehnand.com/projects/water-billing-system) and [Adam AI](https://ehnand.com/projects/adam-ai), which I lead. For the database side of the same problem, see [A Dump Is Not a Backup Until You Have Restored It](https://ehnand.com/articles/dump-is-not-a-backup-until-restored). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

@@ -1,0 +1,106 @@
+---
+title: "Should You Self-Host Trigger.dev? What One Production Bill Said"
+seoTitle: "Self-Host Trigger.dev vs Cloud: What One Bill Said"
+date: 2026-11-09
+category: "SaaS, Cloud & Security"
+tags: [trigger-dev, self-hosting, cost-optimization, background-jobs, cloud]
+summary: "At 200% of plan I costed moving a production Trigger.dev workload to a VPS. Hardware alone came to about €113 a month against about $105 on Cloud, before 10 to 13 developer days of migration, and self-hosting loses the checkpoints that billed one task 0.48 hours for 12.51 hours of execution."
+---
+
+On 6 November 2026 the background-job bill for [Adam AI](https://ehnand.com/projects/adam-ai) reached 200% of its Trigger.dev plan, and I asked the obvious question: would a VPS be cheaper?
+
+It would not. I costed it against seven days of real usage data before touching anything, and the hardware alone came to about what the whole Cloud bill was. That is before the migration work, the operations time, and the platform feature that was already saving real money without my noticing.
+
+**Compare self-hosting against the bill you would have after fixing your code, not the bill you have today, and count what the platform stops doing for you the day you leave.**
+
+## Is self-hosting Trigger.dev cheaper than Cloud?
+
+Not for this workload: self-hosted hardware alone came to about €113 a month, against about $105 a month for the whole Cloud bill.
+
+| | Trigger.dev Cloud | Self-hosted on Hetzner |
+|---|---|---|
+| Monthly running cost | About $105 projected for November | About €113 for hardware in the documented split layout, up to about €174 with headroom |
+| Migration | None | 10 to 13 developer days over 3 to 5 calendar weeks (estimate) |
+| Ongoing operations | None | 2 to 10 hours a month (estimate) |
+| [Checkpoints, warm starts, auto-scaling](https://trigger.dev/docs/self-hosting/overview) | Yes | No |
+
+[Hetzner's list prices](https://www.hetzner.com/cloud/regular-performance/) on 9 November 2026 were €35.99 for a CPX32, €69.99 for a CPX42 and €130.49 for a CPX62. Hetzner repriced in June 2026, so a comparison written before then will understate this column.
+
+The currencies differ and I have left them that way. The conclusion does not depend on the exchange rate.
+
+## What was actually on the bill?
+
+Almost all of it was compute, and almost all of the compute was waiting. These are the seven days to 6 November, from the platform's own query tool:
+
+| Measure | Value |
+|---|---|
+| Production spend | $22.87 |
+| Runs | 38,704 |
+| Compute hours | 156 |
+| Compute's share of spend | 95.8% |
+| Peak memory | 602 MB |
+
+One matching workload was 70.6% of the spend, one polling integration was 15.1%, and the document pipeline was 7.8%. A workload like that looks as if a cheap server should handle it easily. Which is true, right up to the moment you ask what the waiting costs.
+
+## Why do checkpoints change the math?
+
+Because a checkpointed wait is not billed, and on a self-hosted install there are no checkpoints, so a waiting task keeps its container.
+
+One document task logged **12.51 hours of execution and was billed for 0.48**. The rest was a parent waiting on its child runs, checkpointed and not charged. Trigger.dev's [feature comparison](https://trigger.dev/docs/self-hosting/overview) marks checkpoints as Cloud only, described as "Non-blocking waits, less resource usage".
+
+So the workload that appears ideal for a small server is the one that depends most on the feature you lose. Without checkpoints, every waiting parent holds a container and a concurrency slot. This system has 17 queues limited to one concurrent run, and a parent waiting on a child in a one-slot queue is how you build a deadlock.
+
+## What else would silently change?
+
+Production would have behaved like staging after the move, because 41 source files compare the platform's project reference to hardcoded values and a self-hosted project gets a new reference. It would have skipped its outbound pushes, alerts and message sends while every job reported success.
+
+I would have found that eventually, probably from a customer. It is worth fixing on Cloud anyway by moving those comparisons into one module, and it is a good example of what "10 to 13 developer days" is made of.
+
+Self-hosting also means keeping the server version-locked to the CLI, and only the latest line gets patches. There were seven releases between 20 and 30 October 2026 alone.
+
+## What would reduce the bill instead?
+
+Changing what the code does, which is where the money was going in the first place:
+
+| Change | Estimated saving per month |
+|---|---|
+| Coalesce one cascade of repeated rebuilds, and slow one five-minute job | $13 to $21 |
+| Slow a polling integration, subject to how fresh the business needs it | $6 to $9 |
+| Poll a document service through a checkpointed wait, resize one task, slow one poller | $7 to $10 |
+
+Together that is about $26 to $40 a month, leaving a floor of roughly $65 to $79 against the $105 projection.
+
+There is also a change that costs nothing. [Hobby is $10 with $10 of usage included, and Pro is $50 with $50 included](https://trigger.dev/pricing), so at $50 or more of usage the two cost the same, and Pro adds a 30-day query window instead of 7 days. Being on the smaller plan past that point buys nothing, and it hides the history you need to investigate the bill.
+
+## When would self-hosting make sense?
+
+At sustained Cloud spend of around $400 a month after the code changes, or when a compliance rule requires it.
+
+That figure is an estimate from before Hetzner's June repricing, so the real threshold is probably higher. Below it, the estimates show no saving for the migration to pay back, and alternatives like rewriting about 97 tasks for another engine are a longer-term decision rather than a fix for this month's bill.
+
+## What this does not claim
+
+Nothing here was measured on a self-hosted install. The hardware, effort and break-even numbers come from a research pass using vendor documentation and our usage data, and they are estimates.
+
+The $105 is seven days projected forward. Late October's rate was closer to $78, and spend rose from 1 November when new invoices began triggering more rebuilds, so the true monthly figure depends on whether that continues.
+
+As of 6 November the recommendation had not been acted on, and the savings in the table are forecasts. Prices were read on the dates given, and your workload's ratio of waiting to working decides most of this.
+
+## What to actually do
+
+1. **Pull a week of real usage before pricing anything.** Runs, compute hours, CPU, memory, and the share per task. Guesses about background jobs are usually wrong in the same direction.
+2. **Work out how much of your runtime is waiting.** If it is most of it, price checkpoints explicitly, because you will lose them.
+3. **Price the code fixes first.** Compare self-hosting against what the bill would be after them.
+4. **Search for anything keyed to the platform's identity.** Project references, hostnames, environment checks. These fail silently when the identity changes.
+5. **Check whether a bigger plan is free at your usage.** Included credits can make the upgrade cost nothing.
+6. **Write down the number that would change your mind.** A break-even figure stops this question coming back every time the bill spikes.
+
+## The takeaway
+
+The bill said the platform was expensive. Seven days of data said the code was running work nobody needed, on a platform that was already checkpointing some of its waits. Moving would have cost weeks of engineering, removed checkpoints, and left the expensive behaviour in place on a new server.
+
+> **Before you leave a managed platform, find out what it is doing for free. It is usually the reason your bill is not worse.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. This is the job platform behind [Adam AI](https://ehnand.com/projects/adam-ai), where I am the lead developer. An earlier round of cuts on the same bill is in [Cutting a Matching Job's Cost in Four Phases](https://ehnand.com/articles/shadow-run-before-the-switch). If you have a cloud bill you would like read before you act on it, I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

@@ -39,6 +39,8 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "lookalike-instrument-correlated-error",
     "react-pdf-only-looks-like-css",
     "two-way-google-sheets-sync-overwrites-edits",
+    "self-host-trigger-dev-vs-cloud-cost",
+    "deploy-stops-halfway-make-state-valid",
   ],
   repsshield: [
     "working-function-proves-only-paths-reached",
@@ -63,6 +65,8 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "implementer-sandbox-verification-boundary",
     "lookalike-instrument-correlated-error",
     "agentic-coding-101",
+    "late-penalty-part-paid-bill-base",
+    "deploy-stops-halfway-make-state-valid",
   ],
   "swiss-energy-platform-suite": [
     "document-matching-strategies",
@@ -100,6 +104,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "read-criterion-not-label",
     "leaving-cloudesk",
     "agentic-coding-101",
+    "deploy-stops-halfway-make-state-valid",
   ],
   memberpulse: ["leaving-cloudesk"],
 }

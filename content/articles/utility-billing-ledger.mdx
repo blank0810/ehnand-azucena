@@ -85,7 +85,7 @@ The move took the payment credits, including the cancelled one, and left the rev
 
 The −₱550 is a false credit: the connection appears to be owed ₱550 with nothing behind it. That amount comes from the test that reproduced it, and I have not measured how many real accounts it touched. The fix moves reversal debits with their payment credits. It is deliberately limited to debits, because the same table has a different kind of reversal, a credit against a charge, whose line number is always 1. Without that filter, moving allocation 1 would also have dragged in an unrelated charge reversal, and there is a test that fails if the filter is removed.
 
-The general rule: **when you re-parent ledger rows, move each reversal with the payment it reverses, and limit the match so it cannot pull in an unrelated reversal.** An append-only ledger makes the history trustworthy. It does nothing to protect a query that moves half of it.
+The general rule: **when you re-parent ledger rows, move each reversal with the payment it reverses, and limit the match so it cannot pull in an unrelated reversal.** An append-only ledger makes the history trustworthy. It does nothing to protect a query that moves half of it. On a bill, cancelling a payment has a second effect: it [raises the base of a late penalty](https://ehnand.com/articles/late-penalty-part-paid-bill-base).
 
 ## Rate schedules must be versioned, not edited
 
