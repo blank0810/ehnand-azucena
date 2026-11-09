@@ -1,0 +1,106 @@
+---
+title: "Why php -d memory_limit Never Reaches artisan test"
+seoTitle: "php -d memory_limit Ignored by artisan test: Why"
+date: 2026-11-09
+category: "Engineering Practice & Reliability"
+tags: [laravel, php, testing, memory-limits, ci]
+summary: "php artisan test starts a second PHP process and does not pass interpreter flags to it, so php -d memory_limit=512M artisan test still runs your tests at 128M. Measured on Laravel 13.40, with the three routes that do reach the worker, why --filter does not reduce what loads, and how to tell which memory limit killed your run."
+---
+
+On 26 October 2026, `php artisan test --filter=TransferChargesToConnectionTest` died at PHP's 128 MB limit, inside the class loader, before running a single test. The filter named one class, and the run still ran out of memory.
+
+The instinctive fix is `php -d memory_limit=1024M artisan test`, and it does nothing. Earlier that month, in an unrelated TypeScript project, `NODE_OPTIONS=--max-old-space-size=6144` did nothing either for a typecheck being killed inside a 4 GB container. The two failures have the same shape.
+
+**A memory flag helps only on the process that dies and at the limit that kills it, and a filter chooses what runs, not what loads.**
+
+## Why does php -d memory_limit not work with artisan test?
+
+Because `artisan test` starts a second PHP process, and interpreter flags given to the first one do not reach it.
+
+The command is a wrapper. This is how Collision, the package behind `artisan test`, builds the worker's command line:
+
+```php
+if ('phpdbg' === PHP_SAPI) {
+    return array_merge([PHP_BINARY, '-qrr'], $command);
+}
+
+return array_merge([PHP_BINARY], $command);
+```
+
+It runs `PHP_BINARY` with the test runner's path and nothing else, so the new process reads `php.ini` again. I confirmed this by having a test print the value it could see, on Laravel 13.40.0, Collision 8.9.5 and PHP 8.5.12, with `php.ini` set to 128M:
+
+| Command | `memory_limit` inside the test |
+|---|---|
+| `php artisan test` | 128M |
+| `php -d memory_limit=512M artisan test` | **128M** |
+| `php -d memory_limit=512M vendor/bin/phpunit` | 512M |
+| `PHP_INI_SCAN_DIR=/tmp/ini php artisan test` (a 768M ini file) | 768M |
+| `php artisan test`, with `<ini name="memory_limit" value="640M"/>` in `phpunit.xml` | 640M |
+
+The flag raises the limit on a parent process that was never short of memory. The worker that does the real work is unchanged, and nothing warns you.
+
+## How do you raise the memory limit for artisan test?
+
+Set `memory_limit` in `phpunit.xml`, point `PHP_INI_SCAN_DIR` at an extra ini file, or call the runner directly. Each suits a different situation:
+
+| Route | Use it when |
+|---|---|
+| `<ini name="memory_limit" value="..."/>` in `phpunit.xml` | You want the whole team and CI to get the same limit |
+| `PHP_INI_SCAN_DIR` pointing at an extra ini file | You need it for one environment without changing the repo |
+| Call the runner directly: `vendor/bin/pest -d memory_limit=512M <file>` | You want one file, now |
+
+The third is what I used on the day. `vendor/bin/pest -d memory_limit=512M` on the one test file finished in about ten seconds.
+
+## Does --filter reduce what gets loaded?
+
+No. A filter selects which tests run after the runner has discovered them, so every test file is still loaded.
+
+I checked by having one test report whether another test class in a different file had been loaded:
+
+| Command | Was the other test class loaded? | Files included |
+|---|---|---|
+| `vendor/bin/phpunit --filter=MemProbe` | **Yes** | 1,306 |
+| `vendor/bin/phpunit tests/Unit/MemProbeTest.php` | No | 1,289 |
+
+The skeleton app has only a few tests, so the gap here is small. On a suite with thousands of tests, discovery alone can exceed 128 MB, which is how a filter for one class died before running it. To narrow what loads, give the runner a path.
+
+TypeScript behaves similarly. A scoped `tsc` config still follows every import of the files you list: in that project, 3 changed files pulled in 1,236. Narrowing the input helps only until the import closure is the expensive part.
+
+## Which memory limit killed your run?
+
+A PHP limit prints `Allowed memory size of N bytes exhausted`, a V8 limit prints `JavaScript heap out of memory`, and a container kill prints nothing and exits 137.
+
+| Layer | What you see | The flag that helps |
+|---|---|---|
+| PHP `memory_limit` | `Allowed memory size of N bytes exhausted` | `memory_limit`, set in the process that died |
+| V8 heap | `FATAL ERROR: ... JavaScript heap out of memory` | `--max-old-space-size` |
+| Container cgroup | **No message at all, exit 137** | Container memory, or a smaller job |
+
+I reproduced the last two. Inside a 256 MB container with `--max-old-space-size=2048`, a Node process allocating memory exited 137 with zero bytes of output: the V8 limit was never reached, because the kernel killed it first. With a 128 MB heap in a 1 GB container, Node printed the heap error instead.
+
+That was the TypeScript failure. A full typecheck wanted about 5.5 GB in a container capped at 4 GB, so raising V8's heap only moved a ceiling that was already above the real one. Only the lowest limit applies.
+
+The silent one is the one to watch. A helper script in that project reported "0 new errors" after a typecheck had been killed with 137 and produced nothing to compare. A run that died looks exactly like a run with nothing to report unless you read the exit code.
+
+## What this does not claim
+
+I reproduced the flag behaviour on a fresh Laravel 13.40.0 install with Collision 8.9.5, and it may differ on other versions. The filter result is confirmed for PHPUnit here and was observed for Pest on the original project, and I would not assume it for other test runners. The 128 MB failure was on a large real suite, and my reproduction measures what the worker can see, not an out-of-memory crash.
+
+## What to actually do
+
+1. **Name the process that died before raising anything.** A wrapper that spawns a worker does not pass on interpreter flags.
+2. **Read the failure for its layer.** A PHP error, a V8 error and a silent 137 need three different fixes.
+3. **Put the limit in `phpunit.xml` if the whole suite needs it.** It reaches the worker and it is version-controlled.
+4. **Give the runner a path when you want one test.** `--filter` still pays for discovery.
+5. **Fix the recipe in your docs.** If your contributing guide says `artisan test --filter`, and that is the command that dies, every new developer will run it.
+6. **Check the exit code in every script that wraps a check.** Treat a missing report as a failure, never as a clean result.
+
+## The takeaway
+
+Memory errors invite the same response every time: raise the number. It feels productive, it changes nothing when the number is on the wrong process, and the run fails again the same way. The cost is an afternoon of raising a limit that was never the problem.
+
+> **Before you raise a memory limit, name the process that died and the layer that killed it. A flag on anything else is decoration.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. The Laravel failure came from the [water billing system](https://ehnand.com/projects/water-billing-system) I lead, and the TypeScript one from [Adam AI](https://ehnand.com/projects/adam-ai). For more on checks that report success without having done the work, see [A Control With One Possible Answer Is Not Failing, It Is Not Running](https://ehnand.com/articles/controls-with-one-possible-answer). I take remote contract and lead engagements. [Get in touch](https://ehnand.com/#contact).*

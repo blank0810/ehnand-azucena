@@ -67,6 +67,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
     "agentic-coding-101",
     "late-penalty-part-paid-bill-base",
     "deploy-stops-halfway-make-state-valid",
+    "php-memory-limit-ignored-artisan-test",
   ],
   "swiss-energy-platform-suite": [
     "document-matching-strategies",
@@ -86,6 +87,7 @@ const RELATED_ARTICLES: Record<string, string[]> = {
   "kai-assistant": [
     "pairing-vs-prompt-injection",
     "config-pointing-outside-your-repo",
+    "systemd-environmentfile-inline-comment",
   ],
   "serverless-erp-backend": [
     "fastapi-erp-terraform-aws-lambda",

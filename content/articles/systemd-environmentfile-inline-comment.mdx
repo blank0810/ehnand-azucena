@@ -1,0 +1,116 @@
+---
+title: "systemd Keeps Your Inline Comment, So Production Mode Can Turn Off"
+seoTitle: "systemd EnvironmentFile Keeps Your Inline Comment"
+date: 2026-11-09
+category: "Engineering Practice & Reliability"
+tags: [systemd, docker-compose, configuration, deployment, linux]
+summary: "An env file that works under Docker Compose can change meaning under systemd: an inline comment becomes part of the value, so ENVIRONMENT stops equalling production and every exact-match check falls back to non-production while the service looks healthy. A tested comparison of how the two parse the same file."
+---
+
+On 22 October 2026 I was moving an API service from Docker Compose to systemd. The env file came across unchanged, and one line of it was this:
+
+```bash
+ENVIRONMENT=production       # production | staging | development
+```
+
+Under Docker Compose that value is `production`. Under a systemd `EnvironmentFile` it is the whole line after the equals sign, spaces and inline comment included. I tested it on the new host before go-live, and the service would have started, answered its health check, and quietly stopped being in production mode.
+
+**An env file is not a format. Docker Compose and systemd parse the same file by different rules, so check the value the process actually receives, and make the application refuse an environment name it does not recognise.**
+
+## Does systemd EnvironmentFile support inline comments?
+
+No. systemd ignores comments only when they start the line.
+
+The [systemd.exec manual](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#EnvironmentFile=) says "Empty lines, lines without an "=" separator, or lines starting with ";" or "#" will be ignored", and that in an unquoted value "interior whitespace is preserved". [Docker Compose's rules](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/) are different: "Inline comments for unquoted values must be preceded with a space."
+
+So the same line is correct in one and data in the other. Neither tool is wrong, and neither warns you. It is the same shape as [a blank field that systems read as opposite instructions](https://ehnand.com/articles/unspecified-is-not-neutral).
+
+## How do systemd and Docker Compose parse the same env file differently?
+
+They differ on inline comments, `$` expansion, backslashes and `export` prefixes. For `A=production   # a comment`, systemd 259 keeps the whole string and Docker Compose 5.6.0 returns `production`. This is what each process received from the same file:
+
+| Line in the file | systemd value | Docker Compose value |
+|---|---|---|
+| `A=production   # a comment` | **`production   # a comment`** | `production` |
+| `A="production" # comment` | **`production# comment`** | `production` |
+| `A=production# no space` | `production# no space` | `production# no space` |
+| `A=pa$HOME` | `pa$HOME` (literal) | **`pa` plus the value of `HOME`** |
+| `A=pa$$word` | `pa$$word` | **`pa$word`** |
+| `A=C:\temp\new` | **`C:tempnew`** | `C:\temp\new` |
+| `export A=yes` | **not set at all** | `yes` |
+| `A=production` with trailing spaces | `production` | `production` |
+| `A=two  words` | `two  words` | `two  words` |
+
+Bold marks the result most likely to surprise you. The dollar row is the dangerous reverse of the comment row: a password containing `$` is literal under systemd and gets interpolated under Compose, so moving in either direction can change a secret without changing the file.
+
+## Why does the service still look healthy?
+
+Because code that compares the environment to the exact string `"production"` treats anything else as not production, and the failure has no error.
+
+In outline, this service had four checks of this shape:
+
+```python
+if settings.environment == "production":
+    ...
+```
+
+With the comment in the value, all four are false:
+
+| Production-only behaviour | With the comment in the value |
+|---|---|
+| Restrictive CORS rules | Falls back to the non-production rules |
+| Interactive API docs hidden | Docs stop being hidden |
+| Setup token required to create a dashboard account | Token stops being required |
+| A production-only branch in webhook handling | Skipped |
+
+Every one of these fails open, and the process is up and answering requests the whole time. A health check asks whether the service responds, and it does. No check was asking which mode it had started in.
+
+## How do you see the value systemd actually sets?
+
+Run a throwaway unit with the same file, and print the variable:
+
+```bash
+systemd-run --user --wait --pipe -q \
+  -p EnvironmentFile=/absolute/path/deploy.env \
+  /usr/bin/printenv ENVIRONMENT
+```
+
+That shows the value the service would get, with no need to start the service. It is how I produced the table above.
+
+## How do you stop this happening again?
+
+Two guards stop it: a deploy script that rejects any unquoted value with an inline comment, and a startup check that refuses an environment name outside a fixed list.
+
+**Before deploy, reject the line.** The deploy script on this service refuses to run while any unquoted value carries an inline comment, and it names the key. A simple version:
+
+```bash
+if grep -nE '^[A-Za-z_][A-Za-z0-9_]*=[^"'"'"']*[[:space:]]#' deploy.env; then
+  echo "inline comment in env file: systemd keeps it in the value" >&2
+  exit 1
+fi
+```
+
+**At startup, refuse an unknown name.** Exact-match checks fail open because any unexpected string is simply "not production". Parsing the value against a fixed list means a bad value stops the boot, which is loud and immediate. That is the guard I would add first on any new service.
+
+## What this does not claim
+
+This was caught on the new host before go-live, so nothing ran in production in the wrong mode. The matrix is from systemd 259 and Docker Compose 5.6.0, and these rules have changed before, so run the `systemd-run` check on yours. I also tested only the cases in the table, and the shape of your values may expose others.
+
+## What to actually do
+
+1. **Move comments onto their own line in every env file.** Both parsers agree on that.
+2. **Quote nothing you do not need to, and test what you do.** A quoted value followed by a comment gives a different result in each.
+3. **Compare the two parsers before you migrate.** Print every key from both and diff them. It takes a minute.
+4. **Check `$` and backslashes in secrets.** A password can change under either parser without the file changing.
+5. **Fail the boot on an unknown environment name.** Do not let "anything else" mean development.
+6. **Report the running mode where you can see it.** A health endpoint that includes the parsed environment name would have shown this immediately.
+
+## The takeaway
+
+The file looked identical before and after the move, and that was the trap. Nothing failed, nothing logged, and the most security-relevant setting in the service would have changed meaning because of a helpful comment someone wrote months earlier.
+
+> **Moving an env file between tools is a data migration. Diff what the process receives, not what the file says.**
+
+---
+
+*I'm Ehnand Azucena, full stack and lead developer. [Kai](https://ehnand.com/projects/kai-assistant), which I built solo, also runs under systemd. For another value that changes without the code changing, see [Nothing Re-Reads a Value That Was Resolved at Deploy Time](https://ehnand.com/articles/nothing-re-reads-deploy-time-values). I take remote contract and lead engagements, including moving services between hosts without surprises. [Get in touch](https://ehnand.com/#contact).*
