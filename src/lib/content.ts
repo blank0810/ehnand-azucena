@@ -2,6 +2,7 @@ import { getCollection, type CollectionEntry } from "astro:content"
 import { ARTICLE_CATEGORIES } from "@/data/article-categories"
 import { PROJECTS } from "@/data/projects"
 import { compareIsoDesc } from "@/lib/dates"
+import { selectRelatedArticles } from "@/lib/related-articles"
 
 export type ArticleEntry = CollectionEntry<"articles">
 export type CaseStudyEntry = CollectionEntry<"caseStudies">
@@ -45,17 +46,7 @@ export async function getRelatedArticles(
   article: ArticleEntry,
   limit = 3,
 ): Promise<ArticleEntry[]> {
-  const published = (await getPublishedArticles()).filter(
-    (candidate) => candidate.id !== article.id,
-  )
-  const sameCategory = published.filter(
-    (candidate) => candidate.data.category === article.data.category,
-  )
-  const remaining = published.filter(
-    (candidate) => candidate.data.category !== article.data.category,
-  )
-
-  return [...sameCategory, ...remaining].slice(0, limit)
+  return selectRelatedArticles(article, await getPublishedArticles(), limit)
 }
 
 export async function getHomepageArticles(): Promise<ArticleEntry[]> {
