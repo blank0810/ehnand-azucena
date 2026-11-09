@@ -114,6 +114,23 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
     <JsonLd value={buildPersonSchema()} />
     {schemas.map((schema) => <JsonLd value={schema} />)}
+
+    <!-- BEGIN PLERDY CODE -->
+    <script is:inline data-plerdy_code="1">
+      (function(w,d){
+        if(w.__plerdyCode)return;
+        w.__plerdyCode=1;
+        w._protocol=w.location.protocol=="https:"?"https://":"http://";
+        w._site_hash_code="e607428eab2fcf28710808d3c3cdb598";
+        w._suid=83021;
+        const s=d.createElement("script");
+        s.async=true;
+        s.referrerPolicy="strict-origin-when-cross-origin";
+        s.src="https://a.plerdy.com/public/js/click/main.js?v="+Math.random();
+        d.head.appendChild(s);
+      })(window,document);
+    </script>
+    <!-- END PLERDY CODE -->
   </head>
   <body data-motion-root>
     <Fragment set:html={directionContract} />
